@@ -1,0 +1,79 @@
+---
+title: "20211213_ChIRPKitRep1_Firre_RTqPCR"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+```
+
+ChIRP Pulldown of Firre Compared to Input
+
+```{r computed level}
+results_Firre <- read_excel("20211213_ChIRPKit_Firre_fix.xlsx",
+           sheet="ANOVA Work",
+           range="i1:j7",
+           col_names=TRUE,
+           trim_ws=TRUE)
+results_NegControls <- read_excel("20211213_ChIRPKit_Firre_fix.xlsx",
+           sheet="ANOVA Work",
+           range="k1:l13",
+           col_names=TRUE,
+           trim_ws=TRUE)
+results_Odd <- read_excel("20211213_ChIRPKit_Firre_fix.xlsx",
+           sheet="ANOVA Work",
+           range="b1:c10",
+           col_names=TRUE,
+           trim_ws=TRUE)
+results_Even <- read_excel("20211213_ChIRPKit_Firre_fix.xlsx",
+           sheet="ANOVA Work",
+           range="e1:f10",
+           col_names=TRUE,
+           trim_ws=TRUE)
+data_odd_even <- read_excel("20211213_ChIRPKit_Firre_fix.xlsx",
+           sheet="ANOVA Work",
+           range="o1:q10",
+           col_names=TRUE,
+           trim_ws=TRUE)
+data_transcripts <- read_excel("20211213_ChIRPKit_Firre_fix.xlsx",
+           sheet="ANOVA Work",
+           range="s1:v7",
+           col_names=TRUE,
+           trim_ws=TRUE)
+```
+One-Way Anova to Test Significance between Transcripts
+
+Research Question : Is Firre pulldown significant compared to negaive control transcripts in ChIRP experiments with WT mES Cells using RT-qPCR data? 
+
+```{r}
+Odd_Firre_v_Gapdh.aov <- aov(Odd ~ Sample, data=results_Odd[1:6,])
+summary(Odd_Firre_v_Gapdh.aov)
+
+Odd_Firre_v_mTug1.aov <- aov(Odd ~ Sample, data=results_Odd[4:9,])
+summary(Odd_Firre_v_mTug1.aov)
+
+Even_Firre_v_Gapdh.aov <- aov(Even ~ Sample, data=results_Even[1:6,])
+summary(Even_Firre_v_Gapdh.aov)
+
+Even_Firre_v_mTug1.aov <- aov(Even ~ Sample, data=results_Even[4:9,])
+summary(Even_Firre_v_mTug1.aov)
+```
+
+Two ANOVA to Test Significance between Transcripts for WT mES Cells by tying together both odd and even oligo sets
+Expectation: No difference between Odd and Even Sets, but might get some, especially for Firre
+
+```{r}
+print("Odd and Even Multivariable ANOVA")
+Odd_Even_results.man <- manova(cbind(Firre, mTUG1, Gapdh) ~ Sample, data = data_transcripts)
+summary(Odd_Even_results.man)
+summary.aov(Odd_Even_results.man)
+```
+
+
