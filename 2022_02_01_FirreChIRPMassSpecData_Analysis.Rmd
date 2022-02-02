@@ -15,9 +15,8 @@ library(ggvenn)
 #Reading csv files of the Mass Spec data into R
 ```{r}
 mass_spec_Sep2021_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20210921_Fusion_FAriel_combined_protein_spc_FA.csv")
-
+mass_spec_Sep2021_FA <- mass_spec_Sep2021_FA[,0:33]
 mass_spec_Jan2022_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20220107_SCP_FAriel.csv")
-
 kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv")
 
 ```
@@ -30,16 +29,23 @@ ggvenn(genes, c("genes_Sep2021", "genes_Jan2022", "genes_kitJan2022"))
 dev.off()
 ```
 
-##List of the Overlapping genes between Two Categories at a Time
+##Amounts and Data Tables of the Overlapping genes between Mass Spec Runs at a Time
 ```{r}
 genes_Sep2021_v_genes_Jan2022 <- genes$genes_Sep2021[genes$genes_Sep2021 %in% genes$genes_Jan2022]
 genes_Sep2021_v_genes_kitJan2022 <- genes$genes_Sep2021[genes$genes_Sep2021 %in% genes$genes_kitJan2022]
 genes_Jan2022_v_genes_kitJan2022 <- genes$genes_kitJan2022[genes$genes_kitJan2022 %in% genes$genes_Jan2022]
 allthree <- genes_Jan2022_v_genes_kitJan2022 [genes_Jan2022_v_genes_kitJan2022 %in% genes_Sep2021_v_genes_Jan2022]
+##Number of genes common to both Sep 2021 and Jan 2022 Runs of Fede's Samples
 length(genes_Sep2021_v_genes_Jan2022)
-#length(genes_Sep2021_v_genes_kitJan2022)
-#length(genes_Jan2022_v_genes_kitJan2022)
-subset1 <- mass_spec_Sep2021_FA[grepl(genes_Sep2021_v_genes_Jan2022, mass_spec_Sep2021_FA$Gene),]
-#table(grepl(genes_Sep2021_v_genes_Jan2022, mass_spec_Sep2021_FA$))
+##Number of genes common to both Sep 2021 Run of Fede's Samples and my Kit Sample
+length(genes_Sep2021_v_genes_kitJan2022)
+##Number of genes common to both Sep 2021 Run of Fede's Samples and my Kit Sample
+length(genes_Jan2022_v_genes_kitJan2022)
+##Number of genes common to all three runs
+length(allthree)
+pattern_to_search1 <- paste0(genes_Sep2021_v_genes_Jan2022, collapse = "|")
+grepl(pattern_to_search1, mass_spec_Sep2021_FA$Gene)
+subset1 <- mass_spec_Sep2021_FA[grepl(pattern_to_search1, mass_spec_Sep2021_FA$Gene),]
+write.csv(subset1,file = "subset1.csv", row.names=TRUE)
 ```
 
