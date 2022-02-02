@@ -1,0 +1,44 @@
+---
+title: "2022_02_01_FirreChIRPMassSpecData_Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = FALSE)
+library(GenomicRanges)
+library(tidyverse)
+library(ggplot2)
+library(ggvenn)
+```
+
+#Reading csv files of the Mass Spec data into R
+```{r}
+mass_spec_Sep2021_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20210921_Fusion_FAriel_combined_protein_spc_FA.csv")
+
+mass_spec_Jan2022_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20220107_SCP_FAriel.csv")
+
+kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv")
+
+```
+
+#Making a Venn Diagram of the three datasets
+```{r}
+genes <- list(genes_Sep2021 = sort(mass_spec_Sep2021_FA$Gene), genes_Jan2022 = sort(mass_spec_Jan2022_FA$Gene), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$Gene))
+pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
+ggvenn(genes, c("genes_Sep2021", "genes_Jan2022", "genes_kitJan2022"))
+dev.off()
+```
+
+##List of the Overlapping genes between Two Categories at a Time
+```{r}
+genes_Sep2021_v_genes_Jan2022 <- genes$genes_Sep2021[genes$genes_Sep2021 %in% genes$genes_Jan2022]
+genes_Sep2021_v_genes_kitJan2022 <- genes$genes_Sep2021[genes$genes_Sep2021 %in% genes$genes_kitJan2022]
+genes_Jan2022_v_genes_kitJan2022 <- genes$genes_kitJan2022[genes$genes_kitJan2022 %in% genes$genes_Jan2022]
+length(genes_Sep2021_v_genes_Jan2022)
+length(genes_Sep2021_v_genes_kitJan2022)
+length(genes_Jan2022_v_genes_kitJan2022)
+
+#table(grepl(genes_Sep2021_v_genes_Jan2022, mass_spec_Sep2021_FA$))
+```
+
