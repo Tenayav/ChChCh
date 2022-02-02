@@ -35,10 +35,11 @@ dev.off()
 genes_Sep2021_v_genes_Jan2022 <- genes$genes_Sep2021[genes$genes_Sep2021 %in% genes$genes_Jan2022]
 genes_Sep2021_v_genes_kitJan2022 <- genes$genes_Sep2021[genes$genes_Sep2021 %in% genes$genes_kitJan2022]
 genes_Jan2022_v_genes_kitJan2022 <- genes$genes_kitJan2022[genes$genes_kitJan2022 %in% genes$genes_Jan2022]
+allthree <- genes_Jan2022_v_genes_kitJan2022 [genes_Jan2022_v_genes_kitJan2022 %in% genes_Sep2021_v_genes_Jan2022]
 length(genes_Sep2021_v_genes_Jan2022)
-length(genes_Sep2021_v_genes_kitJan2022)
-length(genes_Jan2022_v_genes_kitJan2022)
-
+#length(genes_Sep2021_v_genes_kitJan2022)
+#length(genes_Jan2022_v_genes_kitJan2022)
+subset1 <- mass_spec_Sep2021_FA[grepl(genes_Sep2021_v_genes_Jan2022, mass_spec_Sep2021_FA$Gene),]
 #table(grepl(genes_Sep2021_v_genes_Jan2022, mass_spec_Sep2021_FA$))
 ```
 
