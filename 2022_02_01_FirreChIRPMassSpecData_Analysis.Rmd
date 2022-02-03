@@ -12,12 +12,23 @@ library(ggplot2)
 library(ggvenn)
 ```
 
-#Reading csv files of the Mass Spec data into R
+#Reading csv files of the Mass Spec data into R and amending Column Names to be different
 ```{r}
 mass_spec_Sep2021_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20210921_Fusion_FAriel_combined_protein_spc_FA.csv")
 mass_spec_Sep2021_FA <- mass_spec_Sep2021_FA[,0:33]
+#print(colnames(mass_spec_Sep2021_FA))
+#colnames(mass_spec_Sep2021_FA) <- #paste(colnames(mass_spec_Sep2021_FA),"Sep2021FA",sep="_")
+#print(colnames(mass_spec_Sep2021_FA))
+
 mass_spec_Jan2022_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20220107_SCP_FAriel.csv")
+#print(colnames(mass_spec_Jan2022_FA))
+#colnames(mass_spec_Jan2022_FA) <- #paste(colnames(mass_spec_Jan2022_FA),"Jan2022FA",sep="_")
+#print(colnames(mass_spec_Jan2022_FA))
+
 kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv")
+#print(colnames(kit_mass_spec_Jan2022_TV))
+#colnames(kit_mass_spec_Jan2022_TV) <- #paste(colnames(kit_mass_spec_Jan2022_TV),"KitJan2022TV",sep="_")
+#print(colnames(kit_mass_spec_Jan2022_TV))
 
 ```
 
@@ -73,7 +84,8 @@ subset5 <- mass_spec_Jan2022_FA[grepl(pattern_to_search3, mass_spec_Jan2022_FA$G
 subset6 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search3,kit_mass_spec_Jan2022_TV$Gene),]
 write.csv(subset5, file = "genes_Jan2022_v_genes_kitJan2022_data_Jan2022.csv", row.names=TRUE)
 write.csv(subset6, file = "genes_Jan2022_v_genes_kitJan2022_data_kit2022.csv", row.names=TRUE)
-#left_join <- merge(x=subset5, y=subset6, by="Gene")
+composite_genes_Jan2022_v_genes_kitJan2022 <- left_join(x=subset5, y=subset6, by= "Gene", copy=FALSE, suffix = c(".Jan2022", ".KitJan2022"),...)
+write.csv(composite_genes_Jan2022_v_genes_kitJan2022, file = "genes_Jan2022_v_genes_kitJan2022_alldata.csv", row.names=TRUE)
 
 ##Fourth is ones common to all three runs.
 pattern_to_searchD <- paste0(allthree, collapse = "$|^")
