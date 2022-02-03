@@ -17,24 +17,24 @@ library(ggvenn)
 mass_spec_Sep2021_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20210921_Fusion_FAriel_combined_protein_spc_FA.csv")
 mass_spec_Sep2021_FA <- mass_spec_Sep2021_FA[,0:33]
 #print(colnames(mass_spec_Sep2021_FA))
-#colnames(mass_spec_Sep2021_FA) <- #paste(colnames(mass_spec_Sep2021_FA),"Sep2021FA",sep="_")
+colnames(mass_spec_Sep2021_FA) <- paste(colnames(mass_spec_Sep2021_FA),"Sep2021FA",sep="_")
 #print(colnames(mass_spec_Sep2021_FA))
 
 mass_spec_Jan2022_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20220107_SCP_FAriel.csv")
 #print(colnames(mass_spec_Jan2022_FA))
-#colnames(mass_spec_Jan2022_FA) <- #paste(colnames(mass_spec_Jan2022_FA),"Jan2022FA",sep="_")
+colnames(mass_spec_Jan2022_FA) <- paste(colnames(mass_spec_Jan2022_FA),"Jan2022FA",sep="_")
 #print(colnames(mass_spec_Jan2022_FA))
 
 kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv")
 #print(colnames(kit_mass_spec_Jan2022_TV))
-#colnames(kit_mass_spec_Jan2022_TV) <- #paste(colnames(kit_mass_spec_Jan2022_TV),"KitJan2022TV",sep="_")
+colnames(kit_mass_spec_Jan2022_TV) <- paste(colnames(kit_mass_spec_Jan2022_TV),"KitJan2022TV",sep="_")
 #print(colnames(kit_mass_spec_Jan2022_TV))
 
 ```
 
 #Making a Venn Diagram of the three datasets
 ```{r}
-genes <- list(genes_Sep2021 = sort(mass_spec_Sep2021_FA$Gene), genes_Jan2022 = sort(mass_spec_Jan2022_FA$Gene), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$Gene))
+genes <- list(genes_Sep2021 = sort(mass_spec_Sep2021_FA$Gene_Sep2021FA), genes_Jan2022 = sort(mass_spec_Jan2022_FA$Gene_Jan2022FA), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$Gene_KitJan2022TV))
 pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
 ggvenn(genes, c("genes_Sep2021", "genes_Jan2022", "genes_kitJan2022"))
 dev.off()
@@ -61,9 +61,9 @@ length(allthree)
 pattern_to_searchA <- paste0(genes_Sep2021_v_genes_Jan2022, collapse = "$|^")
 pattern_to_search1 <- paste("^",pattern_to_searchA,"$",sep="")
 #grepl(pattern_to_search1, mass_spec_Sep2021_FA$Gene)
-subset1 <- mass_spec_Sep2021_FA[grepl(pattern_to_search1, mass_spec_Sep2021_FA$Gene),]
+subset1 <- mass_spec_Sep2021_FA[grepl(pattern_to_search1, mass_spec_Sep2021_FA$Gene_Sep2021FA),]
 write.csv(subset1,file = "genes_Sep2021_v_genes_Jan2022_data_Sep2021.csv", row.names=TRUE)
-subset2 <- mass_spec_Jan2022_FA[grepl(pattern_to_search1, mass_spec_Jan2022_FA$Gene),]
+subset2 <- mass_spec_Jan2022_FA[grepl(pattern_to_search1, mass_spec_Jan2022_FA$Gene_Jan2022FA),]
 write.csv(subset2,file = "genes_Sep2021_v_genes_Jan2022_data_Jan2021.csv", row.names=TRUE)
 ##Something is wrong. I'm not getting 76 obs. 
 ##I had to do some fancy stuff with the piping of paste0 and the collapse part. 
@@ -71,8 +71,8 @@ write.csv(subset2,file = "genes_Sep2021_v_genes_Jan2022_data_Jan2021.csv", row.n
 ##Second will be genes_Sep2021_v_genes_kitJan2022
 pattern_to_searchB <- paste0(genes_Sep2021_v_genes_kitJan2022, collapse = "$|^")
 pattern_to_search2 <- paste("^",pattern_to_searchB,"$",sep="")
-subset3 <- mass_spec_Sep2021_FA[grepl(pattern_to_search2, mass_spec_Sep2021_FA$Gene),]
-subset4 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search2,kit_mass_spec_Jan2022_TV$Gene),]
+subset3 <- mass_spec_Sep2021_FA[grepl(pattern_to_search2, mass_spec_Sep2021_FA$Gene_Sep2021FA),]
+subset4 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search2,kit_mass_spec_Jan2022_TV$Gene_KitJan2022TV),]
 write.csv(subset3,file = "genes_Sep2021_v_genes_kitJan2022_data_Sep2021.csv", row.names = TRUE )
 write.csv(subset4,file = "genes_Sep2021_v_genes_kitJan2022_data_KitJan2022.csv", row.names = TRUE )
 
@@ -80,20 +80,20 @@ write.csv(subset4,file = "genes_Sep2021_v_genes_kitJan2022_data_KitJan2022.csv",
 ##The Third one I think is going to be the most valuable one. 
 pattern_to_searchC <- paste0(genes_Jan2022_v_genes_kitJan2022, collapse = "$|^")
 pattern_to_search3 <- paste("^",pattern_to_searchC,"$",sep="")
-subset5 <- mass_spec_Jan2022_FA[grepl(pattern_to_search3, mass_spec_Jan2022_FA$Gene),]
-subset6 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search3,kit_mass_spec_Jan2022_TV$Gene),]
+subset5 <- mass_spec_Jan2022_FA[grepl(pattern_to_search3, mass_spec_Jan2022_FA$Gene_Jan2022FA),]
+subset6 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search3,kit_mass_spec_Jan2022_TV$Gene_KitJan2022TV),]
 write.csv(subset5, file = "genes_Jan2022_v_genes_kitJan2022_data_Jan2022.csv", row.names=TRUE)
 write.csv(subset6, file = "genes_Jan2022_v_genes_kitJan2022_data_kit2022.csv", row.names=TRUE)
-composite_genes_Jan2022_v_genes_kitJan2022 <- left_join(x=subset5, y=subset6, by= "Gene", copy=FALSE, suffix = c(".Jan2022", ".KitJan2022"),...)
-write.csv(composite_genes_Jan2022_v_genes_kitJan2022, file = "genes_Jan2022_v_genes_kitJan2022_alldata.csv", row.names=TRUE)
+composite_genes_Jan2022_v_genes_kitJan2022 <- left_join(subset5, subset6, by = c("Gene_Jan2022FA" = "Gene_KitJan2022TV"), copy = FALSE, suffix = c("Jan2022FA", "KitJan2022TV"))
+#write.csv(composite_genes_Jan2022_v_genes_kitJan2022, file = "genes_Jan2022_v_genes_kitJan2022_alldata.csv", row.names=TRUE)
 
 ##Fourth is ones common to all three runs.
 pattern_to_searchD <- paste0(allthree, collapse = "$|^")
 pattern_to_search4 <- paste("^",pattern_to_searchD,"$",sep="")
 
-subset7 <- mass_spec_Sep2021_FA[grepl(pattern_to_search4, mass_spec_Sep2021_FA$Gene),]
-subset8 <- mass_spec_Jan2022_FA[grepl(pattern_to_search4, mass_spec_Jan2022_FA$Gene),]
-subset9 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search4,kit_mass_spec_Jan2022_TV$Gene),]
+subset7 <- mass_spec_Sep2021_FA[grepl(pattern_to_search4, mass_spec_Sep2021_FA$Gene_Sep2021FA),]
+subset8 <- mass_spec_Jan2022_FA[grepl(pattern_to_search4, mass_spec_Jan2022_FA$Gene_Jan2022FA),]
+subset9 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search4,kit_mass_spec_Jan2022_TV$Gene_KitJan2022TV),]
 write.csv(subset7, file = "allthree_data_Sep2021.csv", row.names = TRUE)
 write.csv(subset8, file = "allthree_data_Jan2022.csv", row.names = TRUE)
 write.csv(subset9, file = "allthree_data_Kit2022.csv", row.names = TRUE)
