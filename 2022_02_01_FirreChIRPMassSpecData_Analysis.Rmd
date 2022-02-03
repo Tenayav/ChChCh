@@ -47,9 +47,11 @@ dev.off()
 ##Making a venn diagram according to size
 ```{r}
 venn_win <- euler(c(Sep2021=98, Jan2022=224, KitJan2022=130, "Sep2021&Jan2022"=76, "Sep2021&KitJan2022"=26, "Jan2022&KitJan2022"=49,"Sep2021&Jan2022&KitJan2022"=23), shape = "ellipse")
+pdf("VennDiagram_MassSpec_GeneOverlap_bysize.pdf")
 plot(venn_win, 
      fill = c("white", "skyblue1", "firebrick"),
-     quantities = list(type = "percent"))
+     quantities = list(fontsize = 13))
+dev.off()
 
 #size_venn <- venneuler(c(Sep2021=98, Jan2022=224, KitJan2022=130, "Sep2021&Jan2022"=76, "Sep2021&KitJan2022"=26, "Jan2022&KitJan2022"=49 ,"Sep2021&Jan2022&KitJan2022"=23))
 #plot(size_venn, quantities = list(type = "integers"))
