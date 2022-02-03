@@ -89,6 +89,8 @@ subset2 <- mass_spec_Jan2022_FA[grepl(pattern_to_search1, mass_spec_Jan2022_FA$G
 write.csv(subset2,file = "genes_Sep2021_v_genes_Jan2022_data_Jan2021.csv", row.names=TRUE)
 ##Something is wrong. I'm not getting 76 obs. 
 ##I had to do some fancy stuff with the piping of paste0 and the collapse part. 
+composite_genes_Sep2021_v_genes_Jan2022 <- inner_join(subset2, subset1, by = c("Gene_Jan2022FA" = "Gene_Sep2021FA"))
+write.csv(composite_genes_Sep2021_v_genes_Jan2022, file = "genes_Sep2021_v_genes_Jan2022_alldata.csv", row.names=TRUE)
 
 ##Second will be genes_Sep2021_v_genes_kitJan2022
 pattern_to_searchB <- paste0(genes_Sep2021_v_genes_kitJan2022, collapse = "$|^")
@@ -97,6 +99,8 @@ subset3 <- mass_spec_Sep2021_FA[grepl(pattern_to_search2, mass_spec_Sep2021_FA$G
 subset4 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search2,kit_mass_spec_Jan2022_TV$Gene_KitJan2022TV),]
 write.csv(subset3,file = "genes_Sep2021_v_genes_kitJan2022_data_Sep2021.csv", row.names = TRUE )
 write.csv(subset4,file = "genes_Sep2021_v_genes_kitJan2022_data_KitJan2022.csv", row.names = TRUE )
+composite_genes_Sep2021_v_genes_kitJan2022 <- inner_join(subset4, subset3, by = c("Gene_KitJan2022TV" = "Gene_Sep2021FA"))
+write.csv(composite_genes_Sep2021_v_genes_kitJan2022, file = "genes_Sep2021_v_genes_kitJan2022_alldata.csv", row.names=TRUE)
 
 ##Third is genes_Jan2022_v_genes_kitJan2022
 ##The Third one I think is going to be the most valuable one. 
@@ -119,7 +123,6 @@ subset9 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search4,kit_mass_spec_Jan20
 write.csv(subset7, file = "allthree_data_Sep2021.csv", row.names = TRUE)
 write.csv(subset8, file = "allthree_data_Jan2022.csv", row.names = TRUE)
 write.csv(subset9, file = "allthree_data_Kit2022.csv", row.names = TRUE)
-
 
 ```
 
