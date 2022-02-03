@@ -11,6 +11,9 @@ library(tidyverse)
 library(ggplot2)
 library(ggvenn)
 library(dplyr)
+library(VennDiagram)
+library(venneuler)
+library(eulerr)
 ```
 
 #Reading csv files of the Mass Spec data into R and amending Column Names to be different
@@ -40,6 +43,22 @@ pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
 ggvenn(genes, c("genes_Sep2021", "genes_Jan2022", "genes_kitJan2022"))
 dev.off()
 ```
+
+##Making a venn diagram according to size
+```{r}
+venn_win <- euler(c(Sep2021=98, Jan2022=224, KitJan2022=130, "Sep2021&Jan2022"=76, "Sep2021&KitJan2022"=26, "Jan2022&KitJan2022"=49,"Sep2021&Jan2022&KitJan2022"=23), shape = "ellipse")
+plot(venn_win, 
+     fill = c("white", "skyblue1", "firebrick"),
+     quantities = list(type = "percent"))
+
+#size_venn <- venneuler(c(Sep2021=98, Jan2022=224, KitJan2022=130, "Sep2021&Jan2022"=76, "Sep2021&KitJan2022"=26, "Jan2022&KitJan2022"=49 ,"Sep2021&Jan2022&KitJan2022"=23))
+#plot(size_venn, quantities = list(type = "integers"))
+#venn.plot <- draw.triple.venn(98, 224, 130,76, 49, 26, 23, c("Sep2021_FA", "Jan2022_FA", "KitJan2022_TV"));
+#grid.draw(venn.plot);
+#grid.newpage();
+```
+
+
 
 ##Amounts and Data Tables of the Overlapping genes between Mass Spec Runs at a Time
 ```{r}
