@@ -10,6 +10,7 @@ library(GenomicRanges)
 library(tidyverse)
 library(ggplot2)
 library(ggvenn)
+library(dplyr)
 ```
 
 #Reading csv files of the Mass Spec data into R and amending Column Names to be different
@@ -84,8 +85,8 @@ subset5 <- mass_spec_Jan2022_FA[grepl(pattern_to_search3, mass_spec_Jan2022_FA$G
 subset6 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search3,kit_mass_spec_Jan2022_TV$Gene_KitJan2022TV),]
 write.csv(subset5, file = "genes_Jan2022_v_genes_kitJan2022_data_Jan2022.csv", row.names=TRUE)
 write.csv(subset6, file = "genes_Jan2022_v_genes_kitJan2022_data_kit2022.csv", row.names=TRUE)
-composite_genes_Jan2022_v_genes_kitJan2022 <- left_join(subset5, subset6, by = c("Gene_Jan2022FA" = "Gene_KitJan2022TV"), copy = FALSE, suffix = c("Jan2022FA", "KitJan2022TV"))
-#write.csv(composite_genes_Jan2022_v_genes_kitJan2022, file = "genes_Jan2022_v_genes_kitJan2022_alldata.csv", row.names=TRUE)
+composite_genes_Jan2022_v_genes_kitJan2022 <- inner_join(subset6, subset5, by = c("Gene_KitJan2022TV" = "Gene_Jan2022FA"))
+write.csv(composite_genes_Jan2022_v_genes_kitJan2022, file = "genes_Jan2022_v_genes_kitJan2022_alldata.csv", row.names=TRUE)
 
 ##Fourth is ones common to all three runs.
 pattern_to_searchD <- paste0(allthree, collapse = "$|^")
