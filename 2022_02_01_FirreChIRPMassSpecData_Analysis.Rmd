@@ -43,9 +43,49 @@ length(genes_Sep2021_v_genes_kitJan2022)
 length(genes_Jan2022_v_genes_kitJan2022)
 ##Number of genes common to all three runs
 length(allthree)
-pattern_to_search1 <- paste0(genes_Sep2021_v_genes_Jan2022, collapse = "|")
-grepl(pattern_to_search1, mass_spec_Sep2021_FA$Gene)
+
+##Now make CSV files of common genes and their mass spec results
+
+##First will be genes_Sep2021_v_genes_Jan2022
+pattern_to_searchA <- paste0(genes_Sep2021_v_genes_Jan2022, collapse = "$|^")
+pattern_to_search1 <- paste("^",pattern_to_searchA,"$",sep="")
+#grepl(pattern_to_search1, mass_spec_Sep2021_FA$Gene)
 subset1 <- mass_spec_Sep2021_FA[grepl(pattern_to_search1, mass_spec_Sep2021_FA$Gene),]
-write.csv(subset1,file = "subset1.csv", row.names=TRUE)
+write.csv(subset1,file = "genes_Sep2021_v_genes_Jan2022_data_Sep2021.csv", row.names=TRUE)
+subset2 <- mass_spec_Jan2022_FA[grepl(pattern_to_search1, mass_spec_Jan2022_FA$Gene),]
+write.csv(subset2,file = "genes_Sep2021_v_genes_Jan2022_data_Jan2021.csv", row.names=TRUE)
+##Something is wrong. I'm not getting 76 obs. 
+##I had to do some fancy stuff with the piping of paste0 and the collapse part. 
+
+##Second will be genes_Sep2021_v_genes_kitJan2022
+pattern_to_searchB <- paste0(genes_Sep2021_v_genes_kitJan2022, collapse = "$|^")
+pattern_to_search2 <- paste("^",pattern_to_searchB,"$",sep="")
+subset3 <- mass_spec_Sep2021_FA[grepl(pattern_to_search2, mass_spec_Sep2021_FA$Gene),]
+subset4 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search2,kit_mass_spec_Jan2022_TV$Gene),]
+write.csv(subset3,file = "genes_Sep2021_v_genes_kitJan2022_data_Sep2021.csv", row.names = TRUE )
+write.csv(subset4,file = "genes_Sep2021_v_genes_kitJan2022_data_KitJan2022.csv", row.names = TRUE )
+
+##Third is genes_Jan2022_v_genes_kitJan2022
+##The Third one I think is going to be the most valuable one. 
+pattern_to_searchC <- paste0(genes_Jan2022_v_genes_kitJan2022, collapse = "$|^")
+pattern_to_search3 <- paste("^",pattern_to_searchC,"$",sep="")
+subset5 <- mass_spec_Jan2022_FA[grepl(pattern_to_search3, mass_spec_Jan2022_FA$Gene),]
+subset6 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search3,kit_mass_spec_Jan2022_TV$Gene),]
+write.csv(subset5, file = "genes_Jan2022_v_genes_kitJan2022_data_Jan2022.csv", row.names=TRUE)
+write.csv(subset6, file = "genes_Jan2022_v_genes_kitJan2022_data_kit2022.csv", row.names=TRUE)
+#left_join <- merge(x=subset5, y=subset6, by="Gene")
+
+##Fourth is ones common to all three runs.
+pattern_to_searchD <- paste0(allthree, collapse = "$|^")
+pattern_to_search4 <- paste("^",pattern_to_searchD,"$",sep="")
+
+subset7 <- mass_spec_Sep2021_FA[grepl(pattern_to_search4, mass_spec_Sep2021_FA$Gene),]
+subset8 <- mass_spec_Jan2022_FA[grepl(pattern_to_search4, mass_spec_Jan2022_FA$Gene),]
+subset9 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search4,kit_mass_spec_Jan2022_TV$Gene),]
+write.csv(subset7, file = "allthree_data_Sep2021.csv", row.names = TRUE)
+write.csv(subset8, file = "allthree_data_Jan2022.csv", row.names = TRUE)
+write.csv(subset9, file = "allthree_data_Kit2022.csv", row.names = TRUE)
+
+
 ```
 
