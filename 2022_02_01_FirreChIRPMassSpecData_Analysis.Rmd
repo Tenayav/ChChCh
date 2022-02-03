@@ -52,7 +52,7 @@ plot(venn_win,
      fill = c("white", "skyblue1", "lightcoral"),
      quantities = list(fontsize = 13))
 dev.off()
-
+##In Console, type "colors()" to see the list of options by their silly names. 
 #size_venn <- venneuler(c(Sep2021=98, Jan2022=224, KitJan2022=130, "Sep2021&Jan2022"=53, "Sep2021&KitJan2022"=3, "Jan2022&KitJan2022"=26 ,"Sep2021&Jan2022&KitJan2022"=23))
 #plot(size_venn, quantities = list(type = "integers"))
 #venn.plot <- draw.triple.venn(98, 224, 130,76, 49, 26, 23, c("Sep2021_FA", "Jan2022_FA", "KitJan2022_TV"));
