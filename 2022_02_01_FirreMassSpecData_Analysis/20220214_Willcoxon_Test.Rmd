@@ -1,5 +1,5 @@
 ---
-title: "20220214_Willcoxon_Test"
+title: "20220214_Willcoxon_Signed_rank_Test"
 output: html_document
 ---
 
@@ -11,7 +11,7 @@ library(dplyr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##Tibble of data
+##Tibble of data 
 ```{r}
 data <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/Willcoxon_Test_2022_02_11.csv", show_col_types = FALSE)
 
