@@ -4,26 +4,63 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(dplyr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+##Tibble of data
+```{r}
+data <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/Willcoxon_Test_2022_02_11.csv", show_col_types = FALSE)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+SpectralCounts <- data[c(1,2),c(1,2,3)]
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+#longdata
+```{r}
+SpectralCounts_long <- SpectralCounts %>%
+  gather(key = "Expt", value = "Spectral_Count", KO_SpectralCount, WT_SpectralCount)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+##Boxplot
+```{r}
+bxp <- ggpaired(SpectralCounts_long, x = "Expt", y = "Spectral_Count", 
+         order = c("KO_SpectralCount", "WT_SpectralCount"),
+         ylab = "Spectral Count", xlab = "Genotype")
+bxp
+```
+
+##Distribution Check
+```{r}
+SpectralCounts <- SpectralCounts %>% mutate(differences = WT_SpectralCount - KO_SpectralCount)
+gghistogram(SpectralCounts, x = "differences", y = "..density..", 
+            fill = "steelblue",bins = 5, add_density = TRUE)
+
+##The test assumes that differences between paired samples should be distributed symmetrically around the median.
+```
+#Willcoxon signed-rank test
+```{r}
+#Significance
+stat.test <- SpectralCounts_long  %>%
+  wilcox_test(Spectral_Count ~ Expt, paired = TRUE) %>%
+  add_significance()
+stat.test
+
+##For above, in the case of unpaired samples
+##Drop the 'paired = TRUE'
+
+#Effect Size
+SpectralCounts_long  %>%
+  wilcox_effsize(Spectral_Count ~ Expt, paired = TRUE)
+
+##Report
+stat.test <- stat.test %>% add_xy_position(x = "Expt")
+bxp + 
+  stat_pvalue_manual(stat.test, tip.length = 0) +
+  labs(subtitle = get_test_label(stat.test, detailed= TRUE))
+```
+
