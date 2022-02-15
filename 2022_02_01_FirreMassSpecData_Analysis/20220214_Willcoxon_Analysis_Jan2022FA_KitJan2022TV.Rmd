@@ -1,0 +1,75 @@
+---
+title: "20220214_Willcoxon_Test"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(dplyr)
+library(purrr)
+library(janitor)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Tibble of data
+```{r}
+data <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/genes_Jan2022_v_genes_kitJan2022_alldata.csv", show_col_types = FALSE)
+
+#getting rid of spaces in the column names
+data <- clean_names(data)
+
+lst1 <- pmap(data[-1], ~ tibble(KO_0h_even_total_spectral_count_kit_jan2022tv = data$gene_kit_jan2022tv))
+names(lst1) <- data[[5]]
+
+list2env(lst1, .GlobalEnv)
+#SpectralCounts <- data[c(1),c(1,2,3)]
+
+```
+
+#longdata
+```{r}
+SpectralCounts_long <- SpectralCounts %>%
+  gather(key = "Expt", value = "Spectral_Count", KO_SpectralCount, WT_SpectralCount)
+```
+
+
+##Boxplot
+```{r}
+bxp <- ggpaired(SpectralCounts_long, x = "Expt", y = "Spectral_Count", 
+         order = c("KO_SpectralCount", "WT_SpectralCount"),
+         ylab = "Spectral Count", xlab = "Genotype")
+bxp
+```
+
+##Distribution Check
+```{r}
+SpectralCounts <- SpectralCounts %>% mutate(differences = WT_SpectralCount - KO_SpectralCount)
+gghistogram(SpectralCounts, x = "differences", y = "..density..", 
+            fill = "steelblue",bins = 5, add_density = TRUE)
+
+##The test assumes that differences between paired samples should be distributed symmetrically around the median.
+```
+#Willcoxon signed-rank test
+```{r}
+#Significance
+stat.test <- SpectralCounts_long  %>%
+  wilcox_test(Spectral_Count ~ Expt, paired = TRUE) %>%
+  add_significance()
+stat.test
+
+##For above, in the case of unpaired samples
+##Drop the 'paired = TRUE'
+
+#Effect Size
+SpectralCounts_long  %>%
+  wilcox_effsize(Spectral_Count ~ Expt, paired = TRUE)
+
+##Report
+stat.test <- stat.test %>% add_xy_position(x = "Expt")
+bxp + 
+  stat_pvalue_manual(stat.test, tip.length = 0) +
+  labs(subtitle = get_test_label(stat.test, detailed= TRUE))
+```
+
