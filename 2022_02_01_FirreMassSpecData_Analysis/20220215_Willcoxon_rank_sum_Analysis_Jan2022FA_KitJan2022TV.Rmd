@@ -1,0 +1,76 @@
+---
+title: "20220214_Willcoxon_signed_rank_Test"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(dplyr)
+library(purrr)
+library(janitor)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Tibble of data
+```{r}
+data <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20220215_Willcoxon_test2_eef1a1.csv", show_col_types = FALSE)
+
+#getting rid of spaces in the column names
+data <- clean_names(data)
+
+#lst1 <- pmap(data[-1], ~ tibble(KO_0h_even_total_spectral_count_kit_jan2022tv = data$gene_kit_jan2022tv))
+#names(lst1) <- data[[5]]
+
+#list2env(lst1, .GlobalEnv)
+
+##Grabbing just the Spectral Counts
+#SpectralCounts <- data[c(1),c(1:5,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56)]
+
+```
+
+#longdata
+```{r}
+data_long <- data %>%
+  gather(key = "Expt", value = "Spectral_Count", ko, wt)
+#df.select(df.columns.filter(_.startsWith("colF")).map(df(_)) : _*).show
+```
+
+
+##Boxplot
+```{r}
+bxp <- ggboxplot(data_long, x = "Expt", y = "Spectral_Count",
+         ylab = "Spectral Count", xlab = "Genotype", add = "jitter")
+bxp
+```
+
+##Distribution Check (Remnant from Willcoxon Signed Rank TestTa)
+```{r}
+#data <- data %>% mutate(differences = wt - ko)
+#gghistogram(data, x = "differences", y = "..density..", fill = "steelblue",bins = 15, add_density = TRUE)
+
+##The test assumes that differences between paired samples should be distributed symmetrically around the median.
+```
+#Willcoxon signed-rank test
+```{r}
+#Significance
+stat.test <- data_long  %>%
+  wilcox_test(Spectral_Count ~ Expt) %>%
+  add_significance()
+stat.test
+
+##For above, in the case of unpaired samples
+##Drop the 'paired = TRUE'
+
+#Effect Size
+data_long  %>%
+  wilcox_effsize(Spectral_Count ~ Expt)
+
+##Report
+stat.test <- stat.test %>% add_xy_position(x = "Expt")
+bxp + 
+  stat_pvalue_manual(stat.test, tip.length = 0) +
+  labs(subtitle = get_test_label(stat.test, detailed= TRUE))
+```
+
