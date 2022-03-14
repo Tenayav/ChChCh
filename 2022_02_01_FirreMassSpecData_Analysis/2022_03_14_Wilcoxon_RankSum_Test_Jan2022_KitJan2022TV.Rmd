@@ -1,0 +1,35 @@
+---
+title: "2022_03_14_Wilcoxon_RankSum_Test_Jan2022_KitJan2022TV"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(dplyr)
+library(purrr)
+library(janitor)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#Making Tibbles of Spectral data for each dbp from the Jan2022FA and Jan2022TKVkit data
+```{r}
+
+#Jan2022FA data
+mass_spec_Jan2022_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20220107_SCP_FAriel.csv")
+#Clean up column names
+colnames(mass_spec_Jan2022_FA) <- paste(colnames(mass_spec_Jan2022_FA),"Jan2022FA",sep="_")
+#Making tibbles from KO and WT spectral counts from the data
+KO_spectral_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,13,15,17,19,21,23,25,27)]
+WT_spectral_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,29,31,33,35,37,39,41,43)]
+
+#Jan2022TVkit Data Same thing. 
+kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv")
+colnames(kit_mass_spec_Jan2022_TV) <- paste(colnames(kit_mass_spec_Jan2022_TV),"KitJan2022TV",sep="_")
+KO_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,13,14)]
+WT_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,15,16)]
+
+```
+
