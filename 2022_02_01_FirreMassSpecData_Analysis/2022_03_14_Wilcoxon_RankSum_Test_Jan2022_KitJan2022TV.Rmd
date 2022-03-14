@@ -13,8 +13,10 @@ library(janitor)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+##Purpose = Perform Wilcoxon Rank Sum Test on both Spectral Data and Intensities for the two data sets
+##Then compare the significant finds in a venn diagram
 
-#Making Tibbles of Spectral data for each dbp from the Jan2022FA and Jan2022TKVkit data
+#Making Tibbles of Spectral data for each dbp from the Jan2022FA and Jan2022TVkit data
 ```{r}
 
 #Jan2022FA data
@@ -32,4 +34,21 @@ KO_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,13,14)]
 WT_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,15,16)]
 
 ```
+
+#Making Tibbles of Calculated Intensities for each dbp from the Jan2022FA and Jan2022TV data
+```{r}
+#Jan2022FA data
+KO_intensities_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,14,16,18,20,22,24,26,28)]
+WT_intensities_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,30,32,34,36,38,40,42,44)]
+
+#Jan2022TVkit Data Same thing. 
+KO_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,17,18)]
+WT_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,19,20)]
+
+```
+
+```{r}
+
+```
+
 
