@@ -1,5 +1,5 @@
 ---
-title: "20220214_Willcoxon_signed_rank_Test"
+title: "20220214_Wilcoxon_signed_rank_Test"
 output: html_document
 ---
 
@@ -40,19 +40,22 @@ data_long <- data %>%
 
 ##Boxplot
 ```{r}
-bxp <- ggboxplot(data_long, x = "Expt", y = "Spectral_Count",
-         ylab = "Spectral Count", xlab = "Genotype", add = "jitter")
+
+bxp <- ggpaired(data_long, x = "Expt", y = "Spectral_Count", 
+         order = c("ko", "wt"),
+         ylab = "Spectral Count", xlab = "Genotype")
 bxp
 ```
 
-##Distribution Check (Remnant from Willcoxon Signed Rank TestTa)
+##Distribution Check (Remnant from Wilcoxon Signed Rank TestTa)
 ```{r}
 #data <- data %>% mutate(differences = wt - ko)
 #gghistogram(data, x = "differences", y = "..density..", fill = "steelblue",bins = 15, add_density = TRUE)
 
 ##The test assumes that differences between paired samples should be distributed symmetrically around the median.
 ```
-#Willcoxon signed-rank test
+
+#Wilcoxon signed-rank test
 ```{r}
 #Significance
 stat.test <- data_long  %>%
