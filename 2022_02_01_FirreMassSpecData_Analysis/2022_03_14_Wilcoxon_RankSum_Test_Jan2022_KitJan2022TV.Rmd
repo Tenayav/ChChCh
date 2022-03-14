@@ -54,6 +54,29 @@ KO_spectral=KO_spectral_mass_spec_Jan2022_TV %>% full_join(KO_spectral_mass_spec
 WT_spectral=WT_spectral_mass_spec_Jan2022_TV %>% full_join(WT_spectral_mass_spec_Jan2022_FA,by="Gene")
 
 #For Intensities
+KO_intensities = KO_intensities_mass_spec_Jan2022_TV %>% full_join(KO_intensities_mass_spec_Jan2022_FA,by="Gene")
+WT_intensities = WT_intensities_mass_spec_Jan2022_TV %>% full_join(WT_intensities_mass_spec_Jan2022_FA,by="Gene")
+
+#Cleanup by making the Gene column a character column and N/A's into Zeros
+KO_spectral <- as.data.frame(KO_spectral)
+KO_spectral <- replace(KO_spectral, is.na(KO_spectral), 0)
+WT_spectral <- as.data.frame(WT_spectral)
+WT_spectral <- replace(WT_spectral, is.na(WT_spectral), 0)
+KO_intensities <-as.data.frame(KO_intensities)
+KO_intensities <- replace(KO_intensities, is.na(KO_intensities), 0)
+WT_intensities <- as.data.frame(WT_intensities)
+WT_intensities <- replace(WT_intensities, is.na(WT_intensities), 0)
+
+##For later, transpose the tibble
+#WT_intensities <- as.data.frame(t(WT_intensities))
+
+Gene_names <- tibble(KO_spectral$Gene)
+Gene_names <- Gene_names[-c(297:305),] 
 ```
 
+#Making each protein its own tibble.
+```{r}
+KO_list = split(KO_spectral, f = KO_spectral$Gene)
+
+```
 
