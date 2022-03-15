@@ -48,6 +48,7 @@ WT_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,19,20)]
 ```
 
 #Full outer join by protein name, still keeping KO and WT separate
+#Followed by some cleanup
 ```{r}
 #For Spectral
 KO_spectral=KO_spectral_mass_spec_Jan2022_TV %>% full_join(KO_spectral_mass_spec_Jan2022_FA,by="Gene")
@@ -67,16 +68,60 @@ KO_intensities <- replace(KO_intensities, is.na(KO_intensities), 0)
 WT_intensities <- as.data.frame(WT_intensities)
 WT_intensities <- replace(WT_intensities, is.na(WT_intensities), 0)
 
-##For later, transpose the tibble
-#WT_intensities <- as.data.frame(t(WT_intensities))
+#Spectral Clean up
+KO_spectral <- KO_spectral[-c(280,297:305),]
+KO_spectral <- KO_spectral[order(KO_spectral$Gene),]
+WT_spectral <- WT_spectral[-c(280,297:305),]
+WT_spectral <- WT_spectral[order(WT_spectral$Gene),]
+Spectral = WT_spectral %>% full_join(KO_spectral,by="Gene")
+Spectral <- as.data.frame(t(Spectral))
+Spectral_newcol <- c("Gene","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+Spectral <- cbind(Spectral_newcol,Spectral)
+Spectral %>% row_to_names(row_number = 2)
 
-Gene_names <- tibble(KO_spectral$Gene)
-Gene_names <- Gene_names[-c(297:305),] 
+#Intensities Clean up
+KO_intensities <- KO_intensities[-c(280,297:305),]
+KO_intensities <- KO_intensities[order(KO_intensities$Gene),]
+WT_intensities <- WT_intensities[-c(280,297:305),]
+WT_intensities <- WT_intensities[order(WT_intensities$Gene),]
+Intensities = WT_intensities %>% full_join(KO_intensities,by="Gene")
+Intensities <- as.data.frame(t(Intensities))
+Intensities_newcol <- c("Gene","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+Intensities <- cbind(Intensities_newcol,Intensities)
+
 ```
 
-#Making each protein its own tibble.
+#Wilcoxon Test on Spectral
 ```{r}
-KO_list = split(KO_spectral, f = KO_spectral$Gene)
+
+test.fun <- function(Spectral, col) { 
+
+ c1 <- combn(unique(Spectral$a),2)
+ sigs <- list()
+ for(i in 1:ncol(c1)) {
+    sigs[[i]] <- wilcox.test(
+                   dat[dat$a == c1[1,i],col],
+                   dat[dat$a == c1[2,i],col]
+                 )
+    }
+    names(sigs) <- paste("Group",c1[1,],"by Group",c1[2,])
+
+ tests <- data.frame(Test=names(sigs),
+                    W=unlist(lapply(sigs,function(x) x$statistic)),
+                    p=unlist(lapply(sigs,function(x) x$p.value)),row.names=NULL)
+
+ return(tests)
+}
+
+
+tests <- lapply(colnames(dat)[-1],function(x) test.fun(dat,x))
+names(tests) <- colnames(dat)[-1]
+# tests <- do.call(rbind, tests) reprints as data.frame
+
+tests
+
+
+#KO_list = split(KO_spectral, f = KO_spectral$Gene)
 
 ```
 

@@ -1,0 +1,75 @@
+---
+title: "2022_03_15_WilcoxonTest_ForDataframe"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(dplyr)
+library(purrr)
+library(janitor)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#This came from https://stackoverflow.com/questions/21271449/how-to-apply-the-wilcox-test-to-a-whole-dataframe-in-r
+#compiling the dataframe
+```{r}
+dat <- data.frame(a = c("ko", "ko", "ko", "ko", "ko", "wt", "wt", "wt", "wt", "wt"), b= runif(10), c=runif(10))
+
+
+test.fun <- function(dat, col) { 
+
+ c1 <- combn(unique(dat$a),2)
+ sigs <- list()
+ for(i in 1:ncol(c1)) {
+    sigs[[i]] <- wilcox.test(
+                   dat[dat$a == c1[1,i],col],
+                   dat[dat$a == c1[2,i],col]
+                 )
+    }
+    names(sigs) <- paste("Group",c1[1,],"by Group",c1[2,])
+
+ tests <- data.frame(Test=names(sigs),
+                    W=unlist(lapply(sigs,function(x) x$statistic)),
+                    p=unlist(lapply(sigs,function(x) x$p.value)),row.names=NULL)
+
+ return(tests)
+}
+
+
+tests <- lapply(colnames(dat)[-1],function(x) test.fun(dat,x))
+names(tests) <- colnames(dat)[-1]
+# tests <- do.call(rbind, tests) reprints as data.frame
+
+tests
+
+# This solution is not "slow" and outperforms the other answers significantly: 
+#system.time(
+  #rep(
+   #tests <- lapply(colnames(dat)[-1],function(x) test.fun(dat,x)),10000
+  #)
+#)
+```
+
+
+
+
+#This one came from https://stackoverflow.com/questions/33762346/how-to-apply-wilcox-test-to-compare-every-column-of-table?noredirect=1&lq=1
+
+```{r}
+df <- data.frame(a = runif(10), b= runif(10), c=runif(10))
+```
+
+```{r}
+#calculate combinations of names
+combinations <- as.data.frame(combn(names(df), 2), stringsAsFactors=FALSE)
+
+#use the above combinations and calculate the wilcox.test to get the p.values
+lapply(combinations, function(x) {
+  wilcox.test(df[,x[1]] , df[, x[2]], alternative="t", paired=FALSE)$p.value
+})
+
+```
+
