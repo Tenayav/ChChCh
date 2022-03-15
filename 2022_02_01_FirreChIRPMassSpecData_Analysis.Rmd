@@ -38,6 +38,7 @@ colnames(kit_mass_spec_Jan2022_TV) <- paste(colnames(kit_mass_spec_Jan2022_TV),"
 
 #Making a Venn Diagram of the three datasets
 ```{r}
+typeof(mass_spec_Sep2021_FA$Gene_Sep2021FA)
 genes <- list(genes_Sep2021 = sort(mass_spec_Sep2021_FA$Gene_Sep2021FA), genes_Jan2022 = sort(mass_spec_Jan2022_FA$Gene_Jan2022FA), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$Gene_KitJan2022TV))
 pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
 ggvenn(genes, c("genes_Sep2021", "genes_Jan2022", "genes_kitJan2022"))
