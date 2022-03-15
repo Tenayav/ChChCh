@@ -15,6 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##Purpose = Perform Wilcoxon Rank Sum Test on both Spectral Data and Intensities for the two data sets
 ##Then compare the significant finds in a venn diagram
+#More helpful info on Wilcoxon Rank Sum Test from UVA
+#https://data.library.virginia.edu/the-wilcoxon-rank-sum-test/
 
 #Making Tibbles of Spectral data for each protein from the Jan2022FA and Jan2022TVkit data
 ```{r}
@@ -49,6 +51,7 @@ WT_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,19,20)]
 
 #Full outer join by protein name, still keeping KO and WT separate
 #Followed by some cleanup
+
 ```{r}
 #For Spectral
 KO_spectral=KO_spectral_mass_spec_Jan2022_TV %>% full_join(KO_spectral_mass_spec_Jan2022_FA,by="Gene")
@@ -110,7 +113,7 @@ test.fun <- function(Spectral, col) {
  for(i in 1:ncol(c1)) {
     sigs[[i]] <- wilcox.test(
                    Spectral[Spectral$genotype == c1[1,i],col],
-                   Spectral[Spectral$genotype == c1[2,i],col]
+                   Spectral[Spectral$genotype == c1[2,i],col], exact=FALSE
                  )
     }
     names(sigs) <- paste("Group",c1[1,],"by Group",c1[2,])
@@ -143,7 +146,7 @@ test.fun2 <- function(Intensities, col) {
  for(i in 1:ncol(c2)) {
     sigs2[[i]] <- wilcox.test(
                    Intensities[Intensities$gene == c2[1,i],col],
-                   Intensities[Intensities$gene == c2[2,i],col]
+                   Intensities[Intensities$gene == c2[2,i],col], exact=FALSE
                  )
     }
     names(sigs2) <- paste("Group",c2[1,],"by Group",c2[2,])
@@ -165,4 +168,11 @@ names(tests_Intensities) <- colnames(Intensities)[-1]
 
 ```
 
+
+```{r}
+results_Spectral <- do.call(rbind.data.frame, tests_Spectral)
+write.csv(results_Spectral,"/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//results_Spectral.csv",row.names = FALSE)
+results_Intensities <- do.call(rbind.data.frame, tests_Intensities)
+write.csv(results_Intensities,"/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//results_Intensities.csv",row.names = FALSE)
+```
 
