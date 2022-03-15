@@ -138,25 +138,25 @@ names(tests_Spectral) <- colnames(Spectral)[-1]
 
 test.fun2 <- function(Intensities, col) { 
 
- c2 <- combn(unique(Intensities$genotype),2)
+ c2 <- combn(unique(Intensities$gene),2)
  sigs2 <- list()
  for(i in 1:ncol(c2)) {
     sigs2[[i]] <- wilcox.test(
-                   Intensities[Intensities$genotype == c2[1,i],col],
-                   Intensities[Intensities$genotype == c2[2,i],col]
+                   Intensities[Intensities$gene == c2[1,i],col],
+                   Intensities[Intensities$gene == c2[2,i],col]
                  )
     }
     names(sigs2) <- paste("Group",c2[1,],"by Group",c2[2,])
 
  tests_Intensities <- data.frame(Test=names(sigs2),
-                    W=unlist(lapply(sigs,function(x) x$statistic)),
-                    p=unlist(lapply(sigs,function(x) x$p.value)),row.names=NULL)
+                    W=unlist(lapply(sigs2,function(x) x$statistic)),
+                    p=unlist(lapply(sigs2,function(x) x$p.value)),row.names=NULL)
 
  return(tests_Intensities)
 }
 
 
-tests_Intensities <- lapply(colnames(Intensities)[-1],function(x) test.fun(Intensities,x))
+tests_Intensities <- lapply(colnames(Intensities)[-1],function(x) test.fun2(Intensities,x))
 names(tests_Intensities) <- colnames(Intensities)[-1]
 # tests <- do.call(rbind, tests) reprints as data.frame
 
@@ -164,3 +164,5 @@ names(tests_Intensities) <- colnames(Intensities)[-1]
 #KO_list = split(KO_spectral, f = KO_spectral$Gene)
 
 ```
+
+
