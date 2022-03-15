@@ -75,9 +75,10 @@ WT_spectral <- WT_spectral[-c(280,297:305),]
 WT_spectral <- WT_spectral[order(WT_spectral$Gene),]
 Spectral = WT_spectral %>% full_join(KO_spectral,by="Gene")
 Spectral <- as.data.frame(t(Spectral))
-Spectral_newcol <- c("Gene","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+Spectral_newcol <- c("Genotype","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
 Spectral <- cbind(Spectral_newcol,Spectral)
-Spectral %>% row_to_names(row_number = 2)
+Spectral <- Spectral %>% row_to_names (row_number= 1) %>% clean_names()
+Spectral[] <- lapply(Spectral, type.convert, as.is = TRUE)
 
 #Intensities Clean up
 KO_intensities <- KO_intensities[-c(280,297:305),]
@@ -88,40 +89,78 @@ Intensities = WT_intensities %>% full_join(KO_intensities,by="Gene")
 Intensities <- as.data.frame(t(Intensities))
 Intensities_newcol <- c("Gene","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
 Intensities <- cbind(Intensities_newcol,Intensities)
+Intensities <-Intensities %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities[] <- lapply(Intensities, type.convert, as.is = TRUE)
 
 ```
+
+```{r}
+typeof(Spectral$aars1)
+typeof(Intensities$aars1)
+```
+
 
 #Wilcoxon Test on Spectral
 ```{r}
 
 test.fun <- function(Spectral, col) { 
 
- c1 <- combn(unique(Spectral$a),2)
+ c1 <- combn(unique(Spectral$genotype),2)
  sigs <- list()
  for(i in 1:ncol(c1)) {
     sigs[[i]] <- wilcox.test(
-                   dat[dat$a == c1[1,i],col],
-                   dat[dat$a == c1[2,i],col]
+                   Spectral[Spectral$genotype == c1[1,i],col],
+                   Spectral[Spectral$genotype == c1[2,i],col]
                  )
     }
     names(sigs) <- paste("Group",c1[1,],"by Group",c1[2,])
 
- tests <- data.frame(Test=names(sigs),
+ tests_Spectral <- data.frame(Test=names(sigs),
                     W=unlist(lapply(sigs,function(x) x$statistic)),
                     p=unlist(lapply(sigs,function(x) x$p.value)),row.names=NULL)
 
- return(tests)
+ return(tests_Spectral)
 }
 
 
-tests <- lapply(colnames(dat)[-1],function(x) test.fun(dat,x))
-names(tests) <- colnames(dat)[-1]
+tests_Spectral <- lapply(colnames(Spectral)[-1],function(x) test.fun(Spectral,x))
+names(tests_Spectral) <- colnames(Spectral)[-1]
 # tests <- do.call(rbind, tests) reprints as data.frame
 
-tests
 
 
 #KO_list = split(KO_spectral, f = KO_spectral$Gene)
 
 ```
 
+#Wilcoxon Test on Intensities
+```{r}
+
+test.fun2 <- function(Intensities, col) { 
+
+ c2 <- combn(unique(Intensities$genotype),2)
+ sigs2 <- list()
+ for(i in 1:ncol(c2)) {
+    sigs2[[i]] <- wilcox.test(
+                   Intensities[Intensities$genotype == c2[1,i],col],
+                   Intensities[Intensities$genotype == c2[2,i],col]
+                 )
+    }
+    names(sigs2) <- paste("Group",c2[1,],"by Group",c2[2,])
+
+ tests_Intensities <- data.frame(Test=names(sigs2),
+                    W=unlist(lapply(sigs,function(x) x$statistic)),
+                    p=unlist(lapply(sigs,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Intensities)
+}
+
+
+tests_Intensities <- lapply(colnames(Intensities)[-1],function(x) test.fun(Intensities,x))
+names(tests_Intensities) <- colnames(Intensities)[-1]
+# tests <- do.call(rbind, tests) reprints as data.frame
+
+
+#KO_list = split(KO_spectral, f = KO_spectral$Gene)
+
+```
