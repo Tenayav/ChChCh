@@ -15,6 +15,7 @@ library(ggvenn)
 library(VennDiagram)
 library(venneuler)
 library(eulerr)
+library(reshape)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -244,3 +245,45 @@ allgenes
 
 #Need to have the box-whisker plots from my old way of doing this to check that I believe the significance
 #Also need to find the ones that are not significant for KO...how do I do that
+
+#For allgenes, I'm going to do those box-whisker plots 
+```{r}
+#Common genes
+pattern_to_search_commongenes <- paste0(commongenes$gene, collapse = "|")
+long_data_Spectral_sig_commongenes <- Spectral[, grep(pattern_to_search_commongenes, colnames(Spectral))]
+genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+long_data_Spectral_sig_commongenes <- cbind(genotype,long_data_Spectral_sig_commongenes)
+mm_commonSpectral = melt(long_data_Spectral_sig_commongenes)
+
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_16_commongenes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+ggplot(mm_Spectral)+geom_boxplot(aes(x=genotype, y=value))+facet_grid(.~variable)
+dev.off()
+
+for (var in mm_commonSpectral$variable) { 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_03_16_MassSpec_SpectralBoxPlots_SignificantGenes//", var, ".pdf", sep=""))
+  print(ggplot(mm_commonSpectral[mm_commonSpectral$variable==var,])+geom_boxplot(aes(x=genotype, y=value))+ggtitle(var))
+  dev.off()
+  }
+
+#https://stackoverflow.com/questions/26164676/ggplot-boxplot-for-multiple-columns-with-a-factor
+#https://stackoverflow.com/questions/11346880/r-plot-multiple-box-plots-using-columns-from-data-frame
+
+#significance
+
+
+    
+#stat.test <- long_data_Spectral_sig_allgenes %>%
+# wilcox_test( aars1 ~ genotype) %>%
+ #add_significance()
+#stat.test
+
+#report
+#stat.test[i] <- stat.test[i] %>% add_xy_position(x = "genotype")
+#bxp + 
+ #stat_pvalue_manual(stat.test, tip.length = 0) +
+ #labs(subtitle = get_test_label(stat.test, detailed= TRUE))
+#}
+
+```
+
