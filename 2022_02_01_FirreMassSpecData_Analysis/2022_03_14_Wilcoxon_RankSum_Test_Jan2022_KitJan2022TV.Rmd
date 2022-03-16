@@ -220,6 +220,7 @@ significantIntensities_genes <- results_Intensities[grepl(pattern_to_search, res
 ```
 
 #Venn diagram of genes that are significant in Intensities and Spectral Counts
+#Dataframes of common and all significant genes
 ```{r}
 significantSpectral_genes$gene <- row.names(significantSpectral_genes)
 typeof(significantSpectral_genes$gene)
@@ -241,3 +242,5 @@ allgenes = merge(x=significantSpectral_genes,y=significantIntensities_genes,by="
 allgenes
 ```
 
+#Need to have the box-whisker plots from my old way of doing this to check that I believe the significance
+#Also need to find the ones that are not significant for KO...how do I do that
