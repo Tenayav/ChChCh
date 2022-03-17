@@ -260,9 +260,11 @@ pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2
 ggplot(mm_Spectral)+geom_boxplot(aes(x=genotype, y=value))+facet_grid(.~variable)
 dev.off()
 
+
 for (var in mm_commonSpectral$variable) { 
+ 
   pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_03_16_MassSpec_SpectralBoxPlots_SignificantGenes//", var, ".pdf", sep=""))
-  print(ggplot(mm_commonSpectral[mm_commonSpectral$variable==var,])+geom_boxplot(aes(x=genotype, y=value))+ggtitle(var))
+  print(ggplot(mm_commonSpectral[mm_commonSpectral$variable==var,],fill = "#00AFBB")+geom_boxplot(aes(x=genotype, y=value))+ggtitle(var)+)
   dev.off()
   }
 
