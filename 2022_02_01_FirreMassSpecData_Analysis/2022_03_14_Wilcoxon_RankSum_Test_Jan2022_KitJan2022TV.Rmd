@@ -308,4 +308,46 @@ for (var in mm_commonIntensities$variable) {
 #}
 
 ```
+#For Significant genes
+```{r}
+#genes with pvalues <0.05. Making Box Whisker Plots, both all together and individual
+
+#Spectral
+sig_genes <- c("anxa1","atp5f1a","btf3","ckb","gapdh","hdlbp","hnrnpm","krt14","krt16","krt5","mif","naa15","pabpc1","pkp1","rpl10$","rpl38","slc25a5")
+pattern_to_search_sig_genes <- paste0(sig_genes, collapse = "|")
+long_data_Spectral_sig_genes <- Spectral[, grep(pattern_to_search_sig_genes, colnames(Spectral))]
+genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+long_data_Spectral_sig_genes <- cbind(genotype,long_data_Spectral_sig_genes)
+mm_sigSpectral = melt(long_data_Spectral_sig_genes)
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_17_sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+ggplot(mm_sigSpectral)+geom_boxplot(aes(x=genotype, y=value))+facet_grid(.~variable)
+dev.off()
+
+
+for (var in mm_sigSpectral$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_03_16_MassSpec_SpectralBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
+  print(ggplot(mm_sigSpectral[mm_sigSpectral$variable==var,])+geom_boxplot(aes(x=genotype, y=value))+ggtitle(var))
+  dev.off()
+  }
+
+#Intensities
+long_data_Intensities_sig_genes <- Intensities[, grep(pattern_to_search_sig_genes, colnames(Intensities))]
+genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+long_data_Intensities_sig_genes <- cbind(genotype,long_data_Intensities_sig_genes)
+mm_sigIntensities = melt(long_data_Intensities_sig_genes)
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_17_sig_genes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+ggplot(mm_sigIntensities)+geom_boxplot(aes(x=genotype, y=value))+facet_grid(.~variable)
+dev.off()
+
+
+for (var in mm_sigIntensities$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_03_16_MassSpec_IntensitiesBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
+  print(ggplot(mm_sigIntensities[mm_sigIntensities$variable==var,])+geom_boxplot(aes(x=genotype, y=value))+ggtitle(var))
+  dev.off()
+  }
+```
 
