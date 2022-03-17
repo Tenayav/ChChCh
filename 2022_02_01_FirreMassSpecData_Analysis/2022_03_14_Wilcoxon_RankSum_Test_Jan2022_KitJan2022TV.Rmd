@@ -320,9 +320,9 @@ genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","
 long_data_Spectral_sig_genes <- cbind(genotype,long_data_Spectral_sig_genes)
 mm_sigSpectral = melt(long_data_Spectral_sig_genes)
 
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_17_sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
-ggplot(mm_sigSpectral)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)+stat_compare_means(label.x = 0.5)
-dev.off()
+  pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_17_sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+  ggplot(mm_sigSpectral)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
+  dev.off()
 
 
 for (var in mm_sigSpectral$variable) { 
@@ -339,14 +339,14 @@ long_data_Intensities_sig_genes <- cbind(genotype,long_data_Intensities_sig_gene
 mm_sigIntensities = melt(long_data_Intensities_sig_genes)
 
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_17_sig_genes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
-ggplot(mm_sigIntensities)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)+stat_compare_means(label.x = 0.5)
+ggplot(mm_sigIntensities)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
 dev.off()
 
 for (var in mm_sigIntensities$variable) { 
              
   pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_03_16_MassSpec_IntensitiesBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
   #print(ggplot(mm_sigIntensities[mm_sigIntensities$variable==var,])+geom_boxplot(aes(x=genotype, y=value),fill="#00AFBB")+ggtitle(var))
-  print(ggpaired(mm_sigIntensities[mm_sigIntensities$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",xlab = "Genotype of Firre RNA", ylab = "Mass Spec Intensities")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  print(ggpaired(mm_sigIntensities[mm_sigIntensities$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
   dev.off()
 }
 
