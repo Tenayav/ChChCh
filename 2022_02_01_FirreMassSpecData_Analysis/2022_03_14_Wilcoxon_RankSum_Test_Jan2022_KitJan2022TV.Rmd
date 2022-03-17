@@ -196,7 +196,7 @@ dev.off()
 #intensities
 hist(results_Intensities$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from FAJan2022 and TVkitJan2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_15_Histogram_Wilcoxon_Spectral_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_15_Histogram_Wilcoxon_Intensities_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
 hist(results_Intensities$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from FAJan2022 and TVkitJan2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
@@ -239,16 +239,18 @@ dev.off()
 
 commongenes = merge(x=significantSpectral_genes,y=significantIntensities_genes,by="gene")
 commongenes
+write.csv(commongenes, file = "2022_03_15_commongenes.csv", row.names=TRUE)
 allgenes = merge(x=significantSpectral_genes,y=significantIntensities_genes,by="gene",all=TRUE)
 allgenes
+write.csv(allgenes, file = "2022_03_15_allgenes.csv", row.names=TRUE)
 ```
 
 #Need to have the box-whisker plots from my old way of doing this to check that I believe the significance
 #Also need to find the ones that are not significant for KO...how do I do that
 
-#For allgenes, I'm going to do those box-whisker plots 
+#For common genes, I'm going to do those box-whisker plots 
 ```{r}
-#Common genes
+#Common genes Spectral
 pattern_to_search_commongenes <- paste0(commongenes$gene, collapse = "|")
 long_data_Spectral_sig_commongenes <- Spectral[, grep(pattern_to_search_commongenes, colnames(Spectral))]
 genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
@@ -257,14 +259,32 @@ mm_commonSpectral = melt(long_data_Spectral_sig_commongenes)
 
 
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_16_commongenes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
-ggplot(mm_Spectral)+geom_boxplot(aes(x=genotype, y=value))+facet_grid(.~variable)
+ggplot(mm_commonSpectral,fill = "#00AFBB")+geom_boxplot(aes(x=genotype, y=value))+facet_grid(.~variable)
 dev.off()
 
 
 for (var in mm_commonSpectral$variable) { 
  
   pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_03_16_MassSpec_SpectralBoxPlots_SignificantGenes//", var, ".pdf", sep=""))
-  print(ggplot(mm_commonSpectral[mm_commonSpectral$variable==var,],fill = "#00AFBB")+geom_boxplot(aes(x=genotype, y=value))+ggtitle(var)+)
+  print(ggplot(mm_commonSpectral[mm_commonSpectral$variable==var,],fill = "#00AFBB")+geom_boxplot(aes(x=genotype, y=value))+ggtitle(var))
+  dev.off()
+  }
+
+#Common genes Intensities
+long_data_Intensities_sig_commongenes <- Intensities[, grep(pattern_to_search_commongenes, colnames(Intensities))]
+long_data_Intensities_sig_commongenes <- cbind(genotype,long_data_Intensities_sig_commongenes)
+mm_commonIntensities = melt(long_data_Intensities_sig_commongenes)
+
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_16_commongenes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+ggplot(mm_commonIntensities)+geom_boxplot(aes(x=genotype, y=value))+facet_grid(.~variable)
+dev.off()
+
+
+for (var in mm_commonIntensities$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_03_16_MassSpec_IntensitiesBoxPlots_SignificantGenes//", var, ".pdf", sep=""))
+  print(ggplot(mm_commonIntensities[mm_commonIntensities$variable==var,],fill = "#00AFBB")+geom_boxplot(aes(x=genotype, y=value))+ggtitle(var))
   dev.off()
   }
 
