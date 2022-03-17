@@ -328,7 +328,7 @@ mm_sigSpectral = melt(long_data_Spectral_sig_genes)
 for (var in mm_sigSpectral$variable) { 
  
   pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_03_16_MassSpec_SpectralBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
-  print(ggpaired(mm_sigSpectral[mm_sigSpectral$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var))+stat_compare_means(label.x = 0.5)
+  print(ggpaired(mm_sigSpectral[mm_sigSpectral$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
   dev.off()
   }
 
