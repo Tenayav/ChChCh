@@ -357,3 +357,51 @@ for (var in mm_sigIntensities$variable) {
 #http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/
 ```
 
+#Histogram of all intensities and where the 6 of interest fall
+```{r}
+#Spectral Counts
+mm_allSpectral = melt(Spectral)
+mm_allSpectral$logvalue=log(mm_allSpectral$value,10)
+hist(mm_allSpectral$logvalue, breaks = 20, main="Histogram of Spectral Counts in Log Scale \nfrom Mass Spec Runs FAJan2022 and TVkitJan2022", xlab = "log(Spectral Counts)", ylab = "Frequency of Spectral Count Value", labels=TRUE) 
+
+# saving the figure (we will do this over and over again :)
+# we will learn ggplot later but we use PDF and turn of null device (plot window) 
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_21_Histogram_Spectral_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+hist(mm_allSpectral$logvalue, breaks = 20, main="Histogram of Spectral Counts in Log Scale\nfrom Mass Spec Runs FAJan2022 and TVkitJan2022", xlab = "Log(Spectral Counts)", ylab = "Frequency of Spectral Count Value", labels=TRUE) 
+dev.off()
+
+
+mean_spectral <- long_data_Spectral_sig_genes %>%
+    group_by(genotype) %>% 
+    summarise_each(funs(round(mean(.),2)))
+#For entire column
+#Spectral_sig_genes <- Spectral[, grep(pattern_to_search_sig_genes, colnames(Spectral))]
+#mean_spectral <- rbind(Spectral_sig_genes, colMeans = colMeans(Spectral_sig_genes))
+write.csv(mean_spectral,"/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_21_meanSpectral_siggenes.csv",row.names = TRUE)
+
+
+#Intensities
+mm_allIntensities = melt(Intensities)
+mm_allIntensities$logvalue=log(mm_allIntensities$value,10)
+hist(mm_allIntensities$logvalue, breaks = 20, main="Histogram of Intensities in Log Scale \nfrom Mass Spec Runs FAJan2022 and TVkitJan2022", xlab = "Log(Intensities)", ylab = "Frequency of Intensity Value",labels=TRUE) 
+
+# saving the figure (we will do this over and over again :)
+# we will learn ggplot later but we use PDF and turn of null device (plot window) 
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_21_Histogram_Intensites_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+hist(mm_allIntensities$logvalue, breaks = 20, main="Histogram of Intensities in Log Scale \nfrom Mass Spec Runs FAJan2022 and TVkitJan2022", xlab = "Log(Intensities)", ylab = "Frequency of Intensity Value",labels=TRUE) 
+dev.off()
+
+mean_intensities <- long_data_Intensities_sig_genes %>%
+    group_by(genotype) %>% 
+    summarise_each(funs(round(mean(.),2)))
+
+#Intensities_sig_genes <- Intensities[, grep(pattern_to_search_sig_genes, colnames(Intensities))]
+#mean_intensities <- rbind(Intensities_sig_genes, colMeans = colMeans(Intensities_sig_genes))
+#keep in mind the above means are not in log scale. So you'll have to transform these in the table later. 
+write.csv(mean_intensities,"/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_21_meanIntensities_siggenes.csv",row.names = TRUE)
+
+
+```
+
