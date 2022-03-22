@@ -318,8 +318,8 @@ write.csv(allgenes, file = "2022_03_15_allgenes.csv", row.names=TRUE)
 
 ```
 #Same thing but now for Significant genes
-#Pvalues are on graphs
-#Graphs here are fancy
+#Pvalues are on individual graphs, but not the big graph. 
+#Graphs here are fancy and pretty close to publication ready. 
 #Feel free to change the fill color. It's teal. 
 ```{r}
 #genes with pvalues <0.05. Making Box Whisker Plots, both all together and individual
