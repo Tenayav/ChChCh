@@ -32,6 +32,8 @@ mass_spec_Jan2022_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_
 #Clean up column names
 #colnames(mass_spec_Jan2022_FA) <- paste(colnames(mass_spec_Jan2022_FA),"Jan2022FA",sep="_")
 #Making tibbles from KO and WT spectral counts from the data
+
+#Below is grabbing the KO and WT separately. I will recombine these later but first I want to put the different datasets together. 
 KO_spectral_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,13,15,17,19,21,23,25,27)]
 WT_spectral_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,29,31,33,35,37,39,41,43)]
 
@@ -109,7 +111,8 @@ typeof(Intensities$aars1)
 ```
 
 
-#Wilcoxon Test on Spectral
+#Wilcoxon Test on Spectral. 
+#Output is a csv file to have the pvalues in a table format. 
 ```{r}
 
 test.fun <- function(Spectral, col) { 
@@ -143,6 +146,7 @@ names(tests_Spectral) <- colnames(Spectral)[-1]
 ```
 
 #Wilcoxon Test on Intensities
+#Output is a csv file to have the pvalues in a table format. 
 ```{r}
 
 test.fun2 <- function(Intensities, col) { 
@@ -174,7 +178,7 @@ names(tests_Intensities) <- colnames(Intensities)[-1]
 
 ```
 
-
+#Writing CSV of the Wilcoxon Test
 ```{r}
 results_Spectral <- do.call(rbind.data.frame, tests_Spectral)
 write.csv(results_Spectral,"/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//results_Spectral.csv",row.names = FALSE)
@@ -202,6 +206,7 @@ dev.off()
 
 ```
 #Genes Below 0.05 and 0.10 p-value
+#Feel free to change the names and the pvalue cutoffs
 ```{r}
 results_Spectral <- results_Spectral %>% 
   mutate(significance = ifelse(p < 0.05, "very",
@@ -221,7 +226,8 @@ significantIntensities_genes <- results_Intensities[grepl(pattern_to_search, res
 ```
 
 #Venn diagram of genes that are significant in Intensities and Spectral Counts
-#Dataframes of common and all significant genes
+#Dataframes of common (found as significant in both Intensities and Spectral counts)
+#Feel free to silence this one. I used this for my initial analysis. 
 ```{r}
 significantSpectral_genes$gene <- row.names(significantSpectral_genes)
 typeof(significantSpectral_genes$gene)
@@ -245,10 +251,13 @@ allgenes
 write.csv(allgenes, file = "2022_03_15_allgenes.csv", row.names=TRUE)
 ```
 
-#Need to have the box-whisker plots from my old way of doing this to check that I believe the significance
-#Also need to find the ones that are not significant for KO...how do I do that
-
-#For common genes, I'm going to do those box-whisker plots 
+#Box-whisker plots of common genes to check that I believe the significance
+#Feel free to silence. This was just a quality control. 
+#You'll find that I have a big box-whisker plot of common gene, KO vs. WT, for both
+#intensities and spectral plots. This is saved as a pdf.
+#The For Loop generates individual box-whisker plots for each common gene and puts them in a folder. 
+#So make folders ahead of time. 
+#You'll find that I melt the data. This is essential for getting the box whisker plot to work.
 ```{r}
 #Common genes Spectral
 pattern_to_search_commongenes <- paste0(commongenes$gene, collapse = "|")
@@ -308,12 +317,16 @@ for (var in mm_commonIntensities$variable) {
 #}
 
 ```
-#For Significant genes
+#Same thing but now for Significant genes
+#Pvalues are on graphs
+#Graphs here are fancy
+#Feel free to change the fill color. It's teal. 
 ```{r}
 #genes with pvalues <0.05. Making Box Whisker Plots, both all together and individual
 
 #Spectral
-sig_genes <- c("anxa1","atp5f1a","btf3","ckb","gapdh","hdlbp","hnrnpm","krt14","krt16","krt5","mif","naa15","pabpc1","pkp1","rpl10$","rpl38","slc25a5")
+#in the future I might have to grep these names
+sig_genes <- c("anxa1","atp5f1a","btf3","ckb","hdlbp","hnrnpm","mif","naa15","pabpc1","pkp1","rpl10$","rpl38","slc25a5")
 pattern_to_search_sig_genes <- paste0(sig_genes, collapse = "|")
 long_data_Spectral_sig_genes <- Spectral[, grep(pattern_to_search_sig_genes, colnames(Spectral))]
 genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
@@ -357,7 +370,10 @@ for (var in mm_sigIntensities$variable) {
 #http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/
 ```
 
-#Histogram of all intensities and where the 6 of interest fall
+#Histogram of all intensities 
+#Calculating the mean of the 6 interesting genes for both spectral counts and intensities
+#Saving the means in a csv file 
+#Need to figure out how to incorporate the data from the table into the histogram. 
 ```{r}
 #Spectral Counts
 mm_allSpectral = melt(Spectral)
