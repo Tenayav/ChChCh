@@ -420,4 +420,59 @@ write.csv(mean_intensities,"/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreM
 
 
 ```
+#BoxWhisker Plots of the 6 Interesting Signficiant Genes ONLY
+```{r}
+sig_genes6 <- c("anxa1","btf3","hnrnpm","mif","naa15","rpl10$")
+pattern_to_search_sig_genes6 <- paste0(sig_genes6, collapse = "|")
+
+#Spectral Counts
+long_data_Spectral_sig_genes6 <- Spectral[, grep(pattern_to_search_sig_genes6, colnames(Spectral))]
+log_longdata_Spectral_sig_genes6 <- log(long_data_Spectral_sig_genes6,10)
+genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+long_data_Spectral_sig_genes6<- cbind(genotype,long_data_Spectral_sig_genes6)
+
+mm_sigSpectral6 = melt(long_data_Spectral_sig_genes6)
+
+  pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_22_6sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+  ggplot(mm_sigSpectral6)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format", label.y = 4.5)
+  #expression(atop("A long string of text for the purpose", paste("of illustrating my point" [reported])))
+  #label.x = 0.5
+  dev.off()
+
+#logscale
+#log_longdata_Spectral_sig_genes6 <- data.frame(lapply(log_longdata_Spectral_sig_genes6, function(x) {gsub("-Inf", 0, x)}))
+#log_longdata_Spectral_sig_genes6[] <- lapply(log_longdata_Spectral_sig_genes6, type.convert, as.is = TRUE)
+#log_longdata_Spectral_sig_genes6<- cbind(genotype,log_longdata_Spectral_sig_genes6)
+
+#mm_logsigSpectral6 = melt(log_longdata_Spectral_sig_genes6)
+
+  #pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_22_log6sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+  #ggplot(mm_logsigSpectral6)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format", label.y = 0.75)
+  #expression(atop("A long string of text for the purpose", paste("of illustrating my point" [reported])))
+  #label.x = 0.5
+ # dev.off()
+  
+#Intensities
+sig_genes6 <- c("anxa1","btf3","hnrnpm","mif","naa15","rpl10$")
+long_data_Intensities_sig_genes6 <- Intensities[, grep(pattern_to_search_sig_genes6, colnames(Intensities))]
+genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+long_data_Intensities_sig_genes6 <- cbind(genotype,long_data_Intensities_sig_genes6)
+mm_sigIntensities6 = melt(long_data_Intensities_sig_genes6)
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_22_6sig_genes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+ggplot(mm_sigIntensities6)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format")
+dev.off()
+
+#Sig Genes Minus RPL10 because not significant in intensities
+sig_genes5 <- c("anxa1","btf3","hnrnpm","mif","naa15")
+pattern_to_search_sig_genes5 <- paste0(sig_genes5, collapse = "|")
+long_data_Intensities_sig_genes5 <- Intensities[, grep(pattern_to_search_sig_genes5, colnames(Intensities))]
+genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+long_data_Intensities_sig_genes5 <- cbind(genotype,long_data_Intensities_sig_genes5)
+mm_sigIntensities5 = melt(long_data_Intensities_sig_genes5)
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_22_5sig_genes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+ggplot(mm_sigIntensities5)+geom_boxplot(aes(x=genotype, y=value),fill = "#BB2526")+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format")+ggtitle("Mass Spec Intensities of 5 Genes of Interest")+labs(y = "Mass Spec Intensity", x = "\nFirre Genotype in Mouse Embryonic Stem Cells")
+dev.off()
+```
 
