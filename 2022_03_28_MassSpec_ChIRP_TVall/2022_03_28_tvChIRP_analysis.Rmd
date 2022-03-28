@@ -294,4 +294,4 @@ for (var in mm_sigIntensities$variable) {
 ```
 
 ##Then comes histograms of the spectral and intensities counts
-##Also more fancy box plots for the very interesting genes
+##Also more fancy box plots of the very interesting genes
