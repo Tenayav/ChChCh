@@ -1,0 +1,297 @@
+---
+title: "2022_03_28_AllTVChIRPdata"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(dplyr)
+library(purrr)
+library(janitor)
+library(ggplot2)
+library(ggvenn)
+library(VennDiagram)
+library(venneuler)
+library(eulerr)
+library(reshape)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Making Tibbles of Spectral data for each protein from the Jan2022FA and Jan2022TVkit data
+```{r}
+
+#Mar2022 Kit Data
+mass_spec_Mar2022_TV <- read_csv("File Name")
+#Clean up column names
+#colnames(mass_spec_Jan2022_FA) <- paste(colnames(mass_spec_Jan2022_FA),"Jan2022FA",sep="_")
+#Making tibbles from KO and WT spectral counts from the data
+
+#Below is grabbing the KO and WT separately. I will recombine these later but first I want to put the different datasets together. 
+
+##Specify the correct column numbers
+KO_spectral_mass_spec_Mar2022_TV <- mass_spec_Mar2022_TV[,c(4,13,15,17,19,21,23,25,27)]
+WT_spectral_mass_spec_Mar2022_TV <- mass_spec_Mar2022_TV[,c(4,29,31,33,35,37,39,41,43)]
+
+#Jan2022TVkit Data Same thing. 
+kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv")
+#colnames(kit_mass_spec_Jan2022_TV) <- paste(colnames(kit_mass_spec_Jan2022_TV),"KitJan2022TV",sep="_")
+KO_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,13,14)]
+WT_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,15,16)]
+
+```
+
+#Making Tibbles of Calculated Intensities for each dbp from the Jan2022FA and Jan2022TV data
+```{r}
+#Mar2022TV data
+##Change column numbers
+KO_intensities_mass_spec_Mar2022_TV <- mass_spec_Mar2022_TV[,c(4,14,16,18,20,22,24,26,28)]
+WT_intensities_mass_spec_Mar2022_TV <- mass_spec_Mar2022_TV[,c(4,30,32,34,36,38,40,42,44)]
+
+#Jan2022TVkit Data Same thing. 
+KO_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,17,18)]
+WT_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,19,20)]
+
+```
+
+#Full outer join by protein name, still keeping KO and WT separate
+#Followed by some cleanup
+
+```{r}
+#For Spectral
+KO_spectral=KO_spectral_mass_spec_Jan2022_TV %>% full_join(KO_spectral_mass_spec_Mar2022_TV,by="Gene")
+WT_spectral=WT_spectral_mass_spec_Jan2022_TV %>% full_join(WT_spectral_mass_spec_Mar2022_TV,by="Gene")
+
+#For Intensities
+KO_intensities = KO_intensities_mass_spec_Jan2022_TV %>% full_join(KO_intensities_mass_spec_Mar2022_TV,by="Gene")
+WT_intensities = WT_intensities_mass_spec_Jan2022_TV %>% full_join(WT_intensities_mass_spec_Mar2022_TV,by="Gene")
+
+#Cleanup by making the Gene column a character column and N/A's into Zeros
+KO_spectral <- as.data.frame(KO_spectral)
+KO_spectral <- replace(KO_spectral, is.na(KO_spectral), 0)
+WT_spectral <- as.data.frame(WT_spectral)
+WT_spectral <- replace(WT_spectral, is.na(WT_spectral), 0)
+KO_intensities <-as.data.frame(KO_intensities)
+KO_intensities <- replace(KO_intensities, is.na(KO_intensities), 0)
+WT_intensities <- as.data.frame(WT_intensities)
+WT_intensities <- replace(WT_intensities, is.na(WT_intensities), 0)
+
+#Spectral Clean up
+##Might have to check if these rows still need to be removed. 
+KO_spectral <- KO_spectral[-c(280,297:305),]
+KO_spectral <- KO_spectral[order(KO_spectral$Gene),]
+WT_spectral <- WT_spectral[-c(280,297:305),]
+WT_spectral <- WT_spectral[order(WT_spectral$Gene),]
+Spectral = WT_spectral %>% full_join(KO_spectral,by="Gene")
+Spectral <- as.data.frame(t(Spectral))
+##Might have to check numbers of WT and KO to match below genotype cbind
+Spectral_newcol <- c("Genotype","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+Spectral <- cbind(Spectral_newcol,Spectral)
+Spectral <- Spectral %>% row_to_names (row_number= 1) %>% clean_names()
+Spectral[] <- lapply(Spectral, type.convert, as.is = TRUE)
+
+#Intensities Clean up
+##Same here check as you did in the above. 
+KO_intensities <- KO_intensities[-c(280,297:305),]
+KO_intensities <- KO_intensities[order(KO_intensities$Gene),]
+WT_intensities <- WT_intensities[-c(280,297:305),]
+WT_intensities <- WT_intensities[order(WT_intensities$Gene),]
+Intensities = WT_intensities %>% full_join(KO_intensities,by="Gene")
+Intensities <- as.data.frame(t(Intensities))
+Intensities_newcol <- c("Gene","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+Intensities <- cbind(Intensities_newcol,Intensities)
+Intensities <-Intensities %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities[] <- lapply(Intensities, type.convert, as.is = TRUE)
+
+```
+
+##Need to change below gene to do a check. 
+```{r}
+typeof(Spectral$aars1)
+typeof(Intensities$aars1)
+```
+
+#Making a Venn Diagram of the two datasets just to see overlap
+##If this is interesting, go back to Feb 1st and grep the names to know common genes
+```{r}
+typeof(mass_spec_Mar2022_TV$Gene)
+genes <- list(genes_Mar2022 = sort(mass_spec_Mar2022_TV$Gene), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$Gene))
+pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
+ggvenn(genes, c("genes_Mar2022", "genes_kitJan2022"))
+dev.off()
+```
+
+#Wilcoxon Test on Spectral. 
+#Output is a csv file to have the pvalues in a table format. 
+```{r}
+
+test.fun <- function(Spectral, col) { 
+
+ c1 <- combn(unique(Spectral$genotype),2)
+ sigs <- list()
+ for(i in 1:ncol(c1)) {
+    sigs[[i]] <- wilcox.test(
+                   Spectral[Spectral$genotype == c1[1,i],col],
+                   Spectral[Spectral$genotype == c1[2,i],col], exact=FALSE
+                 )
+    }
+    names(sigs) <- paste("Group",c1[1,],"by Group",c1[2,])
+
+ tests_Spectral <- data.frame(Test=names(sigs),
+                    W=unlist(lapply(sigs,function(x) x$statistic)),
+                    p=unlist(lapply(sigs,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Spectral)
+}
+
+
+tests_Spectral <- lapply(colnames(Spectral)[-1],function(x) test.fun(Spectral,x))
+names(tests_Spectral) <- colnames(Spectral)[-1]
+# tests <- do.call(rbind, tests) reprints as data.frame
+
+
+
+#KO_list = split(KO_spectral, f = KO_spectral$Gene)
+
+```
+
+#Wilcoxon Test on Intensities
+#Output is a csv file to have the pvalues in a table format. 
+```{r}
+
+test.fun2 <- function(Intensities, col) { 
+
+ c2 <- combn(unique(Intensities$gene),2)
+ sigs2 <- list()
+ for(i in 1:ncol(c2)) {
+    sigs2[[i]] <- wilcox.test(
+                   Intensities[Intensities$gene == c2[1,i],col],
+                   Intensities[Intensities$gene == c2[2,i],col], exact=FALSE
+                 )
+    }
+    names(sigs2) <- paste("Group",c2[1,],"by Group",c2[2,])
+
+ tests_Intensities <- data.frame(Test=names(sigs2),
+                    W=unlist(lapply(sigs2,function(x) x$statistic)),
+                    p=unlist(lapply(sigs2,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Intensities)
+}
+
+
+tests_Intensities <- lapply(colnames(Intensities)[-1],function(x) test.fun2(Intensities,x))
+names(tests_Intensities) <- colnames(Intensities)[-1]
+# tests <- do.call(rbind, tests) reprints as data.frame
+
+
+#KO_list = split(KO_spectral, f = KO_spectral$Gene)
+
+```
+
+#Writing CSV of the Wilcoxon Test
+```{r}
+results_Spectral <- do.call(rbind.data.frame, tests_Spectral)
+write.csv(results_Spectral,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//results_Spectral.csv",row.names = FALSE)
+results_Intensities <- do.call(rbind.data.frame, tests_Intensities)
+write.csv(results_Intensities,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//results_Intensities.csv",row.names = FALSE)
+```
+
+#Histogram of p-values
+```{r}
+hist(results_Spectral$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+
+# saving the figure (we will do this over and over again :)
+# we will learn ggplot later but we use PDF and turn of null device (plot window) 
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_Histogram_Wilcoxon_Spectral_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
+hist(results_Spectral$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
+
+#intensities
+hist(results_Intensities$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_Histogram_Wilcoxon_Intensities_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
+hist(results_Intensities$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
+
+```
+
+#Genes Below 0.05 and 0.10 p-value
+#Feel free to change the names and the pvalue cutoffs
+```{r}
+results_Spectral <- results_Spectral %>% 
+  mutate(significance = ifelse(p < 0.05, "very",
+                          ifelse(p < 0.10, "significant", "not")))
+
+significant <- c("very", "significant")
+pattern_to_search <- paste0(significant, collapse = "|")
+
+significantSpectral_genes <- results_Spectral[grepl(pattern_to_search, results_Spectral$significance), ]
+
+results_Intensities <- results_Intensities%>% 
+  mutate(significance = ifelse(p < 0.05, "very",
+                          ifelse(p < 0.10, "significant", "not")))
+
+significantIntensities_genes <- results_Intensities[grepl(pattern_to_search, results_Intensities$significance), ]
+
+```
+
+##will need to change the gene names below that I put in manually
+##make sure genotype entry is the same as above
+#Pvalues are on individual graphs, but not the big graph. 
+#Graphs here are fancy and pretty close to publication ready. 
+#Feel free to change the fill color. It's teal. 
+```{r}
+#genes with pvalues <0.05. Making Box Whisker Plots, both all together and individual
+
+#Spectral
+#in the future I might have to grep these names
+sig_genes <- c("anxa1","atp5f1a","btf3","ckb","hdlbp","hnrnpm","mif","naa15","pabpc1","pkp1","rpl10$","rpl38","slc25a5")
+pattern_to_search_sig_genes <- paste0(sig_genes, collapse = "|")
+long_data_Spectral_sig_genes <- Spectral[, grep(pattern_to_search_sig_genes, colnames(Spectral))]
+genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+long_data_Spectral_sig_genes <- cbind(genotype,long_data_Spectral_sig_genes)
+mm_sigSpectral = melt(long_data_Spectral_sig_genes)
+
+  pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
+  ggplot(mm_sigSpectral)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
+  dev.off()
+
+
+for (var in mm_sigSpectral$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_28_MassSpec_SpectralBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
+  print(ggpaired(mm_sigSpectral[mm_sigSpectral$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  dev.off()
+  }
+
+#Intensities
+long_data_Intensities_sig_genes <- Intensities[, grep(pattern_to_search_sig_genes, colnames(Intensities))]
+genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+long_data_Intensities_sig_genes <- cbind(genotype,long_data_Intensities_sig_genes)
+mm_sigIntensities = melt(long_data_Intensities_sig_genes)
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_sig_genes_Intensities_boxwhisker_Wilcoxon_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
+ggplot(mm_sigIntensities)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
+dev.off()
+
+for (var in mm_sigIntensities$variable) { 
+             
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_28_MassSpec_IntensitiesBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
+  #print(ggplot(mm_sigIntensities[mm_sigIntensities$variable==var,])+geom_boxplot(aes(x=genotype, y=value),fill="#00AFBB")+ggtitle(var))
+  print(ggpaired(mm_sigIntensities[mm_sigIntensities$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  dev.off()
+}
+
+#Trying to add pvalues to plots.
+#Help websites
+#https://www.datanovia.com/en/blog/ggpubr-how-to-add-p-values-generated-elsewhere-to-a-ggplot/
+#https://www.r-bloggers.com/2017/06/add-p-values-and-significance-levels-to-ggplots/
+#http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/
+```
+
+##Then comes histograms of the spectral and intensities counts
+##Also more fancy box plots for the very interesting genes

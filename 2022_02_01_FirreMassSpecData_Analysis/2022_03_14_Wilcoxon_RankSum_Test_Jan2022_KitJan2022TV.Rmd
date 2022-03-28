@@ -475,5 +475,6 @@ mm_sigIntensities5 = melt(long_data_Intensities_sig_genes5)
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_22_5sig_genes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
 ggplot(mm_sigIntensities5)+geom_boxplot(aes(x=genotype, y=value),fill = "#BB2526",size=0.5)+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format")+ggtitle("Mass Spec Intensities of 5 Genes of Interest")+labs(y = "Mass Spec Intensity", x = "\nFirre Genotype in Mouse Embryonic Stem Cells")
 dev.off()
+##Hello
 ```
 
