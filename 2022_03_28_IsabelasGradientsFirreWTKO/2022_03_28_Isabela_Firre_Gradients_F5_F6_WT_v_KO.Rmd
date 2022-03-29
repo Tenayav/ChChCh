@@ -67,7 +67,10 @@ Intensities_100ng <- mass_spec_100ng_Mar2022_SucGrad[,c(4,28,29,30,31)]
 Intensities_50ng_WTcheck <- mass_spec_50ng_Mar2022_SucGrad[,c(4,30,31)]
 Intensities_100ng_WTcheck <- mass_spec_100ng_Mar2022_SucGrad[,c(4,30,31)]
 
-Intensities_WTcheck = Intensities_50ng_WTcheck %>% full_join(Intensities_100ng_WTcheck,by="Gene")
+Intensities_WTcheck = Intensities_50ng_WTcheck %>% full_join(Intensities_100ng_WTcheck,by="Gene",suffix = c(".50ng",".100ng"))
+
+sums_Intensities_WTcheck  <-  rowSums(Intensities_WTcheck[,2:5])
+Intensities_WTcheck2  <-  cbind(Intensities_WTcheck, sums_Intensities_WTcheck)
 
 
 ```
