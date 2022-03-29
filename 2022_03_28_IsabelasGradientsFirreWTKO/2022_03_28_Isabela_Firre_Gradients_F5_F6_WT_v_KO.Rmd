@@ -310,11 +310,11 @@ pattern_to_search <- paste0(significant, collapse = "|")
 
 significantSpectral_50ng_genes <- results_Spectral_50ng[grepl(pattern_to_search, results_Spectral_50ng$significance), ]
 
-results_Intensities <- results_Intensities%>% 
+results_Intensities_50ng <- results_Intensities_50ng%>% 
   mutate(significance = ifelse(p < 0.05, "very",
                           ifelse(p < 0.10, "significant", "not")))
 
-significantIntensities_genes <- results_Intensities[grepl(pattern_to_search, results_Intensities$significance), ]
+significantIntensities_50ng_genes <- results_Intensities_50ng[grepl(pattern_to_search, results_Intensities_50ng$significance), ]
 
 ```
 
