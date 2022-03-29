@@ -25,7 +25,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 
 #Mar2022 Kit Data
-mass_spec_Mar2022_TV <- read_csv("File Name")
+mass_spec_50ng_Mar2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_50ng_protein_ChIRP_5percentFDR_JRinn.csv")
+mass_spec_100ng_Mar2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_100ng_ChIRP_5percentFDR_JRinn_Results.csv")
 #Clean up column names
 #colnames(mass_spec_Jan2022_FA) <- paste(colnames(mass_spec_Jan2022_FA),"Jan2022FA",sep="_")
 #Making tibbles from KO and WT spectral counts from the data
@@ -33,8 +34,8 @@ mass_spec_Mar2022_TV <- read_csv("File Name")
 #Below is grabbing the KO and WT separately. I will recombine these later but first I want to put the different datasets together. 
 
 ##Specify the correct column numbers
-KO_spectral_mass_spec_Mar2022_TV <- mass_spec_Mar2022_TV[,c(4,13,15,17,19,21,23,25,27)]
-WT_spectral_mass_spec_Mar2022_TV <- mass_spec_Mar2022_TV[,c(4,29,31,33,35,37,39,41,43)]
+KO_spectral_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,16,18)]
+WT_spectral_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,17,19,20)]
 
 #Jan2022TVkit Data Same thing. 
 kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv")
@@ -48,12 +49,48 @@ WT_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,15,16)]
 ```{r}
 #Mar2022TV data
 ##Change column numbers
-KO_intensities_mass_spec_Mar2022_TV <- mass_spec_Mar2022_TV[,c(4,14,16,18,20,22,24,26,28)]
-WT_intensities_mass_spec_Mar2022_TV <- mass_spec_Mar2022_TV[,c(4,30,32,34,36,38,40,42,44)]
+KO_intensities_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,34,36)]
+WT_intensities_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,35,37,39)]
 
 #Jan2022TVkit Data Same thing. 
 KO_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,17,18)]
 WT_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,19,20)]
+
+```
+
+#Making a Venn Diagram of the two datasets just to see overlap
+##If this is interesting, go back to Feb 1st and grep the names to know common genes
+```{r}
+#typeof(mass_spec_Mar2022_TV$Gene)
+genes <- list(genes_50ng_Mar2022 = sort(mass_spec_50ng_Mar2022_TV$Gene),genes_100ng_Mar2022 = sort(mass_spec_100ng_Mar2022_TV$Gene), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$Gene))
+pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
+ggvenn(genes, c("genes_50ng_Mar2022","genes_100ng_Mar2022" ,"genes_kitJan2022"))
+dev.off()
+
+venn_win <- euler(c(Genes_50ng_Mar2022=668, Genes_100ng_Mar2022=587,Genes_Jan2022=29, "Genes_50ng_Mar2022&Genes_100ng_Mar2022"=2568,"Genes_50ng_Mar2022&Genes_Jan2022"=5,"Genes_100ng_Mar2022&Genes_Jan2022"=1,"Genes_50ng_Mar2022&Genes_100ng_Mar2022&Genes_Jan2022"=95), shape = "ellipse")
+pdf("VennDiagram_MassSpec_GeneOverlap_bysize.pdf")
+plot(venn_win, 
+     fill = c("white","skyblue1", "lightcoral"),
+     quantities = list(fontsize = 13))
+dev.off()
+```
+```{r}
+genes_50ng_Mar2022_v_genes_100ng_Mar2022 <- genes$genes_50ng_Mar2022[genes$genes_50ng_Mar2022 %in% genes$genes_100ng_Mar2022]
+genes_50ng_Mar2022_v_genes_kitJan2022 <- genes$genes_50ng_Mar2022[genes$genes_50ng_Mar2022 %in% genes$genes_kitJan2022]
+genes_100ng_Mar2022_v_genes_kitJan2022 <- genes$genes_100ng_Mar2022[genes$genes_100ng_Mar2022 %in% genes$genes_Jan2022]
+allthree <- genes_50ng_Mar2022_v_genes_100ng_Mar2022 [genes_50ng_Mar2022_v_genes_100ng_Mar2022 %in% genes_50ng_Mar2022_v_genes_kitJan2022]
+length(allthree)
+
+pattern_to_searchD <- paste0(allthree, collapse = "$|^")
+pattern_to_search4 <- paste("^",pattern_to_searchD,"$",sep="")
+
+subset7 <- mass_spec_50ng_Mar2022_TV[grepl(pattern_to_search4, mass_spec_50ng_Mar2022_TV$Gene),]
+subset8 <- mass_spec_100ng_Mar2022_TV[grepl(pattern_to_search4, mass_spec_100ng_Mar2022_TV$Gene),]
+subset9 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search4,kit_mass_spec_Jan2022_TV$Gene),]
+
+allthree_withdata <- cbind(subset7,subset8)
+allthree_withdata <- cbind(subset8,subset9)
+write.csv(allthree_withdata, file = "allthree_complete.csv", row.names = TRUE)
 
 ```
 
@@ -112,16 +149,6 @@ Intensities[] <- lapply(Intensities, type.convert, as.is = TRUE)
 ```{r}
 typeof(Spectral$aars1)
 typeof(Intensities$aars1)
-```
-
-#Making a Venn Diagram of the two datasets just to see overlap
-##If this is interesting, go back to Feb 1st and grep the names to know common genes
-```{r}
-typeof(mass_spec_Mar2022_TV$Gene)
-genes <- list(genes_Mar2022 = sort(mass_spec_Mar2022_TV$Gene), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$Gene))
-pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
-ggvenn(genes, c("genes_Mar2022", "genes_kitJan2022"))
-dev.off()
 ```
 
 #Wilcoxon Test on Spectral. 
