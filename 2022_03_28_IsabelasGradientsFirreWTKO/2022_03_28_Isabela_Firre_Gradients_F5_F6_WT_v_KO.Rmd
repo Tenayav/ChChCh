@@ -56,6 +56,24 @@ Intensities_100ng <- mass_spec_100ng_Mar2022_SucGrad[,c(4,28,29,30,31)]
 
 ```
 
+#You'll see a shift to only analyzing the intensities. I can go back to Spectral Counts
+#You'll also see that I'm favoring regular intensities right now. I'll go back and look at the other three types of intensities. Just want to get my bearing. 
+#I'm going to filter out any genes with 0 intensities for WT and start treating the two technical runs as replicates
+```{r}
+#The plan is to separate out the WT genes
+#Take a sum of each row
+#Sort out those greater than 0
+#Then grep those genes, grabbing both KO and WT at that point and also for both runs and putting them together in one dataframe to proceed forward. 
+Intensities_50ng_WTcheck <- mass_spec_50ng_Mar2022_SucGrad[,c(4,30,31)]
+Intensities_100ng_WTcheck <- mass_spec_100ng_Mar2022_SucGrad[,c(4,30,31)]
+
+Intensities_WTcheck = Intensities_50ng_WTcheck %>% full_join(Intensities_100ng_WTcheck,by="Gene")
+
+
+```
+
+
+
 #Full outer join by protein name, still keeping KO and WT separate
 #Followed by some cleanup
 

@@ -50,7 +50,7 @@ WT_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,15,16)]
 #Mar2022TV data
 ##Change column numbers
 KO_intensities_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,34,36)]
-WT_intensities_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,35,37,39)]
+WT_intensities_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,35,37,38)]
 
 #Jan2022TVkit Data Same thing. 
 KO_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,17,18)]
@@ -99,18 +99,18 @@ write.csv(allthree_withdata, file = "allthree_complete.csv", row.names = TRUE)
 
 ```{r}
 #For Spectral
-KO_spectral=KO_spectral_mass_spec_Jan2022_TV %>% full_join(KO_spectral_mass_spec_Mar2022_TV,by="Gene")
-WT_spectral=WT_spectral_mass_spec_Jan2022_TV %>% full_join(WT_spectral_mass_spec_Mar2022_TV,by="Gene")
+#KO_spectral=KO_spectral_mass_spec_Jan2022_TV %>% full_join(KO_spectral_mass_spec_Mar2022_TV,by="Gene")
+#WT_spectral=WT_spectral_mass_spec_Jan2022_TV %>% full_join(WT_spectral_mass_spec_Mar2022_TV,by="Gene")
 
 #For Intensities
-KO_intensities = KO_intensities_mass_spec_Jan2022_TV %>% full_join(KO_intensities_mass_spec_Mar2022_TV,by="Gene")
-WT_intensities = WT_intensities_mass_spec_Jan2022_TV %>% full_join(WT_intensities_mass_spec_Mar2022_TV,by="Gene")
+KO_intensities = KO_intensities_mass_spec_Jan2022_TV %>% full_join(KO_intensities_mass_spec_50ng_Mar2022_TV,by="Gene")
+WT_intensities = WT_intensities_mass_spec_Jan2022_TV %>% full_join(WT_intensities_mass_spec_50ng_Mar2022_TV,by="Gene")
 
 #Cleanup by making the Gene column a character column and N/A's into Zeros
-KO_spectral <- as.data.frame(KO_spectral)
-KO_spectral <- replace(KO_spectral, is.na(KO_spectral), 0)
-WT_spectral <- as.data.frame(WT_spectral)
-WT_spectral <- replace(WT_spectral, is.na(WT_spectral), 0)
+#KO_spectral <- as.data.frame(KO_spectral)
+#KO_spectral <- replace(KO_spectral, is.na(KO_spectral), 0)
+#WT_spectral <- as.data.frame(WT_spectral)
+#WT_spectral <- replace(WT_spectral, is.na(WT_spectral), 0)
 KO_intensities <-as.data.frame(KO_intensities)
 KO_intensities <- replace(KO_intensities, is.na(KO_intensities), 0)
 WT_intensities <- as.data.frame(WT_intensities)
@@ -118,23 +118,23 @@ WT_intensities <- replace(WT_intensities, is.na(WT_intensities), 0)
 
 #Spectral Clean up
 ##Might have to check if these rows still need to be removed. 
-KO_spectral <- KO_spectral[-c(280,297:305),]
-KO_spectral <- KO_spectral[order(KO_spectral$Gene),]
-WT_spectral <- WT_spectral[-c(280,297:305),]
-WT_spectral <- WT_spectral[order(WT_spectral$Gene),]
-Spectral = WT_spectral %>% full_join(KO_spectral,by="Gene")
-Spectral <- as.data.frame(t(Spectral))
+#KO_spectral <- KO_spectral[-c(280,297:305),]
+#KO_spectral <- KO_spectral[order(KO_spectral$Gene),]
+#WT_spectral <- WT_spectral[-c(280,297:305),]
+#WT_spectral <- WT_spectral[order(WT_spectral$Gene),]
+#Spectral = WT_spectral %>% full_join(KO_spectral,by="Gene")
+#Spectral <- as.data.frame(t(Spectral))
 ##Might have to check numbers of WT and KO to match below genotype cbind
-Spectral_newcol <- c("Genotype","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
-Spectral <- cbind(Spectral_newcol,Spectral)
-Spectral <- Spectral %>% row_to_names (row_number= 1) %>% clean_names()
-Spectral[] <- lapply(Spectral, type.convert, as.is = TRUE)
+#Spectral_newcol <- c("Genotype","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+#Spectral <- cbind(Spectral_newcol,Spectral)
+#Spectral <- Spectral %>% row_to_names (row_number= 1) %>% clean_names()
+#Spectral[] <- lapply(Spectral, type.convert, as.is = TRUE)
 
 #Intensities Clean up
 ##Same here check as you did in the above. 
-KO_intensities <- KO_intensities[-c(280,297:305),]
+#KO_intensities <- KO_intensities[-c(280,297:305),]
 KO_intensities <- KO_intensities[order(KO_intensities$Gene),]
-WT_intensities <- WT_intensities[-c(280,297:305),]
+#WT_intensities <- WT_intensities[-c(280,297:305),]
 WT_intensities <- WT_intensities[order(WT_intensities$Gene),]
 Intensities = WT_intensities %>% full_join(KO_intensities,by="Gene")
 Intensities <- as.data.frame(t(Intensities))
