@@ -250,16 +250,19 @@ quick_sig_genes_intensities_Mar2022withJan2022$gene <- row.names(significant_Int
 #quick_sig_genes_intensities_Jan2022 <- read_csv("/file/path") %>% clean_names()
 #names(quick_sig_genes_intensities_Jan2022)[names(quick_sig_genes_intensities_Jan2022) == "x1"] <- "gene"
 
-significant_intensities_genes <- list(genes_ChIRP_Mar2022 = sort(quick_sig_genes_intensities_Mar2022$gene), genes_SucGrad_Mar2022= sort(quick_sig_genes_intensities_SucGrad_Mar2022$gene))
+significant_intensities_genes1 <- list(genes_ChIRP_Mar2022 = sort(quick_sig_genes_intensities_Mar2022$gene), genes_SucGrad_Mar2022= sort(quick_sig_genes_intensities_SucGrad_Mar2022$gene))
 pdf("VennDiagram_SigGenes_ChIRPMar2022_SucGradMar2022.pdf")
-ggvenn(genes, c("genes_ChIRP_Mar2022","genes_SucGrad_Mar2022"))
+ggvenn(significant_intensities_genes1, c("genes_ChIRP_Mar2022","genes_SucGrad_Mar2022"))
 dev.off()
 
-significant_intensities_genes <- list(genes_ChIRP_Mar_Jan2022 = sort(quick_sig_genes_intensities_Mar2022withJan2022$gene), genes_SucGrad_Mar2022= sort(quick_sig_genes_intensities_SucGrad_Mar2022$gene))
+significant_intensities_genes2 <- list(genes_ChIRP_Mar_Jan2022 = sort(quick_sig_genes_intensities_Mar2022withJan2022$gene), genes_SucGrad_Mar2022= sort(quick_sig_genes_intensities_SucGrad_Mar2022$gene))
 pdf("VennDiagram_SigGenes_ChIRPMarJan2022_SucGradMar2022.pdf")
-ggvenn(genes, c("genes_ChIRP_Mar_Jan2022","genes_SucGrad_Mar2022"))
+ggvenn(significant_intensities_genes2, c("genes_ChIRP_Mar_Jan2022","genes_SucGrad_Mar2022"))
 dev.off()
 
+
+composite_genes_SucGrad_ChIRPMar2022 <- inner_join(quick_sig_genes_intensities_SucGrad_Mar2022, quick_sig_genes_intensities_Mar2022, by = "gene")
+write.csv(composite_genes_SucGrad_ChIRPMar2022, file = "composite_genes_SucGrad_ChIRPMar2022.csv", row.names=TRUE)
 ```
 
 
