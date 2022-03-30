@@ -26,7 +26,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #50ng protein
 #Anthony said the 50ng yielded more genes identified
-mass_spec_50ng_Mar2022_SucGrad <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/2022_03_24_50ng_protein_SCP_JRinn_PTN_MESC_results.csv")
+mass_spec_50ng_Mar2022_SucGrad <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/2022_03_24_50ng_protein_SCP_JRinn_PTN_MESC_results.csv") %>% clean_names()
 #Clean up column names
 #colnames(mass_spec_Jan2022_FA) <- paste(colnames(mass_spec_Jan2022_FA),"Jan2022FA",sep="_")
 #Making tibbles from KO and WT spectral counts from the data
@@ -37,7 +37,7 @@ Spectral_50ng <- mass_spec_50ng_Mar2022_SucGrad[,c(4,16,17,18,19)]
 #WT_spectral_mass_spec_50ng_Mar2022_SucGrad <- mass_spec_50ng_Mar2022_SucGrad[,c(4,18,19)]
 
 #100ng protein 
-mass_spec_100ng_Mar2022_SucGrad <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/2022_03_24_100ng_protein_SCP_JRinn_PTN_MESC_results.csv")
+mass_spec_100ng_Mar2022_SucGrad <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/2022_03_24_100ng_protein_SCP_JRinn_PTN_MESC_results.csv") %>% clean_names()
 #colnames(kit_mass_spec_Jan2022_TV) <- paste(colnames(kit_mass_spec_Jan2022_TV),"KitJan2022TV",sep="_")
 Spectral_100ng <- mass_spec_100ng_Mar2022_SucGrad[,c(4,16,17,18,19)]
 #WT_spectral_mass_spec_100ng_Mar2022_SucGrad <- mass_spec_100ng_Mar2022_SucGrad[,c(4,)]
@@ -48,10 +48,13 @@ Spectral_100ng <- mass_spec_100ng_Mar2022_SucGrad[,c(4,16,17,18,19)]
 ```{r}
 #50 ng protein 
 Intensities_50ng <- mass_spec_50ng_Mar2022_SucGrad[,c(4,28,29,30,31)]
+colnames(Intensities_50ng)[2:5] <- paste(colnames(Intensities_50ng)[2:5],"50ng",sep=".")
 #WT_intensities_mass_spec_50ng_Mar2022_SucGrad <- mass_spec_50ng_Mar2022_SucGrad[,c(4,30,31)]
 
 #100ng protein same thing. 
 Intensities_100ng <- mass_spec_100ng_Mar2022_SucGrad[,c(4,28,29,30,31)]
+# colnames(CTDB)[9:83] <- paste(colnames(CTDB)[9:83], "CHILD", sep = "_")
+colnames(Intensities_100ng)[2:5] <- paste(colnames(Intensities_100ng)[2:5],"100ng",sep=".")
 #WT_intensities_mass_spec_100ng_Mar2022_SucGrad <- mass_spec_100ng_Mar2022_SucGrad[,c(4,30,31)]
 
 ```
@@ -64,15 +67,35 @@ Intensities_100ng <- mass_spec_100ng_Mar2022_SucGrad[,c(4,28,29,30,31)]
 #Take a sum of each row
 #Sort out those greater than 0
 #Then grep those genes, grabbing both KO and WT at that point and also for both runs and putting them together in one dataframe to proceed forward. 
-Intensities_50ng_WTcheck <- mass_spec_50ng_Mar2022_SucGrad[,c(4,30,31)]
-Intensities_100ng_WTcheck <- mass_spec_100ng_Mar2022_SucGrad[,c(4,30,31)]
+Intensities_50ng_WTcheck <- Intensities_50ng[,c(1,4,5)]
+Intensities_100ng_WTcheck <- Intensities_100ng[,c(1,4,5)]
+#hAVING PROBLEMS WITH RETURNING GENE NAMES AS NA IN THE BELOW FULL JOIN
+Intensities_WTcheck <- full_join(Intensities_50ng_WTcheck,Intensities_100ng_WTcheck,by="gene",copy=FALSE,keep = FALSE)
+Intensities_WTcheck <- as.data.frame(Intensities_WTcheck)
 
-Intensities_WTcheck = Intensities_50ng_WTcheck %>% full_join(Intensities_100ng_WTcheck,by="Gene",suffix = c(".50ng",".100ng"))
+Intensities_WTcheckA <- Intensities_WTcheck %>% replace_na(list(ptn_mesc_wt_p1_f5_f6_intensity.50ng = 0, ptn_mesc_wt_p2_f5_f6_intensity.50ng = 0, ptn_mesc_wt_p1_f5_f6_intensity.100ng=0, ptn_mesc_wt_p2_f5_f6_intensity.100ng=0))
 
-sums_Intensities_WTcheck  <-  rowSums(Intensities_WTcheck[,2:5])
-Intensities_WTcheck2  <-  cbind(Intensities_WTcheck, sums_Intensities_WTcheck)
+#sum of each row
 
+Intensities_WTcheck2 <- Intensities_WTcheckA %>% mutate(intensities_sum = rowSums(.[,sapply(., is.numeric)])) 
+summary(Intensities_WTcheck2$intensities_sum)
 
+Intensities_WTvalid <- dplyr::filter(Intensities_WTcheck2, intensities_sum > 0)
+Intensities_WTvalid2 <- Intensities_WTvalid [1:(length(Intensities_WTvalid )-1)]
+
+Intensities_valid1 <-  Intensities_WTvalid2 %>% left_join(Intensities_50ng[,c(1,2,3)],by="gene")
+Intensities_valid <- Intensities_valid1 %>% left_join(Intensities_100ng[,c(1,2,3)],by="gene")
+Intensities_valid <- Intensities_valid %>% replace_na(list(ptn_mesc_ko_p1_f5_f6_intensity.50ng = 0, ptn_mesc_ko_p2_f5_f6_intensity.50ng = 0, ptn_mesc_ko_p1_f5_f6_intensity.100ng=0, ptn_mesc_ko_p2_f5_f6_intensity.100ng=0))
+#for multiple things to filter remember
+#max_peaks <- dplyr::filter(peaks_per_dbp, num_peaks > 30000, total_peak_length == 133310967)
+
+#Now need to grab all the data for these genes
+#with all the technical replicates
+#valid_intensitiesgenes <- Intensities_WTvalid$gene
+#pattern_to_search_valid_intensities <- paste0(valid_intensitiesgenes , collapse = "$|^")
+#pattern_to_search_valid_intensities_ready <- paste("^",pattern_to_search_valid_intensities,"$",sep="")
+
+#Intensities_valid_50ng <- Intensities_50ng[grepl(pattern_to_search_valid_intensities_ready, #Intensities_50ng$gene),]
 ```
 
 
@@ -109,16 +132,16 @@ Intensities_WTcheck2  <-  cbind(Intensities_WTcheck, sums_Intensities_WTcheck)
 #WT_spectral <- WT_spectral[-c(280,297:305),]
 #WT_spectral <- WT_spectral[order(WT_spectral$Gene),]
 #Spectral = WT_spectral %>% full_join(KO_spectral,by="Gene")
-Spectral_50ng <- as.data.frame(t(Spectral_50ng))
-Spectral_100ng <- as.data.frame(t(Spectral_100ng))
+#Spectral_50ng <- as.data.frame(t(Spectral_50ng))
+#Spectral_100ng <- as.data.frame(t(Spectral_100ng))
 ##Might have to check numbers of WT and KO to match below genotype cbind
-Spectral_newcol <- c("Genotype","KO","KO","WT","WT")
-Spectral_50ng <- cbind(Spectral_newcol,Spectral_50ng)
-Spectral_100ng <- cbind(Spectral_newcol,Spectral_100ng)
-Spectral_50ng <- Spectral_50ng %>% row_to_names (row_number= 1) %>% clean_names()
-Spectral_100ng <- Spectral_100ng %>% row_to_names (row_number= 1) %>% clean_names()
-Spectral_50ng[] <- lapply(Spectral_50ng, type.convert, as.is = TRUE)
-Spectral_100ng[] <- lapply(Spectral_100ng, type.convert, as.is = TRUE)
+#Spectral_newcol <- c("Genotype","KO","KO","WT","WT")
+#Spectral_50ng <- cbind(Spectral_newcol,Spectral_50ng)
+#Spectral_100ng <- cbind(Spectral_newcol,Spectral_100ng)
+#Spectral_50ng <- Spectral_50ng %>% row_to_names (row_number= 1) %>% clean_names()
+#Spectral_100ng <- Spectral_100ng %>% row_to_names (row_number= 1) %>% clean_names()
+#Spectral_50ng[] <- lapply(Spectral_50ng, type.convert, as.is = TRUE)
+#Spectral_100ng[] <- lapply(Spectral_100ng, type.convert, as.is = TRUE)
 
 #Intensities Clean up
 ##Same here check as you did in the above. 
@@ -127,46 +150,42 @@ Spectral_100ng[] <- lapply(Spectral_100ng, type.convert, as.is = TRUE)
 #WT_intensities <- WT_intensities[-c(280,297:305),]
 #WT_intensities <- WT_intensities[order(WT_intensities$Gene),]
 #Intensities = WT_intensities %>% full_join(KO_intensities,by="Gene")
-Intensities_50ng <- as.data.frame(t(Intensities_50ng))
-Intensities_100ng <- as.data.frame(t(Intensities_100ng))
-Intensities_newcol <- c("Gene","KO","KO","WT","WT")
-Intensities_50ng <- cbind(Intensities_newcol,Intensities_50ng)
-Intensities_50ng <-Intensities_50ng %>% row_to_names (row_number= 1) %>% clean_names()
-Intensities_50ng[] <- lapply(Intensities_50ng, type.convert, as.is = TRUE)
-Intensities_100ng <- cbind(Intensities_newcol,Intensities_100ng)
-Intensities_100ng <-Intensities_100ng %>% row_to_names (row_number= 1) %>% clean_names()
-Intensities_100ng[] <- lapply(Intensities_100ng, type.convert, as.is = TRUE)
+Intensities_valid <- as.data.frame(t(Intensities_valid))
+Intensities_newcol <- c("genotype","WT","WT","WT","WT","KO","KO","KO","KO")
+Intensities_valid <- cbind(Intensities_newcol,Intensities_valid)
+Intensities_valid <-Intensities_valid %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_valid[] <- lapply(Intensities_valid, type.convert, as.is = TRUE)
 
 ```
 
 ##Need to change below gene to do a check. 
 ```{r}
-typeof(Spectral_50ng$dhx8)
-typeof(Spectral_100ng$dhx8)
-typeof(Intensities_50ng$dhx8)
-typeof(Intensities_100ng$dhx8)
+#typeof(Spectral_50ng$dhx8)
+#typeof(Spectral_100ng$dhx8)
+typeof(Intensities_valid$a2m)
+#typeof(Intensities_100ng$dhx8)
 ```
 
 #Making a Venn Diagram of the two datasets just to see overlap
 ##If this is interesting, go back to Feb 1st and grep the names to know common genes
 ```{r}
-typeof(mass_spec_50ng_Mar2022_SucGrad$Gene)
-genes <- list(SucGrad_50ng = sort(mass_spec_50ng_Mar2022_SucGrad$Gene), SucGrad_100ng = sort(mass_spec_100ng_Mar2022_SucGrad$Gene))
-pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
-ggvenn(genes, c("SucGrad_50ng", "SucGrad_100ng"))
-dev.off()
+#typeof(mass_spec_50ng_Mar2022_SucGrad$gene)
+#genes <- list(SucGrad_50ng = sort(mass_spec_50ng_Mar2022_SucGrad$gene), SucGrad_100ng = sort(mass_spec_100ng_Mar2022_SucGrad$gene))
+#pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
+#ggvenn(genes, c("SucGrad_50ng", "SucGrad_100ng"))
+#dev.off()
 
-venn_win <- euler(c(Genes_50ng=628, Genes_100ng=473, "Genes_50ng&Genes_100ng"=3154), shape = "ellipse")
-pdf("VennDiagram_MassSpec_GeneOverlap_bysize.pdf")
-plot(venn_win, 
-     fill = c("skyblue1", "lightcoral"),
-     quantities = list(fontsize = 13))
-dev.off()
+#venn_win <- euler(c(Genes_50ng=628, Genes_100ng=473, "Genes_50ng&Genes_100ng"=3154), shape = "ellipse")
+#pdf("VennDiagram_MassSpec_GeneOverlap_bysize.pdf")
+#plot(venn_win, 
+     #fill = c("skyblue1", "lightcoral"),
+     #quantities = list(fontsize = 13))
+#dev.off()
 ```
 
 #Wilcoxon Test on Spectral. 
 #Output is a csv file to have the pvalues in a table format. 
-```{r}
+#```{r}
 
 test.fun50 <- function(Spectral_50ng, col) { 
 
@@ -217,125 +236,127 @@ names(tests_Spectral_100ng) <- colnames(Spectral_100ng)[-1]
 
 #KO_list = split(KO_spectral, f = KO_spectral$Gene)
 
-```
+#```
 
 #Wilcoxon Test on Intensities
 #Output is a csv file to have the pvalues in a table format. 
 ```{r}
 
-test.funi50 <- function(Intensities_50ng, col) { 
+test.funi <- function(Intensities_valid, col) { 
 
- ci50 <- combn(unique(Intensities_50ng$gene),2)
- sigsi50 <- list()
- for(i in 1:ncol(ci50)) {
-    sigsi50[[i]] <- wilcox.test(
-                   Intensities_50ng[Intensities_50ng$gene == ci50[1,i],col],
-                   Intensities_50ng[Intensities_50ng$gene == ci50[2,i],col], exact=FALSE
+ ci <- combn(unique(Intensities_valid$genotype),2)
+ sigsi <- list()
+ for(i in 1:ncol(ci)) {
+    sigsi[[i]] <- wilcox.test(
+                   Intensities_valid[Intensities_valid$genotype == ci[1,i],col],
+                   Intensities_valid[Intensities_valid$genotype == ci[2,i],col], exact=FALSE
                  )
     }
-    names(sigsi50) <- paste("Group",ci50[1,],"by Group",ci50[2,])
+    names(sigsi) <- paste("Group",ci[1,],"by Group",ci[2,])
 
- tests_Intensities_50ng <- data.frame(Test=names(sigsi50),
-                    W=unlist(lapply(sigsi50,function(x) x$statistic)),
-                    p=unlist(lapply(sigsi50,function(x) x$p.value)),row.names=NULL)
+ tests_Intensities_valid <- data.frame(Test=names(sigsi),
+                    W=unlist(lapply(sigsi,function(x) x$statistic)),
+                    p=unlist(lapply(sigsi,function(x) x$p.value)),row.names=NULL)
 
- return(tests_Intensities_50ng)
+ return(tests_Intensities_valid)
 }
 
 
-tests_Intensities_50ng <- lapply(colnames(Intensities_50ng)[-1],function(x) test.funi50(Intensities_50ng,x))
-names(tests_Intensities_50ng) <- colnames(Intensities_50ng)[-1]
+tests_Intensities_valid <- lapply(colnames(Intensities_valid)[-1],function(x) test.funi(Intensities_valid,x))
+names(tests_Intensities_valid) <- colnames(Intensities_valid)[-1]
 # tests <- do.call(rbind, tests) reprints as data.frame
 #KO_list = split(KO_spectral, f = KO_spectral$Gene)
 
 
-test.funi100 <- function(Intensities_100ng, col) { 
+#test.funi100 <- function(Intensities_100ng, col) { 
 
- ci100 <- combn(unique(Intensities_100ng$gene),2)
- sigsi100 <- list()
- for(i in 1:ncol(ci100)) {
-    sigsi100[[i]] <- wilcox.test(
-                   Intensities_100ng[Intensities_100ng$gene == ci100[1,i],col],
-                   Intensities_100ng[Intensities_100ng$gene == ci100[2,i],col], exact=FALSE
-                 )
-    }
-    names(sigsi100) <- paste("Group",ci100[1,],"by Group",ci100[2,])
+ #ci100 <- combn(unique(Intensities_100ng$gene),2)
+ #sigsi100 <- list()
+ #for(i in 1:ncol(ci100)) {
+    #sigsi100[[i]] <- wilcox.test(
+                  # Intensities_100ng[Intensities_100ng$gene == ci100[1,i],col],
+                  # Intensities_100ng[Intensities_100ng$gene == ci100[2,i],col], exact=FALSE
+                # )
+   # }
+    #names(sigsi100) <- paste("Group",ci100[1,],"by Group",ci100[2,])
 
- tests_Intensities_100ng <- data.frame(Test=names(sigsi100),
-                    W=unlist(lapply(sigsi100,function(x) x$statistic)),
-                    p=unlist(lapply(sigsi100,function(x) x$p.value)),row.names=NULL)
+ #tests_Intensities_100ng <- data.frame(Test=names(sigsi100),
+                   # W=unlist(lapply(sigsi100,function(x) x$statistic)),
+                   # p=unlist(lapply(sigsi100,function(x) x$p.value)),row.names=NULL)
 
- return(tests_Intensities_100ng)
-}
+# return(tests_Intensities_100ng)
+#}
 
 
-tests_Intensities_100ng <- lapply(colnames(Intensities_100ng)[-1],function(x) test.funi100(Intensities_100ng,x))
-names(tests_Intensities_100ng) <- colnames(Intensities_100ng)[-1]
+#tests_Intensities_100ng <- lapply(colnames(Intensities_100ng)[-1],function(x) test.funi100(Intensities_100ng,x))
+#names(tests_Intensities_100ng) <- colnames(Intensities_100ng)[-1]
 
 ```
 
 #Writing CSV of the Wilcoxon Test
 ```{r}
-results_Spectral_50ng <- do.call(rbind.data.frame, tests_Spectral_50ng)
-write.csv(results_Spectral_50ng,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_50ng_protein_Spectral.csv",row.names = FALSE)
-results_Spectral_100ng <- do.call(rbind.data.frame, tests_Spectral_100ng)
-write.csv(results_Spectral_100ng,"//scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_100ng_protein_Spectral.csv",row.names = FALSE)
+#results_Spectral_50ng <- do.call(rbind.data.frame, tests_Spectral_50ng)
+#write.csv(results_Spectral_50ng,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_50ng_protein_Spectral.csv",row.names = FALSE)
+#results_Spectral_100ng <- do.call(rbind.data.frame, tests_Spectral_100ng)
+#write.csv(results_Spectral_100ng,"//scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_100ng_protein_Spectral.csv",row.names = FALSE)
 
 
-results_Intensities_50ng <- do.call(rbind.data.frame, tests_Intensities_50ng)
-write.csv(results_Intensities_50ng,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_50ng_protein_Intensities.csv",row.names = FALSE)
-results_Intensities_100ng <- do.call(rbind.data.frame, tests_Intensities_100ng)
-write.csv(results_Intensities_100ng,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_100ng_protein_Intensities.csv",row.names = FALSE)
+results_Intensities_valid <- do.call(rbind.data.frame, tests_Intensities_valid)
+write.csv(results_Intensities_valid,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_protein_Intensities.csv",row.names = TRUE)
+#results_Intensities_100ng <- do.call(rbind.data.frame, tests_Intensities_100ng)
+#write.csv(results_Intensities_100ng,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_100ng_protein_Intensities.csv",row.names = FALSE)
 ```
 
 #Histogram of p-values
 ```{r}
-hist(results_Spectral_50ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from SucGrad F5&6 100ng", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
-hist(results_Spectral_100ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from SucGrad F5&6 100ng", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#hist(results_Spectral_50ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from SucGrad F5&6 100ng", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#hist(results_Spectral_100ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from SucGrad F5&6 100ng", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
 # saving the figure (we will do this over and over again :)
 # we will learn ggplot later but we use PDF and turn of null device (plot window) 
 
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//2022_03_28_Histogram_Wilcoxon_Spectral_50ng_protein_SucGrad_Mar2022.pdf")
-hist(results_Spectral_50ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from SucGrad F5&6 50ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
-dev.off()
+#pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//2022_03_28_Histogram_Wilcoxon_Spectral_50ng_protein_SucGrad_Mar2022.pdf")
+#hist(results_Spectral_50ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from SucGrad F5&6 50ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#dev.off()
 
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//2022_03_28_Histogram_Wilcoxon_Spectral_100ng_protein_SucGrad_Mar2022.pdf")
-hist(results_Spectral_100ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from SucGrad F5&6 100ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
-dev.off()
+#pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//2022_03_28_Histogram_Wilcoxon_Spectral_100ng_protein_SucGrad_Mar2022.pdf")
+#hist(results_Spectral_100ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from SucGrad F5&6 100ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#dev.off()
 
 #intensities
-hist(results_Intensities_50ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 50ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+hist(results_Intensities_valid$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
-hist(results_Intensities_100ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 100ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#hist(results_Intensities_100ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 100ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//2022_03_28_Histogram_Wilcoxon_Intensities_50ng_protein_SucGrad_Mar2022.pdf")
-hist(results_Intensities_50ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensitiesl Counts from SucGrad F5&6 50ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//2022_03_28_Histogram_Wilcoxon_Intensities_protein_SucGrad_Mar2022.pdf")
+hist(results_Intensities_valid$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensitiesl Counts from SucGrad F5&6 Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//2022_03_28_Histogram_Wilcoxon_Intensities_100ng_protein_SucGrad_Mar2022.pdf")
-hist(results_Intensities_100ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensitiesl Counts from SucGrad F5&6 100ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
-dev.off()
+#pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//2022_03_28_Histogram_Wilcoxon_Intensities_100ng_protein_SucGrad_Mar2022.pdf")
+#hist(results_Intensities_100ng$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensitiesl Counts from SucGrad F5&6 100ng Protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#dev.off()
 
 ```
 
 #Genes Below 0.05 and 0.10 p-value
 #Feel free to change the names and the pvalue cutoffs
 ```{r}
-results_Spectral_50ng <- results_Spectral_50ng %>% 
-  mutate(significance = ifelse(p < 0.05, "very",
-                          ifelse(p < 0.10, "significant", "not")))
+#results_Spectral_valid <- results_Spectral_valid %>% 
+  #mutate(significance = ifelse(p < 0.05, "very",
+                         # ifelse(p < 0.10, "significant", "not")))
 
 significant <- c("very", "significant")
 pattern_to_search <- paste0(significant, collapse = "|")
 
-significantSpectral_50ng_genes <- results_Spectral_50ng[grepl(pattern_to_search, results_Spectral_50ng$significance), ]
+#significantSpectral_50ng_genes <- results_Spectral_50ng[grepl(pattern_to_search, results_Spectral_50ng$significance), ]
 
-results_Intensities_50ng <- results_Intensities_50ng%>% 
+results_Intensities_valid <- results_Intensities_valid%>% 
   mutate(significance = ifelse(p < 0.05, "very",
                           ifelse(p < 0.10, "significant", "not")))
 
-significantIntensities_50ng_genes <- results_Intensities_50ng[grepl(pattern_to_search, results_Intensities_50ng$significance), ]
+significantIntensities_valid_genes <- results_Intensities_valid[grepl(pattern_to_search, results_Intensities_valid$significance), ]
+
+
 
 ```
 
@@ -349,38 +370,41 @@ significantIntensities_50ng_genes <- results_Intensities_50ng[grepl(pattern_to_s
 
 #Spectral
 #in the future I might have to grep these names
-sig_genes <- c("anxa1","atp5f1a","btf3","ckb","hdlbp","hnrnpm","mif","naa15","pabpc1","pkp1","rpl10$","rpl38","slc25a5")
-pattern_to_search_sig_genes <- paste0(sig_genes, collapse = "|")
-long_data_Spectral_sig_genes <- Spectral[, grep(pattern_to_search_sig_genes, colnames(Spectral))]
-genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
-long_data_Spectral_sig_genes <- cbind(genotype,long_data_Spectral_sig_genes)
-mm_sigSpectral = melt(long_data_Spectral_sig_genes)
+sig_genes <- row.names(significantIntensities_valid_genes)
+pattern_to_search_sig_genes <- paste0(sig_genes, collapse = "$|^")
+pattern_to_search_sig_genes <- paste("^",pattern_to_search_sig_genes, "$", sep ="")
+#pattern_to_search_valid_intensities <- paste0(valid_intensitiesgenes , collapse = "$|^")
+#pattern_to_search_valid_intensities_ready <- paste("^",pattern_to_search_valid_intensities,"$",sep="")
+#long_data_Spectral_sig_genes <- Spectral[, grep(pattern_to_search_sig_genes, colnames(Spectral))]
+#genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+#long_data_Spectral_sig_genes <- cbind(genotype,long_data_Spectral_sig_genes)
+#mm_sigSpectral = melt(long_data_Spectral_sig_genes)
 
-  pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
-  ggplot(mm_sigSpectral)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
-  dev.off()
+  #pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
+ # ggplot(mm_sigSpectral)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
+  #dev.off()
 
 
-for (var in mm_sigSpectral$variable) { 
+#for (var in mm_sigSpectral$variable) { 
  
-  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_28_MassSpec_SpectralBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
-  print(ggpaired(mm_sigSpectral[mm_sigSpectral$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
-  dev.off()
-  }
+  #pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_28_MassSpec_SpectralBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
+ # print(ggpaired(mm_sigSpectral[mm_sigSpectral$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  #dev.off()
+ # }
 
 #Intensities
-long_data_Intensities_sig_genes <- Intensities[, grep(pattern_to_search_sig_genes, colnames(Intensities))]
-genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
+long_data_Intensities_sig_genes <- Intensities_valid[, grep(pattern_to_search_sig_genes, colnames(Intensities_valid))]
+genotype <- c("WT","WT","WT","WT","KO","KO","KO","KO")
 long_data_Intensities_sig_genes <- cbind(genotype,long_data_Intensities_sig_genes)
 mm_sigIntensities = melt(long_data_Intensities_sig_genes)
 
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_sig_genes_Intensities_boxwhisker_Wilcoxon_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//2022_03_30_sig_genes_Intensities_boxwhisker_Wilcoxon_MassSpec_protein.pdf")
 ggplot(mm_sigIntensities)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
 dev.off()
 
 for (var in mm_sigIntensities$variable) { 
              
-  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_28_MassSpec_IntensitiesBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/2022_03_30_Intensities_Protein_BoxWhiskerPlots//", var, "_sig.pdf", sep=""))
   #print(ggplot(mm_sigIntensities[mm_sigIntensities$variable==var,])+geom_boxplot(aes(x=genotype, y=value),fill="#00AFBB")+ggtitle(var))
   print(ggpaired(mm_sigIntensities[mm_sigIntensities$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
   dev.off()
@@ -392,6 +416,12 @@ for (var in mm_sigIntensities$variable) {
 #https://www.r-bloggers.com/2017/06/add-p-values-and-significance-levels-to-ggplots/
 #http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/
 ```
+
+#Write a csv of significant genes and their pvalues (n=179)
+```{r}
+write.csv(significantIntensities_valid_genes,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//significant_genes_wilcoxonresults_protein_Intensities.csv",row.names = TRUE)
+```
+
 
 ##Then comes histograms of the spectral and intensities counts
 ##Also more fancy box plots of the very interesting genes
