@@ -21,162 +21,132 @@ library(reshape)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#Making Tibbles of Spectral data for each protein from the Jan2022FA and Jan2022TVkit data
+#Making Tibbles of Intensities for each protein from the March 2022 only including only those with 
+#Wt hits (out = only KO and input)
 ```{r}
 
 #Mar2022 Kit Data
-mass_spec_50ng_Mar2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_50ng_protein_ChIRP_5percentFDR_JRinn.csv")
-mass_spec_100ng_Mar2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_100ng_ChIRP_5percentFDR_JRinn_Results.csv")
-#Clean up column names
-#colnames(mass_spec_Jan2022_FA) <- paste(colnames(mass_spec_Jan2022_FA),"Jan2022FA",sep="_")
-#Making tibbles from KO and WT spectral counts from the data
+mass_spec_50ng_Mar2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_50ng_protein_ChIRP_5percentFDR_JRinn.csv") %>% clean_names()
+mass_spec_100ng_Mar2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_100ng_ChIRP_5percentFDR_JRinn_Results.csv") %>% clean_names()
 
-#Below is grabbing the KO and WT separately. I will recombine these later but first I want to put the different datasets together. 
+#Need to do a few things
+#First I am going to filter out the input entries and KO entries so that we only have the WT significant entries. I will do this by focus on WT intensities, sum the rows, then filter out any sums that are contain zero. 
 
-##Specify the correct column numbers
-KO_spectral_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,16,18)]
-WT_spectral_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,17,19,20)]
+Intensities_50ng <- mass_spec_50ng_Mar2022_TV[,c(4,34,35,36,37,38)]
+colnames(Intensities_50ng)[2:6] <- paste(colnames(Intensities_50ng)[2:6],"50ng",sep=".")
+Intensities_100ng <- mass_spec_100ng_Mar2022_TV[,c(4,34,35,36,37,38)]
+colnames(Intensities_100ng)[2:6] <- paste(colnames(Intensities_100ng)[2:6],"100ng",sep=".")
+Intensities_50ng_WTcheck <- Intensities_50ng[,c(1,3,5,6)]
+Intensities_100ng_WTcheck <- Intensities_100ng[,c(1,3,5,6)]
+Intensities_WTcheck <- full_join(Intensities_50ng_WTcheck,Intensities_100ng_WTcheck,by="gene",copy=FALSE,keep = FALSE)
+Intensities_WTcheck <- as.data.frame(Intensities_WTcheck)
 
-#Jan2022TVkit Data Same thing. 
-kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv")
-#colnames(kit_mass_spec_Jan2022_TV) <- paste(colnames(kit_mass_spec_Jan2022_TV),"KitJan2022TV",sep="_")
-KO_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,13,14)]
-WT_spectral_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,15,16)]
+Intensities_WTcheckA <- Intensities_WTcheck %>% replace_na(list(r2_wt_oe_intensity.50ng = 0, r3_wt_oe_intensity.50ng = 0, r4_wt_oe_intensity.50ng=0, r2_wt_oe_intensity.100ng=0, r3_wt_oe_intensity.100ng=0, r4_wt_oe_intensity.100ng=0))
 
+#sum of each row
+
+Intensities_WTcheck2 <- Intensities_WTcheckA %>% mutate(intensities_sum = rowSums(.[,sapply(., is.numeric)])) 
+summary(Intensities_WTcheck2$intensities_sum)
+
+Intensities_WTvalid <- dplyr::filter(Intensities_WTcheck2, intensities_sum > 0)
+summary(Intensities_WTvalid$intensities_sum)
+Intensities_WTvalid2 <- Intensities_WTvalid [1:(length(Intensities_WTvalid )-1)]
+
+Intensities_valid1 <-  Intensities_WTvalid2 %>% left_join(Intensities_50ng[,c(1,2,4)],by="gene")
+Intensities_valid <- Intensities_valid1 %>% left_join(Intensities_100ng[,c(1,2,4)],by="gene")
+Intensities_valid <- Intensities_valid %>% replace_na(list(r2_ko_oe_intensity.50ng = 0, r3_ko_oe_intensity.50ng = 0, r2_ko_oe_intensity.100ng=0, r3_ko_oe_intensity.100ng=0))
+
+Intensities_valid <- as.data.frame(t(Intensities_valid))
+Intensities_newcol <- c("genotype","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO")
+Intensities_valid <- cbind(Intensities_newcol,Intensities_valid)
+Intensities_valid <-Intensities_valid %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_valid[] <- lapply(Intensities_valid, type.convert, as.is = TRUE)
 ```
-
-#Making Tibbles of Calculated Intensities for each dbp from the Jan2022FA and Jan2022TV data
+#Intensities for each protein from the March 2022 and Jan2022 Kit ChIRP data
 ```{r}
-#Mar2022TV data
-##Change column numbers
-KO_intensities_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,34,36)]
-WT_intensities_mass_spec_50ng_Mar2022_TV <- mass_spec_50ng_Mar2022_TV[,c(4,35,37,38)]
-
 #Jan2022TVkit Data Same thing. 
-KO_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,17,18)]
-WT_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,19,20)]
+kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv") %>% clean_names()
 
+KO_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,17,18)]
+colnames(KO_intensities_mass_spec_Jan2022_TV)[2:3] <- paste(colnames(KO_intensities_mass_spec_Jan2022_TV)[2:3],"Jan2022",sep=".")
+WT_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,19,20)]
+colnames(WT_intensities_mass_spec_Jan2022_TV)[2:3] <- paste(colnames(WT_intensities_mass_spec_Jan2022_TV)[2:3],"Jan2022",sep=".")
+
+Intensities_WTcheck_withJan2022 <- full_join(Intensities_WTcheck, WT_intensities_mass_spec_Jan2022_TV,by="gene",copy=FALSE,keep = FALSE)
+Intensities_WTcheck_withJan2022 <- as.data.frame(Intensities_WTcheck_withJan2022)
+
+Intensities_WTcheck_withJan2022_A <- Intensities_WTcheck_withJan2022 %>% replace_na(list(r2_wt_oe_intensity.50ng = 0, r3_wt_oe_intensity.50ng = 0, r4_wt_oe_intensity.50ng=0, r2_wt_oe_intensity.100ng=0, r3_wt_oe_intensity.100ng=0, r4_wt_oe_intensity.100ng=0, wt_0h_even_total_intensity.Jan2022=0, wt_0h_odd_total_intensity.Jan2022=0))
+
+Intensities_WTcheck_withJan2022_2 <- Intensities_WTcheck_withJan2022_A %>% mutate(intensities_sum = rowSums(.[,sapply(., is.numeric)])) 
+summary(Intensities_WTcheck_withJan2022_2$intensities_sum)
+
+Intensities_WTvalid_withJan2022 <- dplyr::filter(Intensities_WTcheck_withJan2022_2, intensities_sum > 0)
+summary(Intensities_WTvalid_withJan2022$intensities_sum)
+Intensities_WTvalid_withJan2022_2 <- Intensities_WTvalid_withJan2022 [1:(length(Intensities_WTvalid_withJan2022 )-1)]
+
+Intensities_valid_withJan2022_1 <-  Intensities_WTvalid_withJan2022_2 %>% left_join(Intensities_50ng[,c(1,2,4)],by="gene")
+Intensities_valid_withJan2022_2 <- Intensities_valid_withJan2022_1 %>% left_join(Intensities_100ng[,c(1,2,4)],by="gene")
+Intensities_valid_withJan2022 <- Intensities_valid_withJan2022_2 %>% left_join(KO_intensities_mass_spec_Jan2022_TV,by="gene")
+Intensities_valid_withJan2022 <- Intensities_valid_withJan2022 %>% replace_na(list(r2_ko_oe_intensity.50ng = 0, r3_ko_oe_intensity.50ng = 0, r2_ko_oe_intensity.100ng=0, r3_ko_oe_intensity.100ng=0,ko_0h_even_total_intensity.Jan2022=0,ko_0h_odd_total_intensity.Jan2022=0 ))
+
+Intensities_valid_withJan2022 <- as.data.frame(t(Intensities_valid_withJan2022))
+Intensities_withJan2022_newcol <- c("genotype","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO")
+Intensities_valid_withJan2022 <- cbind(Intensities_withJan2022_newcol,Intensities_valid_withJan2022)
+Intensities_valid_withJan2022 <-Intensities_valid_withJan2022 %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_valid_withJan2022[] <- lapply(Intensities_valid_withJan2022, type.convert, as.is = TRUE)
 ```
+
 
 #Making a Venn Diagram of the two datasets just to see overlap
 ##If this is interesting, go back to Feb 1st and grep the names to know common genes
 ```{r}
 #typeof(mass_spec_Mar2022_TV$Gene)
-genes <- list(genes_50ng_Mar2022 = sort(mass_spec_50ng_Mar2022_TV$Gene),genes_100ng_Mar2022 = sort(mass_spec_100ng_Mar2022_TV$Gene), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$Gene))
+genes <- list(genes_WTcheck_Mar2022 = sort(Intensities_valid1$gene), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$gene))
 pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
-ggvenn(genes, c("genes_50ng_Mar2022","genes_100ng_Mar2022" ,"genes_kitJan2022"))
+ggvenn(genes, c("genes_WTcheck_Mar2022","genes_kitJan2022"))
 dev.off()
 
-venn_win <- euler(c(Genes_50ng_Mar2022=668, Genes_100ng_Mar2022=587,Genes_Jan2022=29, "Genes_50ng_Mar2022&Genes_100ng_Mar2022"=2568,"Genes_50ng_Mar2022&Genes_Jan2022"=5,"Genes_100ng_Mar2022&Genes_Jan2022"=1,"Genes_50ng_Mar2022&Genes_100ng_Mar2022&Genes_Jan2022"=95), shape = "ellipse")
+venn_win <- euler(c(Genes_WTcheck_Mar2022=440, Genes_Jan2022=53, "Genes_WTcheck_Mar2022&Genes_Jan2022"=77), shape = "ellipse")
 pdf("VennDiagram_MassSpec_GeneOverlap_bysize.pdf")
 plot(venn_win, 
-     fill = c("white","skyblue1", "lightcoral"),
+     fill = c("white", "lightcoral"),
      quantities = list(fontsize = 13))
 dev.off()
 ```
-```{r}
-genes_50ng_Mar2022_v_genes_100ng_Mar2022 <- genes$genes_50ng_Mar2022[genes$genes_50ng_Mar2022 %in% genes$genes_100ng_Mar2022]
-genes_50ng_Mar2022_v_genes_kitJan2022 <- genes$genes_50ng_Mar2022[genes$genes_50ng_Mar2022 %in% genes$genes_kitJan2022]
-genes_100ng_Mar2022_v_genes_kitJan2022 <- genes$genes_100ng_Mar2022[genes$genes_100ng_Mar2022 %in% genes$genes_Jan2022]
-allthree <- genes_50ng_Mar2022_v_genes_100ng_Mar2022 [genes_50ng_Mar2022_v_genes_100ng_Mar2022 %in% genes_50ng_Mar2022_v_genes_kitJan2022]
-length(allthree)
 
-pattern_to_searchD <- paste0(allthree, collapse = "$|^")
-pattern_to_search4 <- paste("^",pattern_to_searchD,"$",sep="")
-
-subset7 <- mass_spec_50ng_Mar2022_TV[grepl(pattern_to_search4, mass_spec_50ng_Mar2022_TV$Gene),]
-subset8 <- mass_spec_100ng_Mar2022_TV[grepl(pattern_to_search4, mass_spec_100ng_Mar2022_TV$Gene),]
-subset9 <- kit_mass_spec_Jan2022_TV[grepl(pattern_to_search4,kit_mass_spec_Jan2022_TV$Gene),]
-
-allthree_withdata <- cbind(subset7,subset8)
-allthree_withdata <- cbind(subset8,subset9)
-write.csv(allthree_withdata, file = "allthree_complete.csv", row.names = TRUE)
-
-```
-
-#Full outer join by protein name, still keeping KO and WT separate
-#Followed by some cleanup
-
-```{r}
-#For Spectral
-#KO_spectral=KO_spectral_mass_spec_Jan2022_TV %>% full_join(KO_spectral_mass_spec_Mar2022_TV,by="Gene")
-#WT_spectral=WT_spectral_mass_spec_Jan2022_TV %>% full_join(WT_spectral_mass_spec_Mar2022_TV,by="Gene")
-
-#For Intensities
-KO_intensities = KO_intensities_mass_spec_Jan2022_TV %>% full_join(KO_intensities_mass_spec_50ng_Mar2022_TV,by="Gene")
-WT_intensities = WT_intensities_mass_spec_Jan2022_TV %>% full_join(WT_intensities_mass_spec_50ng_Mar2022_TV,by="Gene")
-
-#Cleanup by making the Gene column a character column and N/A's into Zeros
-#KO_spectral <- as.data.frame(KO_spectral)
-#KO_spectral <- replace(KO_spectral, is.na(KO_spectral), 0)
-#WT_spectral <- as.data.frame(WT_spectral)
-#WT_spectral <- replace(WT_spectral, is.na(WT_spectral), 0)
-KO_intensities <-as.data.frame(KO_intensities)
-KO_intensities <- replace(KO_intensities, is.na(KO_intensities), 0)
-WT_intensities <- as.data.frame(WT_intensities)
-WT_intensities <- replace(WT_intensities, is.na(WT_intensities), 0)
-
-#Spectral Clean up
-##Might have to check if these rows still need to be removed. 
-#KO_spectral <- KO_spectral[-c(280,297:305),]
-#KO_spectral <- KO_spectral[order(KO_spectral$Gene),]
-#WT_spectral <- WT_spectral[-c(280,297:305),]
-#WT_spectral <- WT_spectral[order(WT_spectral$Gene),]
-#Spectral = WT_spectral %>% full_join(KO_spectral,by="Gene")
-#Spectral <- as.data.frame(t(Spectral))
-##Might have to check numbers of WT and KO to match below genotype cbind
-#Spectral_newcol <- c("Genotype","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
-#Spectral <- cbind(Spectral_newcol,Spectral)
-#Spectral <- Spectral %>% row_to_names (row_number= 1) %>% clean_names()
-#Spectral[] <- lapply(Spectral, type.convert, as.is = TRUE)
-
-#Intensities Clean up
-##Same here check as you did in the above. 
-#KO_intensities <- KO_intensities[-c(280,297:305),]
-KO_intensities <- KO_intensities[order(KO_intensities$Gene),]
-#WT_intensities <- WT_intensities[-c(280,297:305),]
-WT_intensities <- WT_intensities[order(WT_intensities$Gene),]
-Intensities = WT_intensities %>% full_join(KO_intensities,by="Gene")
-Intensities <- as.data.frame(t(Intensities))
-Intensities_newcol <- c("Gene","WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
-Intensities <- cbind(Intensities_newcol,Intensities)
-Intensities <-Intensities %>% row_to_names (row_number= 1) %>% clean_names()
-Intensities[] <- lapply(Intensities, type.convert, as.is = TRUE)
-
-```
 
 ##Need to change below gene to do a check. 
 ```{r}
-typeof(Spectral$aars1)
-typeof(Intensities$aars1)
+typeof(Intensities_valid$aars1)
+typeof(Intensities_valid_withJan2022$aars1)
 ```
 
 #Wilcoxon Test on Spectral. 
 #Output is a csv file to have the pvalues in a table format. 
 ```{r}
 
-test.fun <- function(Spectral, col) { 
+test.fun <- function(Intensities_valid, col) { 
 
- c1 <- combn(unique(Spectral$genotype),2)
+ c1 <- combn(unique(Intensities_valid$genotype),2)
  sigs <- list()
  for(i in 1:ncol(c1)) {
     sigs[[i]] <- wilcox.test(
-                   Spectral[Spectral$genotype == c1[1,i],col],
-                   Spectral[Spectral$genotype == c1[2,i],col], exact=FALSE
+                   Intensities_valid[Intensities_valid$genotype == c1[1,i],col],
+                   Intensities_valid[Intensities_valid$genotype == c1[2,i],col], exact=FALSE
                  )
     }
     names(sigs) <- paste("Group",c1[1,],"by Group",c1[2,])
 
- tests_Spectral <- data.frame(Test=names(sigs),
+ tests_Intensities_Mar2022 <- data.frame(Test=names(sigs),
                     W=unlist(lapply(sigs,function(x) x$statistic)),
                     p=unlist(lapply(sigs,function(x) x$p.value)),row.names=NULL)
 
- return(tests_Spectral)
+ return(tests_Intensities_Mar2022)
 }
 
 
-tests_Spectral <- lapply(colnames(Spectral)[-1],function(x) test.fun(Spectral,x))
-names(tests_Spectral) <- colnames(Spectral)[-1]
+tests_Intensities_Mar2022 <- lapply(colnames(Intensities_valid)[-1],function(x) test.fun(Intensities_valid,x))
+names(tests_Intensities_Mar2022) <- colnames(Intensities_valid)[-1]
 # tests <- do.call(rbind, tests) reprints as data.frame
 
 
@@ -189,28 +159,28 @@ names(tests_Spectral) <- colnames(Spectral)[-1]
 #Output is a csv file to have the pvalues in a table format. 
 ```{r}
 
-test.fun2 <- function(Intensities, col) { 
+test.fun2 <- function(Intensities_valid_withJan2022, col) { 
 
- c2 <- combn(unique(Intensities$gene),2)
+ c2 <- combn(unique(Intensities_valid_withJan2022$genotype),2)
  sigs2 <- list()
  for(i in 1:ncol(c2)) {
     sigs2[[i]] <- wilcox.test(
-                   Intensities[Intensities$gene == c2[1,i],col],
-                   Intensities[Intensities$gene == c2[2,i],col], exact=FALSE
+                   Intensities_valid_withJan2022[Intensities_valid_withJan2022$genotype == c2[1,i],col],
+                   Intensities_valid_withJan2022[Intensities_valid_withJan2022$genotype == c2[2,i],col], exact=FALSE
                  )
     }
     names(sigs2) <- paste("Group",c2[1,],"by Group",c2[2,])
 
- tests_Intensities <- data.frame(Test=names(sigs2),
+ tests_Intensities_Mar2022withJan2022 <- data.frame(Test=names(sigs2),
                     W=unlist(lapply(sigs2,function(x) x$statistic)),
                     p=unlist(lapply(sigs2,function(x) x$p.value)),row.names=NULL)
 
- return(tests_Intensities)
+ return(tests_Intensities_Mar2022withJan2022)
 }
 
 
-tests_Intensities <- lapply(colnames(Intensities)[-1],function(x) test.fun2(Intensities,x))
-names(tests_Intensities) <- colnames(Intensities)[-1]
+tests_Intensities_Mar2022withJan2022 <- lapply(colnames(Intensities_valid_withJan2022)[-1],function(x) test.fun2(Intensities_valid_withJan2022,x))
+names(tests_Intensities_Mar2022withJan2022) <- colnames(Intensities_valid_withJan2022)[-1]
 # tests <- do.call(rbind, tests) reprints as data.frame
 
 
@@ -220,28 +190,28 @@ names(tests_Intensities) <- colnames(Intensities)[-1]
 
 #Writing CSV of the Wilcoxon Test
 ```{r}
-results_Spectral <- do.call(rbind.data.frame, tests_Spectral)
-write.csv(results_Spectral,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//results_Spectral.csv",row.names = FALSE)
-results_Intensities <- do.call(rbind.data.frame, tests_Intensities)
-write.csv(results_Intensities,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//results_Intensities.csv",row.names = FALSE)
+results_Intensities_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_Mar2022)
+write.csv(results_Intensities_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//results_Intensities_Mar2022.csv",row.names = TRUE)
+results_Intensities_Mar2022withJan2022 <- do.call(rbind.data.frame, tests_Intensities_Mar2022withJan2022)
+write.csv(results_Intensities_Mar2022withJan2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/results_Intensities_Mar2022withJan2022.csv",row.names = TRUE)
 ```
 
 #Histogram of p-values
 ```{r}
-hist(results_Spectral$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+hist(results_Intensities_Mar2022$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
 # saving the figure (we will do this over and over again :)
 # we will learn ggplot later but we use PDF and turn of null device (plot window) 
 
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_Histogram_Wilcoxon_Spectral_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
-hist(results_Spectral$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Spectral Counts from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+hist(results_Intensities_Mar2022$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
 #intensities
-hist(results_Intensities$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+hist(results_Intensities_Mar2022withJan2022$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_Histogram_Wilcoxon_Intensities_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
-hist(results_Intensities$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+hist(results_Intensities_Mar2022withJan2022$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
 ```
@@ -249,22 +219,50 @@ dev.off()
 #Genes Below 0.05 and 0.10 p-value
 #Feel free to change the names and the pvalue cutoffs
 ```{r}
-results_Spectral <- results_Spectral %>% 
+results_Intensities_Mar2022 <- results_Intensities_Mar2022 %>% 
   mutate(significance = ifelse(p < 0.05, "very",
                           ifelse(p < 0.10, "significant", "not")))
 
 significant <- c("very", "significant")
 pattern_to_search <- paste0(significant, collapse = "|")
 
-significantSpectral_genes <- results_Spectral[grepl(pattern_to_search, results_Spectral$significance), ]
+significantIntensities_Mar2022_genes <- results_Intensities_Mar2022[grepl(pattern_to_search, results_Intensities_Mar2022$significance), ]
 
-results_Intensities <- results_Intensities%>% 
+results_Intensities_Mar2022withJan2022 <- results_Intensities_Mar2022withJan2022%>% 
   mutate(significance = ifelse(p < 0.05, "very",
                           ifelse(p < 0.10, "significant", "not")))
 
-significantIntensities_genes <- results_Intensities[grepl(pattern_to_search, results_Intensities$significance), ]
+significant_Intensities_Mar2022withJan2022_genes <- results_Intensities_Mar2022withJan2022[grepl(pattern_to_search, results_Intensities_Mar2022withJan2022$significance), ]
 
 ```
+
+#Want to do a quick check with Isabela's Data (only significant genes)
+```{r}
+quick_sig_genes_intensities_SucGrad_Mar2022 <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/significant_genes_wilcoxonresults_protein_Intensities.csv") %>% clean_names()
+names(quick_sig_genes_intensities_SucGrad_Mar2022)[names(quick_sig_genes_intensities_SucGrad_Mar2022) == "x1"] <- "gene"
+
+quick_sig_genes_intensities_Mar2022 <- significantIntensities_Mar2022_genes
+quick_sig_genes_intensities_Mar2022$gene <- row.names(significantIntensities_Mar2022_genes)
+ 
+quick_sig_genes_intensities_Mar2022withJan2022 <- significant_Intensities_Mar2022withJan2022_genes
+quick_sig_genes_intensities_Mar2022withJan2022$gene <- row.names(significant_Intensities_Mar2022withJan2022_genes)
+
+#quick_sig_genes_intensities_Jan2022 <- read_csv("/file/path") %>% clean_names()
+#names(quick_sig_genes_intensities_Jan2022)[names(quick_sig_genes_intensities_Jan2022) == "x1"] <- "gene"
+
+significant_intensities_genes <- list(genes_ChIRP_Mar2022 = sort(quick_sig_genes_intensities_Mar2022$gene), genes_SucGrad_Mar2022= sort(quick_sig_genes_intensities_SucGrad_Mar2022$gene))
+pdf("VennDiagram_SigGenes_ChIRPMar2022_SucGradMar2022.pdf")
+ggvenn(genes, c("genes_ChIRP_Mar2022","genes_SucGrad_Mar2022"))
+dev.off()
+
+significant_intensities_genes <- list(genes_ChIRP_Mar_Jan2022 = sort(quick_sig_genes_intensities_Mar2022withJan2022$gene), genes_SucGrad_Mar2022= sort(quick_sig_genes_intensities_SucGrad_Mar2022$gene))
+pdf("VennDiagram_SigGenes_ChIRPMarJan2022_SucGradMar2022.pdf")
+ggvenn(genes, c("genes_ChIRP_Mar_Jan2022","genes_SucGrad_Mar2022"))
+dev.off()
+
+```
+
+
 
 ##will need to change the gene names below that I put in manually
 ##make sure genotype entry is the same as above
