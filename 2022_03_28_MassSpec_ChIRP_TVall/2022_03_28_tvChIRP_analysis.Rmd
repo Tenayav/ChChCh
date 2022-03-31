@@ -277,40 +277,44 @@ write.csv(composite_genes_SucGrad_ChIRPMar2022, file = "composite_genes_SucGrad_
 
 #Spectral
 #in the future I might have to grep these names
-sig_genes <- c("anxa1","atp5f1a","btf3","ckb","hdlbp","hnrnpm","mif","naa15","pabpc1","pkp1","rpl10$","rpl38","slc25a5")
-pattern_to_search_sig_genes <- paste0(sig_genes, collapse = "|")
-long_data_Spectral_sig_genes <- Spectral[, grep(pattern_to_search_sig_genes, colnames(Spectral))]
-genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
-long_data_Spectral_sig_genes <- cbind(genotype,long_data_Spectral_sig_genes)
-mm_sigSpectral = melt(long_data_Spectral_sig_genes)
+sig_intensity_Mar2022_genes <- quick_sig_genes_intensities_Mar2022$gene
+pattern_to_search_sig_Mar2022_genes <- paste0(sig_intensity_Mar2022_genes, collapse = "$|^")
+pattern_to_search_sig_Mar2022_genes <- paste("^",pattern_to_search_sig_Mar2022_genes, "$", sep ="")
+long_data_intensities_Mar2022_sig_genes <- Intensities_valid[, grep(pattern_to_search_sig_Mar2022_genes, colnames(Intensities_valid))]
+genotype_search <- c("WT","WT","WT","WT","WT","WT","KO","KO","KO","KO")
+long_data_intensities_Mar2022_sig_genes <- cbind(genotype_search,long_data_intensities_Mar2022_sig_genes)
+mm_sig_intensities_Mar2022 = melt(long_data_intensities_Mar2022_sig_genes)
 
-  pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
-  ggplot(mm_sigSpectral)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
-  dev.off()
+  #pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_31_sig_genes_Spectral_boxwhisker_Wilcoxon_S_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
+ # ggplot(mm_sigSpectral)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
+  #dev.off()
 
 
-for (var in mm_sigSpectral$variable) { 
+for (var in mm_sig_intensities_Mar2022$variable) { 
  
-  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_28_MassSpec_SpectralBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
-  print(ggpaired(mm_sigSpectral[mm_sigSpectral$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_28_MassSpec_Intensities_Mar2022_BoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
+  print(ggpaired(mm_sig_intensities_Mar2022[mm_sig_intensities_Mar2022$variable==var,],x="genotype_search",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
   dev.off()
   }
 
-#Intensities
-long_data_Intensities_sig_genes <- Intensities[, grep(pattern_to_search_sig_genes, colnames(Intensities))]
-genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
-long_data_Intensities_sig_genes <- cbind(genotype,long_data_Intensities_sig_genes)
-mm_sigIntensities = melt(long_data_Intensities_sig_genes)
+#Intensities of Mar 2022 and Jan 2022
+sig_intensity_Jan_Mar2022_genes <- quick_sig_genes_intensities_Mar2022withJan2022$gene
+pattern_to_search_sig_Jan_Mar2022_genes <- paste0(sig_intensity_Jan_Mar2022_genes, collapse = "$|^")
+pattern_to_search_sig_Jan_Mar2022_genes <- paste("^",pattern_to_search_sig_Jan_Mar2022_genes, "$", sep ="")
+long_data_intensities_Jan_Mar2022_sig_genes <- Intensities_valid_withJan2022[, grep(pattern_to_search_sig_Jan_Mar2022_genes, colnames(Intensities_valid_withJan2022))]
+genotype_Jan_Mar_2022 <- c("WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO")
+long_data_intensities_Jan_Mar2022_sig_genes <- cbind(genotype_Jan_Mar_2022,long_data_intensities_Jan_Mar2022_sig_genes)
+mm_sig_intensities_Jan_Mar2022 = melt(long_data_intensities_Jan_Mar2022_sig_genes)
 
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_sig_genes_Intensities_boxwhisker_Wilcoxon_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
-ggplot(mm_sigIntensities)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB")+facet_grid(.~variable)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_31_sig_genes_Jan_Mar2022_Intensities_boxwhisker_Wilcoxon_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
+ggplot(mm_sig_intensities_Jan_Mar2022)+geom_boxplot(aes(x=genotype_Jan_Mar_2022, y=value),fill = "#00AFBB")+facet_grid(.~variable)
 dev.off()
 
-for (var in mm_sigIntensities$variable) { 
+for (var in mm_sig_intensities_Jan_Mar2022$variable) { 
              
-  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_28_MassSpec_IntensitiesBoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_28_MassSpec_Intensities_Jan_Mar_2022_BoxPlots_SignificantGenes//", var, "_sig.pdf", sep=""))
   #print(ggplot(mm_sigIntensities[mm_sigIntensities$variable==var,])+geom_boxplot(aes(x=genotype, y=value),fill="#00AFBB")+ggtitle(var))
-  print(ggpaired(mm_sigIntensities[mm_sigIntensities$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  print(ggpaired(mm_sig_intensities_Jan_Mar2022[mm_sig_intensities_Jan_Mar2022$variable==var,],x="genotype_Jan_Mar_2022",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
   dev.off()
 }
 
