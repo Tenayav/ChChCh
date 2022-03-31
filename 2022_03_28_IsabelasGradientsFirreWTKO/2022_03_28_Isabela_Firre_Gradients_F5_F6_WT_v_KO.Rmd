@@ -422,6 +422,30 @@ for (var in mm_sigIntensities$variable) {
 write.csv(significantIntensities_valid_genes,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//significant_genes_wilcoxonresults_protein_Intensities.csv",row.names = TRUE)
 ```
 
+#I'm going to take the significant genes from Mar2022 and Jan_Mar2022
+#And see how they fall in the SucGrad data
+```{r}
+pvalues_Mar2022_ChIRP <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/results_Intensities_Mar2022.csv") %>% clean_names()
+names(pvalues_Mar2022_ChIRP)[names(pvalues_Mar2022_ChIRP) == "x1"] <- "gene"
+sig_intensity_Mar2022_genes <- pvalues_Mar2022_ChIRP$gene
+pattern_to_search_sig_Mar2022_genes <- paste0(sig_intensity_Mar2022_genes, collapse = "$|^")
+pattern_to_search_sig_Mar2022_genes <- paste("^",pattern_to_search_sig_Mar2022_genes, "$", sep ="")
+
+sucgradintensities_Mar2022_sig_genes <- Intensities_valid[, grep(pattern_to_search_sig_Mar2022_genes, colnames(Intensities_valid))]
+genotype_SucGrad <- c("WT","WT","WT","WT","KO","KO","KO","KO")
+sucgradintensities_Mar2022_sig_genes <- cbind(genotype_SucGrad,sucgradintensities_Mar2022_sig_genes)
+write.csv(sucgradintensities_Mar2022_sig_genes,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//sucgrad_intensities_Mar2022ChIRP_sig_genes_significant_genes_protein.csv",row.names = TRUE)
+
+##Flip the table
+##add pvalues from both SucGrad and Mar2022 ChIRP analysis
+
+pvalues_Jan_Mar2022_ChIRP <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/results_Intensities_Mar2022withJan2022.csv") %>% clean_names()
+names(pvalues_Jan_Mar2022_ChIRP)[names(pvalues_Jan_Mar2022_ChIRP) == "x1"] <- "gene"
+sig_intensity_Jan_Mar2022_genes <- pvalues_Jan_Mar2022_ChIRP$gene
+pattern_to_search_sig_Jan_Mar2022_genes <- paste0(sig_intensity_Jan_Mar2022_genes, collapse = "$|^")
+pattern_to_search_sig_Jan_Mar2022_genes <- paste("^",pattern_to_search_sig_Jan_Mar2022_genes, "$", sep ="")
+```
+
 
 ##Then comes histograms of the spectral and intensities counts
 ##Also more fancy box plots of the very interesting genes
