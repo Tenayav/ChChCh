@@ -18,6 +18,7 @@ library(VennDiagram)
 library(venneuler)
 library(eulerr)
 library(reshape)
+library(tibble)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -434,6 +435,18 @@ pattern_to_search_sig_Mar2022_genes <- paste("^",pattern_to_search_sig_Mar2022_g
 sucgradintensities_Mar2022_sig_genes <- Intensities_valid[, grep(pattern_to_search_sig_Mar2022_genes, colnames(Intensities_valid))]
 genotype_SucGrad <- c("WT","WT","WT","WT","KO","KO","KO","KO")
 sucgradintensities_Mar2022_sig_genes <- cbind(genotype_SucGrad,sucgradintensities_Mar2022_sig_genes)
+sucgradintensities_Mar2022_sig_genes2 <- as.data.frame(t(sucgradintensities_Mar2022_sig_genes))
+colnames(pvalues_Mar2022_ChIRP)[3:4] <- paste(colnames(pvalues_Mar2022_ChIRP)[3:4],"Mar2022_ChIRP",sep=".")
+#left_join(rownames_to_column(x.tsummary), sto.info, by=c("rowname" = "Symbol"))
+colnames(results_Intensities_valid)[3:4] <- paste(colnames(results_Intensities_valid)[3:4],"Mar2022_SucGrad",sep=".")
+sucgradintensities_Mar2022_sig_genes2 <- left_join(rownames_to_column(sucgradintensities_Mar2022_sig_genes2), pvalues_Mar2022_ChIRP, by=c("rowname" = "gene"))
+#results<-merge(x=source1,y=source2,by=”State”,all.x=TRUE)
+#sucgradintensities_Mar2022_sig_genes2 <- merge(x=sucgradintensities_Mar2022_sig_genes2, y=pvalues_Mar2022_ChIRP, all.x=TRUE)
+
+sucgradintensities_Mar2022_sig_genes3 <- left_join(sucgradintensities_Mar2022_sig_genes2,rownames_to_column(results_Intensities_valid), by=c("rowname" = "rowname"))
+#results<-merge(x=source1,y=source2,by=”State”,all.x=TRUE)
+#sucgradintensities_Mar2022_sig_genes2 <- merge(x=sucgradintensities_Mar2022_sig_genes2, y=pvalues_Mar2022_ChIRP, all.x=TRUE)
+
 write.csv(sucgradintensities_Mar2022_sig_genes,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//sucgrad_intensities_Mar2022ChIRP_sig_genes_significant_genes_protein.csv",row.names = TRUE)
 
 ##Flip the table
