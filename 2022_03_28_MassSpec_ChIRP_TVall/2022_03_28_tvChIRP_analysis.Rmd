@@ -243,7 +243,7 @@ names(quick_sig_genes_intensities_SucGrad_Mar2022)[names(quick_sig_genes_intensi
 
 quick_sig_genes_intensities_Mar2022 <- significantIntensities_Mar2022_genes
 quick_sig_genes_intensities_Mar2022$gene <- row.names(significantIntensities_Mar2022_genes)
- 
+
 quick_sig_genes_intensities_Mar2022withJan2022 <- significant_Intensities_Mar2022withJan2022_genes
 quick_sig_genes_intensities_Mar2022withJan2022$gene <- row.names(significant_Intensities_Mar2022withJan2022_genes)
 
@@ -324,6 +324,12 @@ for (var in mm_sig_intensities_Jan_Mar2022$variable) {
 #https://www.r-bloggers.com/2017/06/add-p-values-and-significance-levels-to-ggplots/
 #http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/
 ```
+
+```{r}
+write.csv(quick_sig_genes_intensities_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//pvalues_Mar2022ChIRP_Siggenes.csv",row.names = TRUE)
+write.csv(quick_sig_genes_intensities_Mar2022withJan2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//pvalues_Jan_Mar2022ChIRP_Siggenes.csv",row.names = TRUE)
+```
+
 
 ##Then comes histograms of the spectral and intensities counts
 ##Also more fancy box plots of the very interesting genes
