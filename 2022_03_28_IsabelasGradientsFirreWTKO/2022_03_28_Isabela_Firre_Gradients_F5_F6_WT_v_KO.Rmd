@@ -516,7 +516,7 @@ colnames(Intensities_WT_filter_both) <- "gene"
 #list of 2317 genes to start comparison with KO
 ```
 
-```{r - merge KO values and compare}
+```{r - merge KO values and compare - 2320 genes}
 Intensities_filter_both <- Intensities_WT_filter_both %>%
   left_join(Intensities_50ng) %>%
   left_join(Intensities_100ng)
@@ -622,7 +622,7 @@ sig_Int_genes_filter_4 <- sig_Int_genes_filter %>%
 ```
 
 I noticed that some genes have differences as higher intensities in KO - so let's filter only KO < WT
-```{r}
+```{r - KO > WT (no intesity filter applied here)}
 sig_Int_genes_filter_5 <- sig_Int_genes_filter %>%
   mutate(sum50_ko = rowSums(sig_Int_genes_filter[ , c(6,7)])) %>%
   mutate(sum50_wt = rowSums(sig_Int_genes_filter[ , c(8,9)])) %>%
@@ -663,3 +663,171 @@ intersect_itp_tkv <- intersect(sig_Int_genes_filter_5$ptn_name, significantInten
 #none!!!!!!!!!!
 ```
 
+```{r - filtering further what I found - out of 245 genes}
+#now I'll filter ways of intensities = 0 after ko < wt filter
+
+#intensity = 0 in at least one of KO replicates in any run
+sig_Int_genes_filter_5.1 <- sig_Int_genes_filter_5 %>%
+  filter(ptn_mesc_ko_p1_f5_f6_intensity.50ng == 0 | ptn_mesc_ko_p2_f5_f6_intensity.50ng == 0 | ptn_mesc_ko_p1_f5_f6_intensity.100ng == 0 | ptn_mesc_ko_p2_f5_f6_intensity.100ng == 0)
+#45 genes
+
+#now filtering considering occurence in both replicates for the same run
+sig_Int_genes_filter_5.2 <- sig_Int_genes_filter_5 %>%
+ filter(ptn_mesc_ko_p1_f5_f6_intensity.50ng == 0 & ptn_mesc_ko_p2_f5_f6_intensity.50ng == 0 | ptn_mesc_ko_p1_f5_f6_intensity.100ng == 0 & ptn_mesc_ko_p2_f5_f6_intensity.100ng == 0)
+#14 genes
+
+#save this as my top hits for now
+write_csv(sig_Int_genes_filter_5.2, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/sig_Int_genes_filter_5.2.csv")
+
+#now filtering intensity = 0 in all KO
+sig_Int_genes_filter_5.3 <- sig_Int_genes_filter_5 %>%
+  filter(ptn_mesc_ko_p1_f5_f6_intensity.50ng == 0 & ptn_mesc_ko_p2_f5_f6_intensity.50ng == 0 & ptn_mesc_ko_p1_f5_f6_intensity.100ng == 0 & ptn_mesc_ko_p2_f5_f6_intensity.100ng == 0)
+#none
+```
+
+QUESTION: should we apply these filters before running wilcox? 
+
+```{r - merge KO values - filter KO > WT - run function}
+Intensities_filter_both <- Intensities_WT_filter_both %>%
+  left_join(Intensities_50ng) %>%
+  left_join(Intensities_100ng)
+
+#filter by KO > WT (sum of each run)
+Intensities_filter_both <- Intensities_filter_both %>%
+  mutate(sum50_ko = rowSums(Intensities_filter_both[ , c(2,3)])) %>%
+  mutate(sum50_wt = rowSums(Intensities_filter_both[ , c(4,5)])) %>%
+  mutate(sum100_ko = rowSums(Intensities_filter_both[ , c(6,7)])) %>%
+  mutate(sum100_wt = rowSums(Intensities_filter_both[ , c(8,9)])) 
+
+Intensities_filter_both <- Intensities_filter_both %>%
+  filter(sum50_ko < sum50_wt & sum100_ko < sum100_wt) %>%
+  select(!sum50_ko) %>% select(!sum50_wt) %>% select(!sum100_ko) %>% select(!sum100_wt)
+#744 gene to start!
+
+#prepare table for function
+Intensities_filter <- as.data.frame(t(Intensities_filter_both))
+colnames(Intensities_filter) <- unlist(Intensities_filter[1, ], use.names = F)
+Intensities_filter <- Intensities_filter[-c(1), ]
+genotype <- c("WT","WT","WT","WT","KO","KO","KO","KO")
+Intensities_filter <- Intensities_filter %>% add_column(genotype = genotype, .before = "Aars1")
+
+Intensities_filter[] <- lapply(Intensities_filter, type.convert, as.is = TRUE)
+Intensities_valid <- as.data.frame(Intensities_filter) #I had to keep the name in order to function work
+
+#run function
+#Wilcoxon Test on Intensities
+#Output is a csv file to have the pvalues in a table format. 
+
+test.funi <- function(Intensities_valid, col) { 
+
+ ci <- combn(unique(Intensities_valid$genotype),2)
+ sigsi <- list()
+ for(i in 1:ncol(ci)) {
+    sigsi[[i]] <- wilcox.test(
+                   Intensities_valid[Intensities_valid$genotype == ci[1,i],col],
+                   Intensities_valid[Intensities_valid$genotype == ci[2,i],col], exact=FALSE
+                 )
+    }
+    names(sigsi) <- paste("Group",ci[1,],"by Group",ci[2,])
+
+ tests_Intensities_valid <- data.frame(Test=names(sigsi),
+                    W=unlist(lapply(sigsi,function(x) x$statistic)),
+                    p=unlist(lapply(sigsi,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Intensities_valid)
+}
+
+
+tests_Intensities_valid <- lapply(colnames(Intensities_valid)[-1],function(x) test.funi(Intensities_valid,x))
+names(tests_Intensities_valid) <- colnames(Intensities_valid)[-1]
+
+#write results
+results_Intensities_valid <- do.call(rbind.data.frame, tests_Intensities_valid)
+write.csv(results_Intensities_valid,"/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/results_protein_Intensities_filter.csv",row.names = TRUE)
+
+#plot histogram of results
+hist(results_Intensities_valid$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 Protein - NEW FILTER", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+
+#pdf("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/2022_04_05_Histogram_Wilcoxon_Intensities_protein_SucGrad_filterWT_ITP.pdf")
+#hist(results_Intensities_valid$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 Protein - NEW FILTER", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#dev.off()
+
+results_Intensities_valid_filter2 <- results_Intensities_valid 
+
+#filter by pval - by Tenaya's code
+significant <- c("very", "significant")
+pattern_to_search <- paste0(significant, collapse = "|")
+
+results_Intensities_valid_filter2 <- results_Intensities_valid_filter2 %>% 
+  mutate(significance = ifelse(p < 0.05, "very",
+                          ifelse(p < 0.10, "significant", "not")))
+
+significantIntensities_valid_genes_filter <- results_Intensities_valid_filter2[grepl(pattern_to_search, results_Intensities_valid_filter2$significance), ]
+
+#filter by pval value
+sig_Int_genes_filter2 <- results_Intensities_valid_filter2 %>%
+  filter(p <= 0.05)
+#246 genes
+
+#merge intensities values in the same table
+sig_Int_genes_filter2 <- sig_Int_genes_filter2 %>%
+  rownames_to_column(var = "gene") %>%
+  left_join(Intensities_50ng) %>%
+  left_join(Intensities_100ng)
+
+#save this table
+write_csv(sig_Int_genes_filter2, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/sigInten_valid_genes_filter2_values.csv")
+
+#now let's filter after per intensity = 0
+#intensity = 0 in at least one of KO replicates in any run
+sig_Int_genes_filter2.1 <- sig_Int_genes_filter2 %>%
+  filter(ptn_mesc_ko_p1_f5_f6_intensity.50ng == 0 | ptn_mesc_ko_p2_f5_f6_intensity.50ng == 0 | ptn_mesc_ko_p1_f5_f6_intensity.100ng == 0 | ptn_mesc_ko_p2_f5_f6_intensity.100ng == 0)
+#48 genes
+
+#now filtering considering occurence in both replicates for the same run
+sig_Int_genes_filter2.2 <- sig_Int_genes_filter2 %>%
+ filter(ptn_mesc_ko_p1_f5_f6_intensity.50ng == 0 & ptn_mesc_ko_p2_f5_f6_intensity.50ng == 0 | ptn_mesc_ko_p1_f5_f6_intensity.100ng == 0 & ptn_mesc_ko_p2_f5_f6_intensity.100ng == 0)
+#16 genes
+
+#save this as my top hits for now
+write_csv(sig_Int_genes_filter2.2, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/sig_Int_genes_filter2.2.csv")
+
+#how this overlap with the other filter
+intersect_filters <- intersect(sig_Int_genes_filter2.2$gene, sig_Int_genes_filter_5.2$gene)
+#all 14 ===== DOESN'T MATTER FILTER KO > WT BEFORE OR AFTER WILCOX
+
+#now filtering intensity = 0 in all KO
+sig_Int_genes_filter2.3 <- sig_Int_genes_filter2 %>%
+  filter(ptn_mesc_ko_p1_f5_f6_intensity.50ng == 0 & ptn_mesc_ko_p2_f5_f6_intensity.50ng == 0 & ptn_mesc_ko_p1_f5_f6_intensity.100ng == 0 & ptn_mesc_ko_p2_f5_f6_intensity.100ng == 0)
+#none
+```
+
+
+```{r - RANK INTENSITY}
+#calculate fold change in the intensities and rank them
+#no intensity = 0 apllied here
+#starting with 249 genes 
+
+sig_Int_genes_filter2 <- sig_Int_genes_filter2 %>%
+  mutate(mean50_ko = rowSums(sig_Int_genes_filter2[ , c(6,7)])) %>%
+  mutate(mean50_wt = rowSums(sig_Int_genes_filter2[ , c(8,9)])) %>%
+  mutate(mean100_ko = rowSums(sig_Int_genes_filter2[ , c(10,11)])) %>%
+  mutate(mean100_wt = rowSums(sig_Int_genes_filter2[ , c(12,13)])) 
+
+sig_Int_genes_filter2 <- sig_Int_genes_filter2 %>%
+  mutate(ratio_50 = sig_Int_genes_filter2$mean50_wt/sig_Int_genes_filter2$mean50_ko) %>%
+  mutate(ratio_100 = sig_Int_genes_filter2$mean100_wt/sig_Int_genes_filter2$mean100_ko)
+
+#very stringent filter
+sig_Int_genes_filter2.4 <- sig_Int_genes_filter2 %>%
+  filter(!ratio_50 < 1.5 & !ratio_100 < 1.5)
+#15 genes
+
+#save this as my top hits for now
+write_csv(sig_Int_genes_filter2.4, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/sig_Int_genes_filter2.4.csv")
+
+intersect2.4 <- intersect(sig_Int_genes_filter2.2$gene, sig_Int_genes_filter2.4$gene)
+#3 genes
+```
+
+#TODO: filter or compare at some point the list with ko x wt RNA-seq data
