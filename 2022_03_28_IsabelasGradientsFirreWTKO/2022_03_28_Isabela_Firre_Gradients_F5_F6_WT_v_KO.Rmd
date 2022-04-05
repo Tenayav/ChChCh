@@ -3,6 +3,8 @@ title: "2022_03_28_Isabela_Firre_Gradients_F5_F6_WT_v_KO"
 output:
   pdf_document: default
   html_document: default
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -425,3 +427,91 @@ write.csv(significantIntensities_valid_genes,"/scratch/Shares/rinn/tenaya/ChChCh
 
 ##Then comes histograms of the spectral and intensities counts
 ##Also more fancy box plots of the very interesting genes
+
+##Isabela started working here##
+```{r - merge raw intensities values for valid genes list}
+#read in valid genes (179)
+significantIntensities_valid_genes <- read.csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/significant_genes_wilcoxonresults_protein_Intensities.csv")
+
+#merge intensities values
+Intensities_50ng <- Intensities_50ng %>%
+  mutate(ptn_name = tolower(Intensities_50ng$gene)) %>%
+  select(!gene)
+
+Intensities_100ng <- Intensities_100ng %>%
+  mutate(ptn_name = tolower(Intensities_100ng$gene)) %>%
+  select(!gene)
+
+significantIntensities_valid_genes_values <- significantIntensities_valid_genes %>%
+  dplyr :: rename(ptn_name = X) %>%
+  left_join(Intensities_50ng) %>%
+  left_join(Intensities_100ng)
+
+#save this table
+write_csv(significantIntensities_valid_genes_values, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/sigInten_valid_genes_values.csv")
+```
+
+```{r - more strict filter for WT valid genes}
+#I will consider for the analysis only genes that show intensities > 0 in both replicates
+Intensities_50ng_WTcheck_filter <- Intensities_50ng_WTcheck %>%
+  filter(!ptn_mesc_wt_p1_f5_f6_intensity.50ng == 0, !ptn_mesc_wt_p2_f5_f6_intensity.50ng == 0)
+
+Intensities_100ng_WTcheck_filter <- Intensities_100ng_WTcheck %>%
+  filter(!ptn_mesc_wt_p1_f5_f6_intensity.100ng == 0, !ptn_mesc_wt_p2_f5_f6_intensity.100ng == 0)
+
+Intensities_WT_filter_both <- intersect(Intensities_50ng_WTcheck_filter$gene, Intensities_100ng_WTcheck_filter$gene)
+Intensities_WT_filter_both <- as.data.frame(Intensities_WT_filter_both)
+colnames(Intensities_WT_filter_both) <- "gene"
+#list of 2317 genes to start comparison with KO
+```
+
+```{r - merge KO values and compare}
+Intensities_filter_both <- Intensities_WT_filter_both %>%
+  left_join(Intensities_50ng) %>%
+  left_join(Intensities_100ng)
+
+#prepare table#worked beautifully - but I'll keep Tenaya's format
+#Intensities_filter <- Intensities_filter_both %>%
+ # pivot_longer(
+  # cols = 2:9,
+  # names_to = c("condition", "replicate", "run"),
+  # names_pattern = "ptn_mesc_?(.*)_p?(.*)_f5_f6_intensity.?(.*)",
+  # values_to = "intensity")
+
+#prepare table for function
+Intensities_filter <- as.data.frame(t(Intensities_filter_both))
+colnames(Intensities_filter) <- unlist(Intensities_filter[1, ], use.names = F)
+Intensities_filter <- Intensities_filter[-c(1), ]
+genotype <- c("WT","WT","WT","WT","KO","KO","KO","KO")
+Intensities_filter <- Intensities_filter %>% add_column(genotype = genotype, .before = "Aar2")
+
+
+#run function
+#Wilcoxon Test on Intensities
+#Output is a csv file to have the pvalues in a table format. 
+
+test.funi <- function(Intensities_filter, col) { 
+
+ ci <- combn(unique(Intensities_filter$genotype),2)
+ sigsi <- list()
+ for(i in 1:ncol(ci)) {
+    sigsi[[i]] <- wilcox.test(
+                   Intensities_filter[Intensities_filter$genotype == ci[1,i],col],
+                   Intensities_filter[Intensities_filter$genotype == ci[2,i],col], exact=FALSE
+                 )
+    }
+    names(sigsi) <- paste("Group",ci[1,],"by Group",ci[2,])
+
+ tests_Intensities_valid <- data.frame(Test=names(sigsi),
+                    W=unlist(lapply(sigsi,function(x) x$statistic)),
+                    p=unlist(lapply(sigsi,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Intensities_valid)
+}
+
+###NOT WORKING
+
+tests_Intensities_valid <- lapply(colnames(Intensities_fiter)[-1],function(x) test.funi(Intensities_filter,x))
+names(tests_Intensities_valid) <- colnames(Intensities_valid)[-1]
+```
+
