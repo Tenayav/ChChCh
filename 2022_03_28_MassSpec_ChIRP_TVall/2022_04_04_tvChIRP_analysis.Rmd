@@ -36,17 +36,15 @@ Intensities_50ng <- mass_spec_50ng_Mar2022_TV[,c(4,34,35,36,37,38)]
 colnames(Intensities_50ng)[2:6] <- paste(colnames(Intensities_50ng)[2:6],"50ng",sep=".")
 Intensities_100ng <- mass_spec_100ng_Mar2022_TV[,c(4,34,35,36,37,38)]
 colnames(Intensities_100ng)[2:6] <- paste(colnames(Intensities_100ng)[2:6],"100ng",sep=".")
-Intensities_50ng_WTcheck <- Intensities_50ng[,c(1,3,5,6)]
-Intensities_100ng_WTcheck <- Intensities_100ng[,c(1,3,5,6)]
-Intensities_WTcheck <- full_join(Intensities_50ng_WTcheck,Intensities_100ng_WTcheck,by="gene",copy=FALSE,keep = FALSE)
-Intensities_WTcheck <- as.data.frame(Intensities_WTcheck)
+Intensities <- full_join(Intensities_50ng,Intensities_100ng,by="gene",copy=FALSE,keep = FALSE)
+Intensities <- as.data.frame(Intensities)
 
-Intensities_WTcheckA <- Intensities_WTcheck %>% replace_na(list(r2_wt_oe_intensity.50ng = 0, r3_wt_oe_intensity.50ng = 0, r4_wt_oe_intensity.50ng=0, r2_wt_oe_intensity.100ng=0, r3_wt_oe_intensity.100ng=0, r4_wt_oe_intensity.100ng=0))
+Intensities_A <- Intensities %>% replace_na(list(r2_ko_oe_intensity.50ng = 0,r2_wt_oe_intensity.50ng = 0, r3_ko_oe_intensity.50ng = 0, r3_wt_oe_intensity.50ng = 0, r4_ko_oe_intensity.50ng=0, r4_wt_oe_intensity.50ng=0, r2_ko_oe_intensity.100ng=0, r2_wt_oe_intensity.100ng=0, r3_ko_oe_intensity.100ng=0, r3_wt_oe_intensity.100ng=0, r4_wt_oe_intensity.100ng=0))
 
 #sum of each row
-
-Intensities_WTcheck2 <- Intensities_WTcheckA %>% mutate(intensities_sum = rowSums(.[,sapply(., is.numeric)])) 
-summary(Intensities_WTcheck2$intensities_sum)
+Intensities_A <- Intensities_A[] + 1 
+Intensities_2 <- Intensities_A %>% mutate(intensities_ratio1 = (r2_wt_oe_intensity.50ng/r2_ko_oe_intensity.50ng), intensities_ratio2=(r3_wt_oe_intensity.50ng/r3_ko_oe_intensity.50ng), intensities_ratio3 = (r4_ko_oe_intensity.50ng/mean(c())))
+summary(Intensities_2$intensities_sum)
 
 Intensities_WTvalid <- dplyr::filter(Intensities_WTcheck2, intensities_sum > 0)
 summary(Intensities_WTvalid$intensities_sum)

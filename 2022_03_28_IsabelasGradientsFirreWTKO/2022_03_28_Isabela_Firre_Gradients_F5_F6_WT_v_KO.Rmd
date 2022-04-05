@@ -20,6 +20,7 @@ library(VennDiagram)
 library(venneuler)
 library(eulerr)
 library(reshape)
+library(tibble)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -302,7 +303,7 @@ names(tests_Intensities_valid) <- colnames(Intensities_valid)[-1]
 #results_Spectral_100ng <- do.call(rbind.data.frame, tests_Spectral_100ng)
 #write.csv(results_Spectral_100ng,"//scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_100ng_protein_Spectral.csv",row.names = FALSE)
 
-
+#helloworld
 results_Intensities_valid <- do.call(rbind.data.frame, tests_Intensities_valid)
 write.csv(results_Intensities_valid,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//results_protein_Intensities.csv",row.names = TRUE)
 #results_Intensities_100ng <- do.call(rbind.data.frame, tests_Intensities_100ng)
@@ -422,6 +423,56 @@ for (var in mm_sigIntensities$variable) {
 #Write a csv of significant genes and their pvalues (n=179)
 ```{r}
 write.csv(significantIntensities_valid_genes,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//significant_genes_wilcoxonresults_protein_Intensities.csv",row.names = TRUE)
+```
+
+#I'm going to take the significant genes from Mar2022 and Jan_Mar2022
+#And see how they fall in the SucGrad data
+```{r}
+pvalues_Mar2022_ChIRP <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/pvalues_Mar2022ChIRP_Siggenes.csv") %>% clean_names()
+sig_intensity_Mar2022_genes <- pvalues_Mar2022_ChIRP$gene
+pattern_to_search_sig_Mar2022_genes <- paste0(sig_intensity_Mar2022_genes, collapse = "$|^")
+pattern_to_search_sig_Mar2022_genes <- paste("^",pattern_to_search_sig_Mar2022_genes, "$", sep ="")
+
+sucgradintensities_Mar2022_sig_genes <- Intensities_valid[, grep(pattern_to_search_sig_Mar2022_genes, colnames(Intensities_valid))]
+genotype_SucGrad <- c("WT","WT","WT","WT","KO","KO","KO","KO")
+sucgradintensities_Mar2022_sig_genes <- cbind(genotype_SucGrad,sucgradintensities_Mar2022_sig_genes)
+sucgradintensities_Mar2022_sig_genes2 <- as.data.frame(t(sucgradintensities_Mar2022_sig_genes))
+colnames(pvalues_Mar2022_ChIRP)[3:4] <- paste(colnames(pvalues_Mar2022_ChIRP)[3:4],"Mar2022_ChIRP",sep=".")
+#left_join(rownames_to_column(x.tsummary), sto.info, by=c("rowname" = "Symbol"))
+colnames(results_Intensities_valid)[3:4] <- paste(colnames(results_Intensities_valid)[3:4],"Mar2022_SucGrad",sep=".")
+sucgradintensities_Mar2022_sig_genes2 <- left_join(rownames_to_column(sucgradintensities_Mar2022_sig_genes2), pvalues_Mar2022_ChIRP, by=c("rowname" = "gene"))
+#results<-merge(x=source1,y=source2,by=”State”,all.x=TRUE)
+#sucgradintensities_Mar2022_sig_genes2 <- merge(x=sucgradintensities_Mar2022_sig_genes2, y=pvalues_Mar2022_ChIRP, all.x=TRUE)
+
+sucgradintensities_Mar2022_sig_genes3 <- left_join(sucgradintensities_Mar2022_sig_genes2,rownames_to_column(results_Intensities_valid), by=c("rowname" = "rowname"))
+#results<-merge(x=source1,y=source2,by=”State”,all.x=TRUE)
+#sucgradintensities_Mar2022_sig_genes2 <- merge(x=sucgradintensities_Mar2022_sig_genes2, y=pvalues_Mar2022_ChIRP, all.x=TRUE)
+
+write.csv(sucgradintensities_Mar2022_sig_genes3,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//sucgrad_intensities_Mar2022ChIRP_sig_genes_significant_genes_protein.csv",row.names = TRUE)
+
+##Flip the table
+##add pvalues from both SucGrad and Mar2022 ChIRP analysis
+
+pvalues_Jan_Mar2022_ChIRP <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/pvalues_Jan_Mar2022ChIRP_Siggenes.csv") %>% clean_names()
+sig_intensity_Jan_Mar2022_genes <- pvalues_Jan_Mar2022_ChIRP$gene
+pattern_to_search_sig_Jan_Mar2022_genes <- paste0(sig_intensity_Jan_Mar2022_genes, collapse = "$|^")
+pattern_to_search_sig_Jan_Mar2022_genes <- paste("^",pattern_to_search_sig_Jan_Mar2022_genes, "$", sep ="")
+
+sucgradintensities_Jan_Mar2022_sig_genes <- Intensities_valid[, grep(pattern_to_search_sig_Jan_Mar2022_genes, colnames(Intensities_valid))]
+genotype_SucGrad <- c("WT","WT","WT","WT","KO","KO","KO","KO")
+sucgradintensities_Jan_Mar2022_sig_genes <- cbind(genotype_SucGrad,sucgradintensities_Jan_Mar2022_sig_genes)
+sucgradintensities_Jan_Mar2022_sig_genes2 <- as.data.frame(t(sucgradintensities_Jan_Mar2022_sig_genes))
+colnames(pvalues_Jan_Mar2022_ChIRP)[3:4] <- paste(colnames(pvalues_Jan_Mar2022_ChIRP)[3:4],"Jan_Mar2022_ChIRP",sep=".")
+#left_join(rownames_to_column(x.tsummary), sto.info, by=c("rowname" = "Symbol"))
+sucgradintensities_Jan_Mar2022_sig_genes2 <- left_join(rownames_to_column(sucgradintensities_Jan_Mar2022_sig_genes2), pvalues_Jan_Mar2022_ChIRP, by=c("rowname" = "gene"))
+#results<-merge(x=source1,y=source2,by=”State”,all.x=TRUE)
+#sucgradintensities_Mar2022_sig_genes2 <- merge(x=sucgradintensities_Mar2022_sig_genes2, y=pvalues_Mar2022_ChIRP, all.x=TRUE)
+
+sucgradintensities_Jan_Mar2022_sig_genes3 <- left_join(sucgradintensities_Jan_Mar2022_sig_genes2,rownames_to_column(results_Intensities_valid), by=c("rowname" = "rowname"))
+#results<-merge(x=source1,y=source2,by=”State”,all.x=TRUE)
+#sucgradintensities_Mar2022_sig_genes2 <- merge(x=sucgradintensities_Mar2022_sig_genes2, y=pvalues_Mar2022_ChIRP, all.x=TRUE)
+
+write.csv(sucgradintensities_Jan_Mar2022_sig_genes3,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO//sucgrad_intensities_Jan_Mar2022ChIRP_sig_genes_significant_genes_protein.csv",row.names = TRUE)
 ```
 
 
