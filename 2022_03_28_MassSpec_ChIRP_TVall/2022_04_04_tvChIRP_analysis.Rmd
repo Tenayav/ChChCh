@@ -39,11 +39,26 @@ colnames(Intensities_100ng)[2:6] <- paste(colnames(Intensities_100ng)[2:6],"100n
 Intensities <- full_join(Intensities_50ng,Intensities_100ng,by="gene",copy=FALSE,keep = FALSE)
 Intensities <- as.data.frame(Intensities)
 
-Intensities_A <- Intensities %>% replace_na(list(r2_ko_oe_intensity.50ng = 0,r2_wt_oe_intensity.50ng = 0, r3_ko_oe_intensity.50ng = 0, r3_wt_oe_intensity.50ng = 0, r4_ko_oe_intensity.50ng=0, r4_wt_oe_intensity.50ng=0, r2_ko_oe_intensity.100ng=0, r2_wt_oe_intensity.100ng=0, r3_ko_oe_intensity.100ng=0, r3_wt_oe_intensity.100ng=0, r4_wt_oe_intensity.100ng=0))
+Intensities_A <- Intensities %>% replace_na(list(r2_ko_oe_intensity.50ng = 0,r2_wt_oe_intensity.50ng = 0, r3_ko_oe_intensity.50ng = 0, r3_wt_oe_intensity.50ng = 0, r4_ko_oe_intensity.50ng=0, r4_wt_oe_intensity.50ng=0, r2_ko_oe_intensity.100ng=0, r2_wt_oe_intensity.100ng=0, r3_ko_oe_intensity.100ng=0, r3_wt_oe_intensity.100ng=0, r4_wt_oe_intensity.100ng=0)) 
 
-#sum of each row
-Intensities_A <- Intensities_A[] + 1 
-Intensities_2 <- Intensities_A %>% mutate(intensities_ratio1 = (r2_wt_oe_intensity.50ng/r2_ko_oe_intensity.50ng), intensities_ratio2=(r3_wt_oe_intensity.50ng/r3_ko_oe_intensity.50ng), intensities_ratio3 = (r4_ko_oe_intensity.50ng/mean(c())))
+#Jan2022TVkit Data Same thing. 
+kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv") %>% clean_names()
+
+KO_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,17,18)]
+colnames(KO_intensities_mass_spec_Jan2022_TV)[2:3] <- paste(colnames(KO_intensities_mass_spec_Jan2022_TV)[2:3],"Jan2022",sep=".")
+WT_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,19,20)]
+colnames(WT_intensities_mass_spec_Jan2022_TV)[2:3] <- paste(colnames(WT_intensities_mass_spec_Jan2022_TV)[2:3],"Jan2022",sep=".")
+
+Intensities_with_Jan2022 <- 
+
+#
+Intensities2 <- Intensities_A
+Intensities_2 <- Intensities2 %>% map_if(is.numeric, ~.+1)
+
+
+
+
+Intensities_2 <- Intensities_2 %>% mutate(intensities_ratio1 = (r2_wt_oe_intensity.50ng/r2_ko_oe_intensity.50ng), intensities_ratio2=(r3_wt_oe_intensity.50ng/r3_ko_oe_intensity.50ng), intensities_ratio3 = (r4_ko_oe_intensity.50ng/mean(c())))
 summary(Intensities_2$intensities_sum)
 
 Intensities_WTvalid <- dplyr::filter(Intensities_WTcheck2, intensities_sum > 0)
@@ -62,13 +77,7 @@ Intensities_valid[] <- lapply(Intensities_valid, type.convert, as.is = TRUE)
 ```
 #Intensities for each protein from the March 2022 and Jan2022 Kit ChIRP data
 ```{r}
-#Jan2022TVkit Data Same thing. 
-kit_mass_spec_Jan2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/2022_01_31_SCP_TVallery_combined_proteins.csv") %>% clean_names()
 
-KO_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,17,18)]
-colnames(KO_intensities_mass_spec_Jan2022_TV)[2:3] <- paste(colnames(KO_intensities_mass_spec_Jan2022_TV)[2:3],"Jan2022",sep=".")
-WT_intensities_mass_spec_Jan2022_TV <- kit_mass_spec_Jan2022_TV[,c(4,19,20)]
-colnames(WT_intensities_mass_spec_Jan2022_TV)[2:3] <- paste(colnames(WT_intensities_mass_spec_Jan2022_TV)[2:3],"Jan2022",sep=".")
 
 Intensities_WTcheck_withJan2022 <- full_join(Intensities_WTcheck, WT_intensities_mass_spec_Jan2022_TV,by="gene",copy=FALSE,keep = FALSE)
 Intensities_WTcheck_withJan2022 <- as.data.frame(Intensities_WTcheck_withJan2022)
