@@ -521,6 +521,9 @@ Intensities_filter_both <- Intensities_WT_filter_both %>%
   left_join(Intensities_50ng) %>%
   left_join(Intensities_100ng)
 
+#save this initial table 2320 genes + intensities values
+write_csv(Intensities_filter_both, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/intensities_valid_filter.csv")
+
 #prepare table#worked beautifully - but I'll keep Tenaya's format
 #Intensities_filter <- Intensities_filter_both %>%
  # pivot_longer(
@@ -533,7 +536,7 @@ Intensities_filter_both <- Intensities_WT_filter_both %>%
 Intensities_filter <- as.data.frame(t(Intensities_filter_both))
 colnames(Intensities_filter) <- unlist(Intensities_filter[1, ], use.names = F)
 Intensities_filter <- Intensities_filter[-c(1), ]
-genotype <- c("WT","WT","WT","WT","KO","KO","KO","KO")
+genotype <- c("KO","KO","WT","WT","KO","KO","WT","WT")
 Intensities_filter <- Intensities_filter %>% add_column(genotype = genotype, .before = "Aar2")
 
 Intensities_filter[] <- lapply(Intensities_filter, type.convert, as.is = TRUE)
@@ -592,7 +595,7 @@ significantIntensities_valid_genes_filter <- results_Intensities_valid_filter[gr
 #filter by pval value
 sig_Int_genes_filter <- results_Intensities_valid_filter %>%
   filter(p <= 0.05)
-#808 genes
+#84 genes
 
 #merge intensities values in the same table
 sig_Int_genes_filter <- sig_Int_genes_filter %>%
@@ -631,7 +634,7 @@ sig_Int_genes_filter_5 <- sig_Int_genes_filter %>%
 
 sig_Int_genes_filter_5 <- sig_Int_genes_filter_5 %>%
   filter(sum50_ko < sum50_wt & sum100_ko < sum100_wt)
-#245 genes
+#60 genes
 
 #make this filter in Tenaya's first list - also keep only pval 0.05
 #read in table with intensities values that I saved
@@ -831,3 +834,117 @@ intersect2.4 <- intersect(sig_Int_genes_filter2.2$gene, sig_Int_genes_filter2.4$
 ```
 
 #TODO: filter or compare at some point the list with ko x wt RNA-seq data
+
+```{r - rerun Tenaya's first list - with my clean up and way of doing but using her strategy}
+#50 ng protein
+mass_spec_50ng_Mar2022_SucGrad <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/2022_03_24_50ng_protein_SCP_JRinn_PTN_MESC_results.csv") %>% clean_names()
+
+#100ng protein 
+mass_spec_100ng_Mar2022_SucGrad <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/2022_03_24_100ng_protein_SCP_JRinn_PTN_MESC_results.csv") %>% clean_names()
+
+#filtering only Intensities values
+Intensities_50ng <- mass_spec_50ng_Mar2022_SucGrad[,c(4,28,29,30,31)]
+colnames(Intensities_50ng)[2:5] <- paste(colnames(Intensities_50ng)[2:5],"50ng",sep=".")
+
+
+Intensities_100ng <- mass_spec_100ng_Mar2022_SucGrad[,c(4,28,29,30,31)]
+colnames(Intensities_100ng)[2:5] <- paste(colnames(Intensities_100ng)[2:5],"100ng",sep=".")
+
+```
+#filter initial list using only WT values: sum of intensity > 0 considering the 4 replicates (P1/P2, 50ng/100ng)
+#filter by sum of rows
+```{r - filter based on WT occurance}
+#keep only WT
+Intensities_50ng_WTcheck <- Intensities_50ng[,c(1,4,5)]
+Intensities_100ng_WTcheck <- Intensities_100ng[,c(1,4,5)]
+#join them
+Intensities_WTcheck <- full_join(Intensities_50ng_WTcheck,Intensities_100ng_WTcheck,by="gene",copy=FALSE,keep = FALSE)
+Intensities_WTcheck <- as.data.frame(Intensities_WTcheck)
+#resolve NA - substitute by 0
+Intensities_WTcheckA <- Intensities_WTcheck %>% replace_na(list(ptn_mesc_wt_p1_f5_f6_intensity.50ng = 0, ptn_mesc_wt_p2_f5_f6_intensity.50ng = 0, ptn_mesc_wt_p1_f5_f6_intensity.100ng=0, ptn_mesc_wt_p2_f5_f6_intensity.100ng=0))
+
+#sum of each row
+Intensities_WTcheck2 <- Intensities_WTcheckA %>% mutate(intensities_sum = rowSums(.[,sapply(., is.numeric)]))
+#filter sum > 0
+Intensities_WTvalid <- dplyr::filter(Intensities_WTcheck2, intensities_sum > 0)
+Intensities_WTvalid2 <- Intensities_WTvalid [1:(length(Intensities_WTvalid )-1)]
+
+Intensities_valid1 <-  Intensities_WTvalid2 %>% left_join(Intensities_50ng[,c(1,2,3)],by="gene")
+Intensities_valid <- Intensities_valid1 %>% left_join(Intensities_100ng[,c(1,2,3)],by="gene")
+Intensities_valid <- Intensities_valid %>% replace_na(list(ptn_mesc_ko_p1_f5_f6_intensity.50ng = 0, ptn_mesc_ko_p2_f5_f6_intensity.50ng = 0, ptn_mesc_ko_p1_f5_f6_intensity.100ng=0, ptn_mesc_ko_p2_f5_f6_intensity.100ng=0))
+
+#save this initial table 3945 genes + intensities values
+write_csv(Intensities_valid, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/intensities_valid_TKV.csv")
+#obs:none changes so far
+```
+
+```{r - prep for run function/wilcox test}
+Intensities_valid <- as.data.frame(t(Intensities_valid))
+colnames(Intensities_valid) <- unlist(Intensities_valid[1, ], use.names = F)
+Intensities_valid <- Intensities_valid[-c(1), ]
+genotype <- c("WT","WT","WT","WT","KO","KO","KO","KO")
+Intensities_valid <- Intensities_valid %>% add_column(genotype = genotype, .before = "A2m", name_repair = "minimal")
+Intensities_valid <- Intensities_valid %>%
+  select(!genotype.1) %>%
+  select(!name_repair)
+Intensities_valid[] <- lapply(Intensities_valid, type.convert, as.is = TRUE)
+
+#run function
+test.funi <- function(Intensities_valid, col) { 
+
+ ci <- combn(unique(Intensities_valid$genotype),2)
+ sigsi <- list()
+ for(i in 1:ncol(ci)) {
+    sigsi[[i]] <- wilcox.test(
+                   Intensities_valid[Intensities_valid$genotype == ci[1,i],col],
+                   Intensities_valid[Intensities_valid$genotype == ci[2,i],col], exact=FALSE
+                 )
+    }
+    names(sigsi) <- paste("Group",ci[1,],"by Group",ci[2,])
+
+ tests_Intensities_valid <- data.frame(Test=names(sigsi),
+                    W=unlist(lapply(sigsi,function(x) x$statistic)),
+                    p=unlist(lapply(sigsi,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Intensities_valid)
+}
+
+
+tests_Intensities_valid <- lapply(colnames(Intensities_valid)[-1],function(x) test.funi(Intensities_valid,x))
+names(tests_Intensities_valid) <- colnames(Intensities_valid)[-1]
+
+#save 
+results_Intensities_valid_2 <- do.call(rbind.data.frame, tests_Intensities_valid)
+results_Intensities_valid_2 <- results_Intensities_valid_2 %>%
+  rownames_to_column(var ="gene")
+write.csv(results_Intensities_valid_2,"/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/results_protein_Intensities_2.csv")
+
+#bind intensities values
+results_Intensities_valid_2 <- results_Intensities_valid_2 %>%
+  left_join(Intensities_50ng) %>%
+  left_join(Intensities_100ng)
+
+#save this table
+write_csv(results_Intensities_valid_2, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/sigInten_valid_genes_values.csv")
+```
+
+```{r - comparing results}
+#Tenaya's filter at least one intensity WT >0
+results_Intensities_valid_2 <- results_Intensities_valid_2 %>%
+ filter(p <= 0.05)
+#93 genes
+
+results_Intensities_valid_2_doublefilter <- results_Intensities_valid_2 %>%
+  mutate(sum50_ko = rowSums(results_Intensities_valid_2[ , c(6,7)])) %>%
+  mutate(sum50_wt = rowSums(results_Intensities_valid_2[ , c(8,9)])) %>%
+  mutate(sum100_ko = rowSums(results_Intensities_valid_2[ , c(10,11)])) %>%
+  mutate(sum100_wt = rowSums(results_Intensities_valid_2[ , c(12,13)]))
+
+results_Intensities_valid_2_doublefilter <- results_Intensities_valid_2_doublefilter %>%
+  filter(sum50_ko < sum50_wt & sum100_ko < sum100_wt)
+#60 genes
+
+#compare the 2 strategies
+intersect_itp_tkv <- intersect(sig_Int_genes_filter_5$gene, results_Intensities_valid_2_doublefilter$gene)
+```
+
