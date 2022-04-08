@@ -192,171 +192,302 @@ pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04
 hist(Intensities_ratio_check_6_out_of_6_nonzero$logratio_mean, breaks = 50, main="(6 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
+#Need to filter out those with ratios below 1.5
+#Getting ready for the Wilcoxon Test
 
-
-
-
-Intensities_WTvalid <- dplyr::filter(Intensities_WTcheck2, intensities_sum > 0)
-summary(Intensities_WTvalid$intensities_sum)
-Intensities_WTvalid2 <- Intensities_WTvalid [1:(length(Intensities_WTvalid )-1)]
-
-Intensities_valid1 <-  Intensities_WTvalid2 %>% left_join(Intensities_50ng[,c(1,2,4)],by="gene")
-Intensities_valid <- Intensities_valid1 %>% left_join(Intensities_100ng[,c(1,2,4)],by="gene")
-Intensities_valid <- Intensities_valid %>% replace_na(list(r2_ko_oe_intensity.50ng = 0, r3_ko_oe_intensity.50ng = 0, r2_ko_oe_intensity.100ng=0, r3_ko_oe_intensity.100ng=0))
-
-Intensities_valid <- as.data.frame(t(Intensities_valid))
+#1 out of 6
+Intensities_ratiovalid_1_out_of_6 <- dplyr::filter(Intensities_ratio_check_1_out_of_6_nonzero, ratio_mean > 1.1)
+intensities_validgenenames_1_out_of_6 <- Intensities_ratiovalid_1_out_of_6$gene
+pattern_to_search_1outof6 <- paste0(intensities_validgenenames_1_out_of_6, collapse = "$|^")
+pattern_to_search_1outof6 <- paste("^",pattern_to_search_1outof6,"$",sep="")
+Intensities_1_out_of_6 <- Intensities_ratio_check_1_out_of_6[grepl(pattern_to_search_1outof6, Intensities_ratio_check_1_out_of_6$gene),]
+Intensities_1_out_of_6_ready <- as.data.frame(t(Intensities_1_out_of_6 ))
 Intensities_newcol <- c("genotype","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO")
-Intensities_valid <- cbind(Intensities_newcol,Intensities_valid)
-Intensities_valid <-Intensities_valid %>% row_to_names (row_number= 1) %>% clean_names()
-Intensities_valid[] <- lapply(Intensities_valid, type.convert, as.is = TRUE)
+Intensities_1_out_of_6_ready <- cbind(Intensities_newcol,Intensities_1_out_of_6_ready)
+Intensities_1_out_of_6_ready<-Intensities_1_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_1_out_of_6_ready[] <- lapply(Intensities_1_out_of_6_ready, type.convert, as.is = TRUE)
+
+#2 out of 6
+Intensities_ratiovalid_2_out_of_6 <- dplyr::filter(Intensities_ratio_check_2_out_of_6_nonzero, ratio_mean > 1.1)
+intensities_validgenenames_2_out_of_6 <- Intensities_ratiovalid_2_out_of_6$gene
+pattern_to_search_2outof6 <- paste0(intensities_validgenenames_2_out_of_6, collapse = "$|^")
+pattern_to_search_2outof6 <- paste("^",pattern_to_search_2outof6,"$",sep="")
+Intensities_2_out_of_6 <- Intensities_ratio_check_2_out_of_6[grepl(pattern_to_search_2outof6, Intensities_ratio_check_2_out_of_6$gene),]
+Intensities_2_out_of_6_ready <- as.data.frame(t(Intensities_2_out_of_6 ))
+Intensities_2_out_of_6_ready <- cbind(Intensities_newcol,Intensities_2_out_of_6_ready)
+Intensities_2_out_of_6_ready<-Intensities_2_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_2_out_of_6_ready[] <- lapply(Intensities_2_out_of_6_ready, type.convert, as.is = TRUE)
+
+#3 out of 6
+Intensities_ratiovalid_3_out_of_6 <- dplyr::filter(Intensities_ratio_check_3_out_of_6_nonzero, ratio_mean > 1.1)
+intensities_validgenenames_3_out_of_6 <- Intensities_ratiovalid_3_out_of_6$gene
+pattern_to_search_3outof6 <- paste0(intensities_validgenenames_3_out_of_6, collapse = "$|^")
+pattern_to_search_3outof6 <- paste("^",pattern_to_search_3outof6,"$",sep="")
+Intensities_3_out_of_6 <- Intensities_ratio_check_3_out_of_6[grepl(pattern_to_search_3outof6, Intensities_ratio_check_3_out_of_6$gene),]
+Intensities_3_out_of_6_ready <- as.data.frame(t(Intensities_3_out_of_6 ))
+Intensities_3_out_of_6_ready <- cbind(Intensities_newcol,Intensities_3_out_of_6_ready)
+Intensities_3_out_of_6_ready<-Intensities_3_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_3_out_of_6_ready[] <- lapply(Intensities_3_out_of_6_ready, type.convert, as.is = TRUE)
+
+#4 out of 6
+Intensities_ratiovalid_4_out_of_6 <- dplyr::filter(Intensities_ratio_check_4_out_of_6_nonzero, ratio_mean > 1.1)
+intensities_validgenenames_4_out_of_6 <- Intensities_ratiovalid_4_out_of_6$gene
+pattern_to_search_4outof6 <- paste0(intensities_validgenenames_4_out_of_6, collapse = "$|^")
+pattern_to_search_4outof6 <- paste("^",pattern_to_search_4outof6,"$",sep="")
+Intensities_4_out_of_6 <- Intensities_ratio_check_4_out_of_6[grepl(pattern_to_search_4outof6, Intensities_ratio_check_4_out_of_6$gene),]
+Intensities_4_out_of_6_ready <- as.data.frame(t(Intensities_4_out_of_6 ))
+Intensities_4_out_of_6_ready <- cbind(Intensities_newcol,Intensities_4_out_of_6_ready)
+Intensities_4_out_of_6_ready<-Intensities_4_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_4_out_of_6_ready[] <- lapply(Intensities_4_out_of_6_ready, type.convert, as.is = TRUE)
+
+#5 out of 6
+Intensities_ratiovalid_5_out_of_6 <- dplyr::filter(Intensities_ratio_check_5_out_of_6_nonzero, ratio_mean > 1.1)
+intensities_validgenenames_5_out_of_6 <- Intensities_ratiovalid_5_out_of_6$gene
+pattern_to_search_5outof6 <- paste0(intensities_validgenenames_5_out_of_6, collapse = "$|^")
+pattern_to_search_5outof6 <- paste("^",pattern_to_search_5outof6,"$",sep="")
+Intensities_5_out_of_6 <- Intensities_ratio_check_5_out_of_6[grepl(pattern_to_search_5outof6, Intensities_ratio_check_5_out_of_6$gene),]
+Intensities_5_out_of_6_ready <- as.data.frame(t(Intensities_5_out_of_6 ))
+Intensities_5_out_of_6_ready <- cbind(Intensities_newcol,Intensities_5_out_of_6_ready)
+Intensities_5_out_of_6_ready<-Intensities_5_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_5_out_of_6_ready[] <- lapply(Intensities_5_out_of_6_ready, type.convert, as.is = TRUE)
+
+#6 out of 6
+Intensities_ratiovalid_6_out_of_6 <- dplyr::filter(Intensities_ratio_check_6_out_of_6_nonzero, ratio_mean > 1.1)
+intensities_validgenenames_6_out_of_6 <- Intensities_ratiovalid_6_out_of_6$gene
+pattern_to_search_6outof6 <- paste0(intensities_validgenenames_6_out_of_6, collapse = "$|^")
+pattern_to_search_6outof6 <- paste("^",pattern_to_search_6outof6,"$",sep="")
+Intensities_6_out_of_6 <- Intensities_ratio_check_6_out_of_6[grepl(pattern_to_search_6outof6, Intensities_ratio_check_6_out_of_6$gene),]
+Intensities_6_out_of_6_ready <- as.data.frame(t(Intensities_6_out_of_6 ))
+Intensities_6_out_of_6_ready <- cbind(Intensities_newcol,Intensities_6_out_of_6_ready)
+Intensities_6_out_of_6_ready<-Intensities_6_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_6_out_of_6_ready[] <- lapply(Intensities_6_out_of_6_ready, type.convert, as.is = TRUE)
 ```
-
-
-#Intensities for each protein from the March 2022 and Jan2022 Kit ChIRP data
-```{r}
-
-
-Intensities_WTcheck_withJan2022 <- full_join(Intensities_WTcheck, WT_intensities_mass_spec_Jan2022_TV,by="gene",copy=FALSE,keep = FALSE)
-Intensities_WTcheck_withJan2022 <- as.data.frame(Intensities_WTcheck_withJan2022)
-
-Intensities_WTcheck_withJan2022_A <- Intensities_WTcheck_withJan2022 %>% replace_na(list(r2_wt_oe_intensity.50ng = 0, r3_wt_oe_intensity.50ng = 0, r4_wt_oe_intensity.50ng=0, r2_wt_oe_intensity.100ng=0, r3_wt_oe_intensity.100ng=0, r4_wt_oe_intensity.100ng=0, wt_0h_even_total_intensity.Jan2022=0, wt_0h_odd_total_intensity.Jan2022=0))
-
-Intensities_WTcheck_withJan2022_2 <- Intensities_WTcheck_withJan2022_A %>% mutate(intensities_sum = rowSums(.[,sapply(., is.numeric)])) 
-summary(Intensities_WTcheck_withJan2022_2$intensities_sum)
-
-Intensities_WTvalid_withJan2022 <- dplyr::filter(Intensities_WTcheck_withJan2022_2, intensities_sum > 0)
-summary(Intensities_WTvalid_withJan2022$intensities_sum)
-Intensities_WTvalid_withJan2022_2 <- Intensities_WTvalid_withJan2022 [1:(length(Intensities_WTvalid_withJan2022 )-1)]
-
-Intensities_valid_withJan2022_1 <-  Intensities_WTvalid_withJan2022_2 %>% left_join(Intensities_50ng[,c(1,2,4)],by="gene")
-Intensities_valid_withJan2022_2 <- Intensities_valid_withJan2022_1 %>% left_join(Intensities_100ng[,c(1,2,4)],by="gene")
-Intensities_valid_withJan2022 <- Intensities_valid_withJan2022_2 %>% left_join(KO_intensities_mass_spec_Jan2022_TV,by="gene")
-Intensities_valid_withJan2022 <- Intensities_valid_withJan2022 %>% replace_na(list(r2_ko_oe_intensity.50ng = 0, r3_ko_oe_intensity.50ng = 0, r2_ko_oe_intensity.100ng=0, r3_ko_oe_intensity.100ng=0,ko_0h_even_total_intensity.Jan2022=0,ko_0h_odd_total_intensity.Jan2022=0 ))
-
-Intensities_valid_withJan2022 <- as.data.frame(t(Intensities_valid_withJan2022))
-Intensities_withJan2022_newcol <- c("genotype","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO")
-Intensities_valid_withJan2022 <- cbind(Intensities_withJan2022_newcol,Intensities_valid_withJan2022)
-Intensities_valid_withJan2022 <-Intensities_valid_withJan2022 %>% row_to_names (row_number= 1) %>% clean_names()
-Intensities_valid_withJan2022[] <- lapply(Intensities_valid_withJan2022, type.convert, as.is = TRUE)
-```
-
-
-#Making a Venn Diagram of the two datasets just to see overlap
-##If this is interesting, go back to Feb 1st and grep the names to know common genes
-```{r}
-#typeof(mass_spec_Mar2022_TV$Gene)
-genes <- list(genes_WTcheck_Mar2022 = sort(Intensities_valid1$gene), genes_kitJan2022= sort(kit_mass_spec_Jan2022_TV$gene))
-pdf("VennDiagram_MassSpec_GeneOverlap.pdf")
-ggvenn(genes, c("genes_WTcheck_Mar2022","genes_kitJan2022"))
-dev.off()
-
-venn_win <- euler(c(Genes_WTcheck_Mar2022=440, Genes_Jan2022=53, "Genes_WTcheck_Mar2022&Genes_Jan2022"=77), shape = "ellipse")
-pdf("VennDiagram_MassSpec_GeneOverlap_bysize.pdf")
-plot(venn_win, 
-     fill = c("white", "lightcoral"),
-     quantities = list(fontsize = 13))
-dev.off()
-```
-
 
 ##Need to change below gene to do a check. 
 ```{r}
-typeof(Intensities_valid$aars1)
-typeof(Intensities_valid_withJan2022$aars1)
+typeof(Intensities_1_out_of_6_ready$actb)
+typeof(Intensities_2_out_of_6_ready$actb)
+typeof(Intensities_3_out_of_6_ready$actb)
+typeof(Intensities_4_out_of_6_ready$actb)
+typeof(Intensities_5_out_of_6_ready$actb)
+typeof(Intensities_6_out_of_6_ready$actb)
+
 ```
 
-#Wilcoxon Test on Spectral. 
+#Wilcoxon Test on each of the Intensities Conditional Sort 
 #Output is a csv file to have the pvalues in a table format. 
 ```{r}
+#1 out of 6
+test.fun1 <- function(Intensities_1_out_of_6_ready, col) { 
 
-test.fun <- function(Intensities_valid, col) { 
-
- c1 <- combn(unique(Intensities_valid$genotype),2)
- sigs <- list()
+ c1 <- combn(unique(Intensities_1_out_of_6_ready$genotype),2)
+ sigs1 <- list()
  for(i in 1:ncol(c1)) {
-    sigs[[i]] <- wilcox.test(
-                   Intensities_valid[Intensities_valid$genotype == c1[1,i],col],
-                   Intensities_valid[Intensities_valid$genotype == c1[2,i],col], exact=FALSE
+    sigs1[[i]] <- wilcox_test(
+                   Intensities_1_out_of_6_ready[Intensities_1_out_of_6_ready$genotype == c1[1,i],col],
+                   Intensities_1_out_of_6_ready[Intensities_1_out_of_6_ready$genotype == c1[2,i],col], exact = FALSE
                  )
     }
-    names(sigs) <- paste("Group",c1[1,],"by Group",c1[2,])
+    names(sigs1) <- paste("Group",c1[1,],"by Group",c1[2,])
 
- tests_Intensities_Mar2022 <- data.frame(Test=names(sigs),
-                    W=unlist(lapply(sigs,function(x) x$statistic)),
-                    p=unlist(lapply(sigs,function(x) x$p.value)),row.names=NULL)
+ tests_Intensities_1_out_of_6_Mar2022 <- data.frame(Test=names(sigs1),
+                    W=unlist(lapply(sigs1,function(x) x$statistic)),
+                    p=unlist(lapply(sigs1,function(x) x$p.value)),row.names=NULL)
 
- return(tests_Intensities_Mar2022)
+ return(tests_Intensities_1_out_of_6_Mar2022)
 }
 
 
-tests_Intensities_Mar2022 <- lapply(colnames(Intensities_valid)[-1],function(x) test.fun(Intensities_valid,x))
-names(tests_Intensities_Mar2022) <- colnames(Intensities_valid)[-1]
-# tests <- do.call(rbind, tests) reprints as data.frame
+tests_Intensities_1_out_of_6_Mar2022 <- lapply(colnames(Intensities_1_out_of_6_ready)[-1],function(x) test.fun(Intensities_1_out_of_6_ready,x))
+names(tests_Intensities_1_out_of_6_Mar2022) <- colnames(Intensities_1_out_of_6_ready)[-1]
+results_Intensities_1_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_1_out_of_6_Mar2022)
+write.csv(results_Intensities_1_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_1_out_of_6_Mar2022.csv",row.names = TRUE)
 
 
 
-#KO_list = split(KO_spectral, f = KO_spectral$Gene)
+#2 out of 6
+test.fun2 <- function(Intensities_2_out_of_6_ready, col) { 
 
-```
-
-#Wilcoxon Test on Intensities
-#Output is a csv file to have the pvalues in a table format. 
-```{r}
-
-test.fun2 <- function(Intensities_valid_withJan2022, col) { 
-
- c2 <- combn(unique(Intensities_valid_withJan2022$genotype),2)
+ c2 <- combn(unique(Intensities_2_out_of_6_ready$genotype),2)
  sigs2 <- list()
  for(i in 1:ncol(c2)) {
     sigs2[[i]] <- wilcox.test(
-                   Intensities_valid_withJan2022[Intensities_valid_withJan2022$genotype == c2[1,i],col],
-                   Intensities_valid_withJan2022[Intensities_valid_withJan2022$genotype == c2[2,i],col], exact=FALSE
+                   Intensities_2_out_of_6_ready[Intensities_2_out_of_6_ready$genotype == c2[1,i],col],
+                   Intensities_2_out_of_6_ready[Intensities_2_out_of_6_ready$genotype == c2[2,i],col], exact=FALSE
                  )
     }
     names(sigs2) <- paste("Group",c2[1,],"by Group",c2[2,])
 
- tests_Intensities_Mar2022withJan2022 <- data.frame(Test=names(sigs2),
+ tests_Intensities_2_out_of_6_Mar2022 <- data.frame(Test=names(sigs2),
                     W=unlist(lapply(sigs2,function(x) x$statistic)),
                     p=unlist(lapply(sigs2,function(x) x$p.value)),row.names=NULL)
 
- return(tests_Intensities_Mar2022withJan2022)
+ return(tests_Intensities_2_out_of_6_Mar2022)
 }
 
 
-tests_Intensities_Mar2022withJan2022 <- lapply(colnames(Intensities_valid_withJan2022)[-1],function(x) test.fun2(Intensities_valid_withJan2022,x))
-names(tests_Intensities_Mar2022withJan2022) <- colnames(Intensities_valid_withJan2022)[-1]
-# tests <- do.call(rbind, tests) reprints as data.frame
+tests_Intensities_2_out_of_6_Mar2022 <- lapply(colnames(Intensities_2_out_of_6_ready)[-1],function(x) test.fun(Intensities_2_out_of_6_ready,x))
+names(tests_Intensities_2_out_of_6_Mar2022) <- colnames(Intensities_2_out_of_6_ready)[-1]
+results_Intensities_2_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_2_out_of_6_Mar2022)
+write.csv(results_Intensities_2_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_2_out_of_6_Mar2022.csv",row.names = TRUE)
+
+#3 out of 6
+test.fun3 <- function(Intensities_3_out_of_6_ready, col) { 
+
+ c3 <- combn(unique(Intensities_3_out_of_6_ready$genotype),2)
+ sigs3 <- list()
+ for(i in 1:ncol(c3)) {
+    sigs3[[i]] <- wilcox.test(
+                   Intensities_3_out_of_6_ready[Intensities_3_out_of_6_ready$genotype == c3[1,i],col],
+                   Intensities_3_out_of_6_ready[Intensities_3_out_of_6_ready$genotype == c3[2,i],col], exact=FALSE
+                 )
+    }
+    names(sigs3) <- paste("Group",c3[1,],"by Group",c3[2,])
+
+ tests_Intensities_3_out_of_6_Mar2022 <- data.frame(Test=names(sigs3),
+                    W=unlist(lapply(sigs3,function(x) x$statistic)),
+                    p=unlist(lapply(sigs3,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Intensities_3_out_of_6_Mar2022)
+}
 
 
-#KO_list = split(KO_spectral, f = KO_spectral$Gene)
+tests_Intensities_3_out_of_6_Mar2022 <- lapply(colnames(Intensities_3_out_of_6_ready)[-1],function(x) test.fun(Intensities_3_out_of_6_ready,x))
+names(tests_Intensities_3_out_of_6_Mar2022) <- colnames(Intensities_3_out_of_6_ready)[-1]
+results_Intensities_3_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_3_out_of_6_Mar2022)
+write.csv(results_Intensities_3_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_3_out_of_6_Mar2022.csv",row.names = TRUE)
+
+
+#4 out of 6
+test.fun4 <- function(Intensities_4_out_of_6_ready, col) { 
+
+ c4 <- combn(unique(Intensities_4_out_of_6_ready$genotype),2)
+ sigs4 <- list()
+ for(i in 1:ncol(c4)) {
+    sigs4[[i]] <- wilcox.test(
+                   Intensities_4_out_of_6_ready[Intensities_4_out_of_6_ready$genotype == c4[1,i],col],
+                   Intensities_4_out_of_6_ready[Intensities_4_out_of_6_ready$genotype == c4[2,i],col], exact=FALSE
+                 )
+    }
+    names(sigs4) <- paste("Group",c4[1,],"by Group",c4[2,])
+
+ tests_Intensities_4_out_of_6_Mar2022 <- data.frame(Test=names(sigs4),
+                    W=unlist(lapply(sigs4,function(x) x$statistic)),
+                    p=unlist(lapply(sigs4,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Intensities_4_out_of_6_Mar2022)
+}
+
+
+tests_Intensities_4_out_of_6_Mar2022 <- lapply(colnames(Intensities_4_out_of_6_ready)[-1],function(x) test.fun(Intensities_4_out_of_6_ready,x))
+names(tests_Intensities_4_out_of_6_Mar2022) <- colnames(Intensities_4_out_of_6_ready)[-1]
+results_Intensities_4_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_4_out_of_6_Mar2022)
+write.csv(results_Intensities_4_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_4_out_of_6_Mar2022.csv",row.names = TRUE)
+
+#5 out of 6
+test.fun5 <- function(Intensities_5_out_of_6_ready, col) { 
+
+ c5 <- combn(unique(Intensities_5_out_of_6_ready$genotype),2)
+ sigs5 <- list()
+ for(i in 1:ncol(c5)) {
+    sigs5[[i]] <- wilcox.test(
+                   Intensities_5_out_of_6_ready[Intensities_5_out_of_6_ready$genotype == c5[1,i],col],
+                   Intensities_5_out_of_6_ready[Intensities_5_out_of_6_ready$genotype == c5[2,i],col], exact=FALSE
+                 )
+    }
+    names(sigs5) <- paste("Group",c5[1,],"by Group",c5[2,])
+
+ tests_Intensities_5_out_of_6_Mar2022 <- data.frame(Test=names(sigs5),
+                    W=unlist(lapply(sigs5,function(x) x$statistic)),
+                    p=unlist(lapply(sigs5,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Intensities_5_out_of_6_Mar2022)
+}
+
+
+tests_Intensities_5_out_of_6_Mar2022 <- lapply(colnames(Intensities_5_out_of_6_ready)[-1],function(x) test.fun(Intensities_5_out_of_6_ready,x))
+names(tests_Intensities_5_out_of_6_Mar2022) <- colnames(Intensities_5_out_of_6_ready)[-1]
+results_Intensities_5_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_5_out_of_6_Mar2022)
+write.csv(results_Intensities_5_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_5_out_of_6_Mar2022.csv",row.names = TRUE)
+
+
+
+#6 out of 6
+test.fun6 <- function(Intensities_6_out_of_6_ready, col) { 
+
+ c6 <- combn(unique(Intensities_6_out_of_6_ready$genotype),2)
+ sigs6 <- list()
+ for(i in 1:ncol(c6)) {
+    sigs6[[i]] <- wilcox.test(
+                   Intensities_6_out_of_6_ready[Intensities_6_out_of_6_ready$genotype == c6[1,i],col],
+                   Intensities_6_out_of_6_ready[Intensities_6_out_of_6_ready$genotype == c6[2,i],col], exact=FALSE
+                 )
+    }
+    names(sigs6) <- paste("Group",c6[1,],"by Group",c6[2,])
+
+ tests_Intensities_6_out_of_6_Mar2022 <- data.frame(Test=names(sigs6),
+                    W=unlist(lapply(sigs6,function(x) x$statistic)),
+                    p=unlist(lapply(sigs6,function(x) x$p.value)),row.names=NULL)
+
+ return(tests_Intensities_6_out_of_6_Mar2022)
+}
+
+
+tests_Intensities_6_out_of_6_Mar2022 <- lapply(colnames(Intensities_6_out_of_6_ready)[-1],function(x) test.fun(Intensities_6_out_of_6_ready,x))
+names(tests_Intensities_6_out_of_6_Mar2022) <- colnames(Intensities_6_out_of_6_ready)[-1]
+results_Intensities_6_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_6_out_of_6_Mar2022)
+write.csv(results_Intensities_6_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_6_out_of_6_Mar2022.csv",row.names = TRUE)
 
 ```
 
-#Writing CSV of the Wilcoxon Test
 ```{r}
-results_Intensities_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_Mar2022)
-write.csv(results_Intensities_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//results_Intensities_Mar2022.csv",row.names = TRUE)
-results_Intensities_Mar2022withJan2022 <- do.call(rbind.data.frame, tests_Intensities_Mar2022withJan2022)
-write.csv(results_Intensities_Mar2022withJan2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/results_Intensities_Mar2022withJan2022.csv",row.names = TRUE)
+#Trying another way to do the rank sum test
+
+#1 out of 6
+#https://support.bioconductor.org/p/121358/
+#https://stackoverflow.com/questions/67049231/run-wilcoxon-rank-sum-test-on-each-row-of-a-data-frame
+#p_1_out_of_6 <- apply(Intensities_1_out_of_6[, 2:11], 1, function(x) wilcox.test(x[1:6], x[7:10])$p.value)
+#p_1_out_of_6 <- as.data.frame(p_1_out_of_6)
+#Same results
+
 ```
+
 
 #Histogram of p-values
 ```{r}
-hist(results_Intensities_Mar2022$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
-# saving the figure (we will do this over and over again :)
-# we will learn ggplot later but we use PDF and turn of null device (plot window) 
-
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_Histogram_Wilcoxon_Spectral_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
-hist(results_Intensities_Mar2022$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#1 out of 6
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_1_out_of_6_MassSpec_Mar2022TV.pdf")
+hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
 dev.off()
 
-#intensities
-hist(results_Intensities_Mar2022withJan2022$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
-
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_03_28_Histogram_Wilcoxon_Intensities_MassSpec_Mar2022TV_v_Jan2022TV.pdf")
-hist(results_Intensities_Mar2022withJan2022$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from TVkitJan2022 and TVkitMar2022", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#2 out of 6
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_2_out_of_6_MassSpec_Mar2022TV.pdf")
+hist(results_Intensities_2_out_of_6_Mar2022$p, breaks = 20, main="(2 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
 dev.off()
+
+#3 out of 6
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_3_out_of_6_MassSpec_Mar2022TV.pdf")
+hist(results_Intensities_3_out_of_6_Mar2022$p, breaks = 20, main="(3 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#4 out of 6
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_4_out_of_6_MassSpec_Mar2022TV.pdf")
+hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#5 out of 6
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_1_out_of_6_MassSpec_Mar2022TV.pdf")
+hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#6 out of 6
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_1_out_of_6_MassSpec_Mar2022TV.pdf")
+hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+
 
 ```
 
