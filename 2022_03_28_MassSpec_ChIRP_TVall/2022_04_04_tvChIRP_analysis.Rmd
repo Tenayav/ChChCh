@@ -491,6 +491,131 @@ dev.off()
 
 ```
 
+#Grabbing genes that have large fold changes and making ggplots of them with t-tests and wilcoxon test
+```{r}
+#1 out of 6
+Logratio_filteredgenes_1_out_of_6 <- dplyr::filter(Intensities_ratio_check_1_out_of_6_nonzero, logratio_mean > 0.68)
+genes_Logratio_filtered_1_out_of_6 <- Logratio_filteredgenes_1_out_of_6$gene
+pattern_to_search_logratio_1outof6 <- paste0(genes_Logratio_filtered_1_out_of_6, collapse = "$|^")
+pattern_to_search_logratio_1outof6 <- paste("^", pattern_to_search_logratio_1outof6,"$",sep="")
+Intensities_logratio_1_out_of_6 <- Intensities_ratio_check_1_out_of_6[grepl(pattern_to_search_logratio_1outof6, Intensities_ratio_check_1_out_of_6$gene),]
+Intensities_logratio_1_out_of_6_ready <- as.data.frame(t(Intensities_logratio_1_out_of_6))
+Intensities_logratio_1_out_of_6_ready<- cbind(Intensities_newcol,Intensities_logratio_1_out_of_6_ready)
+Intensities_logratio_1_out_of_6_ready<-Intensities_logratio_1_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_logratio_1_out_of_6_ready[] <- lapply(Intensities_logratio_1_out_of_6_ready, type.convert, as.is = TRUE)
+melted_Intensities_logratio_1_out_of_6_ready = melt(Intensities_logratio_1_out_of_6_ready)
+
+for (var in melted_Intensities_logratio_1_out_of_6_ready$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_1_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_logratio_1_out_of_6_ready[melted_Intensities_logratio_1_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  dev.off()
+  }
+
+
+#2 out of 6
+Logratio_filteredgenes_2_out_of_6 <- dplyr::filter(Intensities_ratio_check_2_out_of_6_nonzero, logratio_mean > 0.68)
+genes_Logratio_filtered_2_out_of_6 <- Logratio_filteredgenes_2_out_of_6$gene
+pattern_to_search_logratio_2outof6 <- paste0(genes_Logratio_filtered_2_out_of_6, collapse = "$|^")
+pattern_to_search_logratio_2outof6 <- paste("^", pattern_to_search_logratio_2outof6,"$",sep="")
+Intensities_logratio_2_out_of_6 <- Intensities_ratio_check_2_out_of_6[grepl(pattern_to_search_logratio_2outof6, Intensities_ratio_check_2_out_of_6$gene),]
+Intensities_logratio_2_out_of_6_ready <- as.data.frame(t(Intensities_logratio_2_out_of_6))
+Intensities_logratio_2_out_of_6_ready<- cbind(Intensities_newcol,Intensities_logratio_2_out_of_6_ready)
+Intensities_logratio_2_out_of_6_ready<-Intensities_logratio_2_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_logratio_2_out_of_6_ready[] <- lapply(Intensities_logratio_2_out_of_6_ready, type.convert, as.is = TRUE)
+melted_Intensities_logratio_2_out_of_6_ready = melt(Intensities_logratio_2_out_of_6_ready)
+
+for (var in melted_Intensities_logratio_2_out_of_6_ready$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_2_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_logratio_2_out_of_6_ready[melted_Intensities_logratio_2_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  dev.off()
+  }
+
+
+#3 out of 6
+Logratio_filteredgenes_3_out_of_6 <- dplyr::filter(Intensities_ratio_check_3_out_of_6_nonzero, logratio_mean > 0.68)
+genes_Logratio_filtered_3_out_of_6 <- Logratio_filteredgenes_3_out_of_6$gene
+pattern_to_search_logratio_3outof6 <- paste0(genes_Logratio_filtered_3_out_of_6, collapse = "$|^")
+pattern_to_search_logratio_3outof6 <- paste("^", pattern_to_search_logratio_3outof6,"$",sep="")
+Intensities_logratio_3_out_of_6 <- Intensities_ratio_check_3_out_of_6[grepl(pattern_to_search_logratio_3outof6, Intensities_ratio_check_3_out_of_6$gene),]
+Intensities_logratio_3_out_of_6_ready <- as.data.frame(t(Intensities_logratio_3_out_of_6))
+Intensities_logratio_3_out_of_6_ready<- cbind(Intensities_newcol,Intensities_logratio_3_out_of_6_ready)
+Intensities_logratio_3_out_of_6_ready<-Intensities_logratio_3_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_logratio_3_out_of_6_ready[] <- lapply(Intensities_logratio_3_out_of_6_ready, type.convert, as.is = TRUE)
+melted_Intensities_logratio_3_out_of_6_ready = melt(Intensities_logratio_3_out_of_6_ready)
+
+for (var in melted_Intensities_logratio_3_out_of_6_ready$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_3_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_logratio_3_out_of_6_ready[melted_Intensities_logratio_3_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  dev.off()
+  }
+
+
+#4 out of 6
+Logratio_filteredgenes_4_out_of_6 <- dplyr::filter(Intensities_ratio_check_4_out_of_6_nonzero, logratio_mean > 0.68)
+genes_Logratio_filtered_4_out_of_6 <- Logratio_filteredgenes_4_out_of_6$gene
+pattern_to_search_logratio_4outof6 <- paste0(genes_Logratio_filtered_4_out_of_6, collapse = "$|^")
+pattern_to_search_logratio_4outof6 <- paste("^", pattern_to_search_logratio_4outof6,"$",sep="")
+Intensities_logratio_4_out_of_6 <- Intensities_ratio_check_4_out_of_6[grepl(pattern_to_search_logratio_4outof6, Intensities_ratio_check_4_out_of_6$gene),]
+Intensities_logratio_4_out_of_6_ready <- as.data.frame(t(Intensities_logratio_4_out_of_6))
+Intensities_logratio_4_out_of_6_ready<- cbind(Intensities_newcol,Intensities_logratio_4_out_of_6_ready)
+Intensities_logratio_4_out_of_6_ready<-Intensities_logratio_4_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_logratio_4_out_of_6_ready[] <- lapply(Intensities_logratio_4_out_of_6_ready, type.convert, as.is = TRUE)
+melted_Intensities_logratio_4_out_of_6_ready = melt(Intensities_logratio_4_out_of_6_ready)
+
+for (var in melted_Intensities_logratio_4_out_of_6_ready$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_4_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_logratio_4_out_of_6_ready[melted_Intensities_logratio_4_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  dev.off()
+  }
+
+#5 out of 6
+Logratio_filteredgenes_5_out_of_6 <- dplyr::filter(Intensities_ratio_check_5_out_of_6_nonzero, logratio_mean > 0.68)
+genes_Logratio_filtered_4_out_of_6 <- Logratio_filteredgenes_4_out_of_6$gene
+pattern_to_search_logratio_4outof6 <- paste0(genes_Logratio_filtered_4_out_of_6, collapse = "$|^")
+pattern_to_search_logratio_4outof6 <- paste("^", pattern_to_search_logratio_4outof6,"$",sep="")
+Intensities_logratio_4_out_of_6 <- Intensities_ratio_check_4_out_of_6[grepl(pattern_to_search_logratio_4outof6, Intensities_ratio_check_4_out_of_6$gene),]
+Intensities_logratio_4_out_of_6_ready <- as.data.frame(t(Intensities_logratio_4_out_of_6))
+Intensities_logratio_4_out_of_6_ready<- cbind(Intensities_newcol,Intensities_logratio_4_out_of_6_ready)
+Intensities_logratio_4_out_of_6_ready<-Intensities_logratio_4_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_logratio_4_out_of_6_ready[] <- lapply(Intensities_logratio_4_out_of_6_ready, type.convert, as.is = TRUE)
+melted_Intensities_logratio_4_out_of_6_ready = melt(Intensities_logratio_4_out_of_6_ready)
+
+for (var in melted_Intensities_logratio_4_out_of_6_ready$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_4_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_logratio_4_out_of_6_ready[melted_Intensities_logratio_4_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5))
+  dev.off()
+  }
+
+
+#6 out of 6
+Logratio_filteredgenes_6_out_of_6 <- dplyr::filter(Intensities_ratio_check_6_out_of_6_nonzero, logratio_mean > 0.68)
+genes_Logratio_filtered_6_out_of_6 <- Logratio_filteredgenes_6_out_of_6$gene
+pattern_to_search_logratio_6outof6 <- paste0(genes_Logratio_filtered_6_out_of_6, collapse = "$|^")
+pattern_to_search_logratio_6outof6 <- paste("^", pattern_to_search_logratio_6outof6,"$",sep="")
+Intensities_logratio_6_out_of_6 <- Intensities_ratio_check_6_out_of_6[grepl(pattern_to_search_logratio_6outof6, Intensities_ratio_check_6_out_of_6$gene),]
+Intensities_logratio_6_out_of_6_ready <- as.data.frame(t(Intensities_logratio_6_out_of_6))
+Intensities_logratio_6_out_of_6_ready<- cbind(Intensities_newcol,Intensities_logratio_6_out_of_6_ready)
+Intensities_logratio_6_out_of_6_ready<-Intensities_logratio_6_out_of_6_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_logratio_6_out_of_6_ready[] <- lapply(Intensities_logratio_6_out_of_6_ready, type.convert, as.is = TRUE)
+melted_Intensities_logratio_6_out_of_6_ready = melt(Intensities_logratio_6_out_of_6_ready)
+
+for (var in melted_Intensities_logratio_6_out_of_6_ready$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_6_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_logratio_6_out_of_6_ready[melted_Intensities_logratio_6_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+  dev.off()
+  }
+
+```
+
+
+
+
 #Genes Below 0.05 and 0.10 p-value
 #Feel free to change the names and the pvalue cutoffs
 ```{r}
