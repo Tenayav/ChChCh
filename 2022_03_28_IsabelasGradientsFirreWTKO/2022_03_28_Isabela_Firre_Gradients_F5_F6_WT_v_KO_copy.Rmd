@@ -560,19 +560,75 @@ mode(counts) <- "integer"
 
 ##here to below
 #run DESeq
-rlog_counts <- DESeqDataSetFromMatrix(counts, samplesheet_grad, 
-                                      design = ~ genotype) %>%
- # rlog() %>%
+deseq_run <- DESeqDataSetFromMatrix(counts, samplesheet_grad, 
+                                      design = ~ genotype)
+
+dds <- DESeq(deseq_run)
+res1 <- results(dds)
+res <- as.data.frame(res1)
+#this table has the results as log2FC and pval
+
+#I'll merge in this table the original intentity values (not the normalized values) and save
+res_merged <- res %>%
+  rownames_to_column(var = "gene") %>%
+  left_join(Intensities_filter_both_adj)
+
+write_csv(res_merged, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/results_deseq_intensities_grad.csv")
+
+##these are normalized counts that can be used in many other analysis for now on - are the values used in deseq
+rlog_counts <- deseq_run %>%
+  rlog() %>%
   assay() %>%
   as.data.frame() %>% 
   rownames_to_column("gene")
 
-#save for futute read in
-write_csv(rlog_counts, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/rlog_counts_deseq.csv")
-##these are normalized counts that can be used in many other analysis for now on
-dds <- DESeq(rlog_counts)
-res1 <- results(dds)
-res <- lfcShrink(dds, coef="genotype_WT_vs_KO")
+rlog_counts <- read_csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/rlog_counts_deseq.csv")
+
+```
+
+Now let's filter the results
+
+```{r - filter Deseq results}
+#read in table if needed
+res_merged <- read_csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/results_deseq_intensities_grad.csv")
+
+res_filter <- res_merged %>%
+  filter(padj <= 0.05, log2FoldChange >= 1.5)
+
+#6 genes here, let's compare to what I got before
+
+#this filter considered wilcox pval < 0.05, KO < WT, FC > 1.5 (simple ratio)
+sig_Int_genes_filter_5.4 <- read_csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/sig_Int_genes_filter_5.4.csv")
+
+intersect_deseq <- intersect(res_filter$gene, sig_Int_genes_filter_5.4$gene)
+intersect_deseq <- as.data.frame(intersect_deseq)
+#all included in both analysis
+#TOP TOP TOP hits!!!
+
+#now if we just consider logFC > 0
+res_filter2 <- res_merged %>%
+  filter(padj <= 0.05, log2FoldChange > 0)
+
+intersect_deseq2 <- intersect(res_filter2$gene, sig_Int_genes_filter_5.4$gene)
+intersect_deseq2 <- as.data.frame(intersect_deseq2)
+```
+
+Now let's compare with RNA-seq data from KO vs WT to be sure that the protein is low in the fractions because potentially binding to Firre and not because is not expressed anymore in the KO genotype at all
+
+```{r - compare to RNA-seq data as a genotype background}
+#Michael gave me the table of DEG in KO vs WT mESC
+#read in
+rna_seq <- read_csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/firre_ko_vs_wt_mesc_deseq_results.csv")
+
+#filter using usual parameters
+rna_seq_filtered <- rna_seq %>%
+  filter(padj <= 0.05, log2FoldChange <= -1.5)
+
+rna_seq_up <- rna_seq %>%
+  filter(padj <= 0.05, log2FoldChange >= 1.5)
+
+rna_seq_up <- rna_seq %>%
+  filter(log2FoldChange >= 1.5)
 ```
 ```
 
