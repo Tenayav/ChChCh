@@ -282,10 +282,10 @@ test.fun1 <- function(Intensities_1_out_of_6_ready, col) {
 
  c1 <- combn(unique(Intensities_1_out_of_6_ready$genotype),2)
  sigs1 <- list()
- for(i in 1:ncol(c1)) {
-    sigs1[[i]] <- wilcox_test(
+ for(i in 1:ncol(c2)) {
+    sigs1[[i]] <- wilcox.test(
                    Intensities_1_out_of_6_ready[Intensities_1_out_of_6_ready$genotype == c1[1,i],col],
-                   Intensities_1_out_of_6_ready[Intensities_1_out_of_6_ready$genotype == c1[2,i],col], exact = FALSE
+                   Intensities_1_out_of_6_ready[Intensities_1_out_of_6_ready$genotype == c1[2,i],col], exact=FALSE
                  )
     }
     names(sigs1) <- paste("Group",c1[1,],"by Group",c1[2,])
@@ -298,7 +298,7 @@ test.fun1 <- function(Intensities_1_out_of_6_ready, col) {
 }
 
 
-tests_Intensities_1_out_of_6_Mar2022 <- lapply(colnames(Intensities_1_out_of_6_ready)[-1],function(x) test.fun(Intensities_1_out_of_6_ready,x))
+tests_Intensities_1_out_of_6_Mar2022 <- lapply(colnames(Intensities_1_out_of_6_ready)[-1],function(x) test.fun2(Intensities_1_out_of_6_ready,x))
 names(tests_Intensities_1_out_of_6_Mar2022) <- colnames(Intensities_1_out_of_6_ready)[-1]
 results_Intensities_1_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_1_out_of_6_Mar2022)
 write.csv(results_Intensities_1_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_1_out_of_6_Mar2022.csv",row.names = TRUE)
@@ -326,7 +326,7 @@ test.fun2 <- function(Intensities_2_out_of_6_ready, col) {
 }
 
 
-tests_Intensities_2_out_of_6_Mar2022 <- lapply(colnames(Intensities_2_out_of_6_ready)[-1],function(x) test.fun(Intensities_2_out_of_6_ready,x))
+tests_Intensities_2_out_of_6_Mar2022 <- lapply(colnames(Intensities_2_out_of_6_ready)[-1],function(x) test.fun2(Intensities_2_out_of_6_ready,x))
 names(tests_Intensities_2_out_of_6_Mar2022) <- colnames(Intensities_2_out_of_6_ready)[-1]
 results_Intensities_2_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_2_out_of_6_Mar2022)
 write.csv(results_Intensities_2_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_2_out_of_6_Mar2022.csv",row.names = TRUE)
@@ -352,7 +352,7 @@ test.fun3 <- function(Intensities_3_out_of_6_ready, col) {
 }
 
 
-tests_Intensities_3_out_of_6_Mar2022 <- lapply(colnames(Intensities_3_out_of_6_ready)[-1],function(x) test.fun(Intensities_3_out_of_6_ready,x))
+tests_Intensities_3_out_of_6_Mar2022 <- lapply(colnames(Intensities_3_out_of_6_ready)[-1],function(x) test.fun3(Intensities_3_out_of_6_ready,x))
 names(tests_Intensities_3_out_of_6_Mar2022) <- colnames(Intensities_3_out_of_6_ready)[-1]
 results_Intensities_3_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_3_out_of_6_Mar2022)
 write.csv(results_Intensities_3_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_3_out_of_6_Mar2022.csv",row.names = TRUE)
@@ -379,7 +379,7 @@ test.fun4 <- function(Intensities_4_out_of_6_ready, col) {
 }
 
 
-tests_Intensities_4_out_of_6_Mar2022 <- lapply(colnames(Intensities_4_out_of_6_ready)[-1],function(x) test.fun(Intensities_4_out_of_6_ready,x))
+tests_Intensities_4_out_of_6_Mar2022 <- lapply(colnames(Intensities_4_out_of_6_ready)[-1],function(x) test.fun4(Intensities_4_out_of_6_ready,x))
 names(tests_Intensities_4_out_of_6_Mar2022) <- colnames(Intensities_4_out_of_6_ready)[-1]
 results_Intensities_4_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_4_out_of_6_Mar2022)
 write.csv(results_Intensities_4_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_4_out_of_6_Mar2022.csv",row.names = TRUE)
@@ -405,7 +405,7 @@ test.fun5 <- function(Intensities_5_out_of_6_ready, col) {
 }
 
 
-tests_Intensities_5_out_of_6_Mar2022 <- lapply(colnames(Intensities_5_out_of_6_ready)[-1],function(x) test.fun(Intensities_5_out_of_6_ready,x))
+tests_Intensities_5_out_of_6_Mar2022 <- lapply(colnames(Intensities_5_out_of_6_ready)[-1],function(x) test.fun5(Intensities_5_out_of_6_ready,x))
 names(tests_Intensities_5_out_of_6_Mar2022) <- colnames(Intensities_5_out_of_6_ready)[-1]
 results_Intensities_5_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_5_out_of_6_Mar2022)
 write.csv(results_Intensities_5_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_5_out_of_6_Mar2022.csv",row.names = TRUE)
@@ -433,7 +433,7 @@ test.fun6 <- function(Intensities_6_out_of_6_ready, col) {
 }
 
 
-tests_Intensities_6_out_of_6_Mar2022 <- lapply(colnames(Intensities_6_out_of_6_ready)[-1],function(x) test.fun(Intensities_6_out_of_6_ready,x))
+tests_Intensities_6_out_of_6_Mar2022 <- lapply(colnames(Intensities_6_out_of_6_ready)[-1],function(x) test.fun6(Intensities_6_out_of_6_ready,x))
 names(tests_Intensities_6_out_of_6_Mar2022) <- colnames(Intensities_6_out_of_6_ready)[-1]
 results_Intensities_6_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_6_out_of_6_Mar2022)
 write.csv(results_Intensities_6_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_6_out_of_6_Mar2022.csv",row.names = TRUE)
@@ -480,6 +480,7 @@ dev.off()
 ```
 
 #Grabbing genes that have large fold changes and making ggplots of them with t-tests and wilcoxon test
+#https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html
 ```{r}
 #1 out of 6
 Logratio_filteredgenes_1_out_of_6 <- dplyr::filter(Intensities_ratio_check_1_out_of_6_nonzero, logratio_mean > 0.68)
@@ -603,37 +604,49 @@ for (var in melted_Intensities_logratio_6_out_of_6_ready$variable) {
 
 
 #ttest and wilcoxon test in one csv
+##I'm narrowing my focus to 4 out of 6 and up.
 ```{r}
+#4 out of 6
+Logratio_filteredgenes_4_out_of_6$ttest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_4_out_of_6), function(i) t.test(as.numeric(as.character(unlist(Logratio_filteredgenes_4_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_4_out_of_6[i,8:11]))))[c("p.value")])
+Logratio_filteredgenes_4_out_of_6$wilcoxtest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_4_out_of_6), function(i) wilcox.test(as.numeric(as.character(unlist(Logratio_filteredgenes_4_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_4_out_of_6[i,8:11]))))[c("p.value")])
+Logratio_filteredgenes_4_out_of_6$ttest_pvalue <- as.numeric(unlist(Logratio_filteredgenes_4_out_of_6$ttest_pvalue))
+Logratio_filteredgenes_4_out_of_6$wilcoxtest_pvalue <- as.numeric(unlist(Logratio_filteredgenes_4_out_of_6$wilcoxtest_pvalue))
+Logratio_filteredgenes_4_out_of_6$ko_check <- rowSums(Logratio_filteredgenes_4_out_of_6[,8:11] < 2)
+write.csv(Logratio_filteredgenes_4_out_of_6,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_pvalues_ttest_Wilcoxon_Intensities_4_out_of_6_Mar2022.csv",row.names = TRUE)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_Histogram_Ttest_pvalues_4_out_of_6_and_RatioCutoff_MassSpec_Mar2022TV.pdf")
+hist(Logratio_filteredgenes_4_out_of_6$ttest_pvalue, breaks = 20, main="(4 out of 6) Frequency of T-Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein and with Ratio Cutoff", xlab = "P-value from T-Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_Histogram_Wilcoxon_test_pvalues_4_out_of_6_and_RatioCutoff_MassSpec_Mar2022TV.pdf")
+hist(Logratio_filteredgenes_4_out_of_6$wilcoxtest_pvalue, breaks = 20, main="(4 out of 6) Frequency of Wilcoxon Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein and with Ratio Cutoff", xlab = "P-value from T-Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#5 out of 6
+Logratio_filteredgenes_5_out_of_6$ttest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_5_out_of_6), function(i) t.test(as.numeric(as.character(unlist(Logratio_filteredgenes_5_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_5_out_of_6[i,8:11]))))[c("p.value")])
+Logratio_filteredgenes_5_out_of_6$wilcoxtest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_5_out_of_6), function(i) wilcox.test(as.numeric(as.character(unlist(Logratio_filteredgenes_5_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_5_out_of_6[i,8:11]))))[c("p.value")])
+Logratio_filteredgenes_5_out_of_6$ttest_pvalue <- as.numeric(unlist(Logratio_filteredgenes_5_out_of_6$ttest_pvalue))
+Logratio_filteredgenes_5_out_of_6$wilcoxtest_pvalue <- as.numeric(unlist(Logratio_filteredgenes_5_out_of_6$wilcoxtest_pvalue))
+Logratio_filteredgenes_5_out_of_6$ko_check <- rowSums(Logratio_filteredgenes_5_out_of_6[,8:11] < 2)
+write.csv(Logratio_filteredgenes_5_out_of_6,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_pvalues_ttest_Wilcoxon_Intensities_5_out_of_6_Mar2022.csv",row.names = TRUE)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_Histogram_Ttest_pvalues_5_out_of_6_and_RatioCutoff_MassSpec_Mar2022TV.pdf")
+hist(Logratio_filteredgenes_5_out_of_6$ttest_pvalue, breaks = 20, main="(5 out of 6) Frequency of T-Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein and with Ratio Cutoff", xlab = "P-value from T-Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_Histogram_Wilcoxon_test_pvalues_5_out_of_6_and_RatioCutoff_MassSpec_Mar2022TV.pdf")
+hist(Logratio_filteredgenes_5_out_of_6$wilcoxtest_pvalue, breaks = 20, main="(5 out of 6) Frequency of Wilcoxon Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein and with Ratio Cutoff", xlab = "P-value from T-Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
 #6 out of 6
-#x$stat <- sapply(1:nrow(x), function(i) t.test(as.numeric(as.character(unlist(x[i,2:4]))), as.numeric(as.character(unlist(x[i,8:10]))))[c("p.value")])
-#x <- lapply(names(Intensities_logratio_6_out_of_6_ready)[-1],function(x) t.test(as.formula(paste(x,"genotype",sep="~")), data=Intensities_logratio_6_out_of_6_ready))
-
-
 Logratio_filteredgenes_6_out_of_6$ttest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_6_out_of_6), function(i) t.test(as.numeric(as.character(unlist(Logratio_filteredgenes_6_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_6_out_of_6[i,8:11]))))[c("p.value")])
 Logratio_filteredgenes_6_out_of_6$wilcoxtest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_6_out_of_6), function(i) wilcox.test(as.numeric(as.character(unlist(Logratio_filteredgenes_6_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_6_out_of_6[i,8:11]))))[c("p.value")])
-
-
-```
-
-
-
-#Genes Below 0.05 and 0.10 p-value
-#Feel free to change the names and the pvalue cutoffs
-```{r}
-results_Intensities_Mar2022 <- results_Intensities_Mar2022 %>% 
-  mutate(significance = ifelse(p < 0.05, "very",
-                          ifelse(p < 0.10, "significant", "not")))
-
-significant <- c("very", "significant")
-pattern_to_search <- paste0(significant, collapse = "|")
-
-significantIntensities_Mar2022_genes <- results_Intensities_Mar2022[grepl(pattern_to_search, results_Intensities_Mar2022$significance), ]
-
-results_Intensities_Mar2022withJan2022 <- results_Intensities_Mar2022withJan2022%>% 
-  mutate(significance = ifelse(p < 0.05, "very",
-                          ifelse(p < 0.10, "significant", "not")))
-
-significant_Intensities_Mar2022withJan2022_genes <- results_Intensities_Mar2022withJan2022[grepl(pattern_to_search, results_Intensities_Mar2022withJan2022$significance), ]
+Logratio_filteredgenes_6_out_of_6$ttest_pvalue <- as.numeric(unlist(Logratio_filteredgenes_6_out_of_6$ttest_pvalue))
+Logratio_filteredgenes_6_out_of_6$wilcoxtest_pvalue <- as.numeric(unlist(Logratio_filteredgenes_6_out_of_6$wilcoxtest_pvalue))
+Logratio_filteredgenes_6_out_of_6$ko_check <- rowSums(Logratio_filteredgenes_6_out_of_6[,8:11] < 2)
+write.csv(Logratio_filteredgenes_6_out_of_6,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_pvalues_ttest_Wilcoxon_Intensities_6_out_of_6_Mar2022.csv",row.names = TRUE)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_Histogram_Ttest_pvalues_6_out_of_6_and_RatioCutoff_MassSpec_Mar2022TV.pdf")
+hist(Logratio_filteredgenes_6_out_of_6$ttest_pvalue, breaks = 20, main="(6 out of 6) Frequency of T-Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein and with Ratio Cutoff", xlab = "P-value from T-Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_Histogram_Wilcoxon_test_pvalues_6_out_of_6_and_RatioCutoff_MassSpec_Mar2022TV.pdf")
+hist(Logratio_filteredgenes_5_out_of_6$wilcoxtest_pvalue, breaks = 20, main="(6 out of 6) Frequency of Wilcoxon Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein and with Ratio Cutoff", xlab = "P-value from T-Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
 
 ```
 
