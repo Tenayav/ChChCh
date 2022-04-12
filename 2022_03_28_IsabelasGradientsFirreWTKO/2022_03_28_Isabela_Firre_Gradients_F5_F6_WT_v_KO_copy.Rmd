@@ -529,6 +529,10 @@ write.csv(results_Intensities_valid,"/scratch/Shares/rinn/isabela/ChChCh/2022_03
 #plot histogram of results
 hist(results_Intensities_valid$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 Protein - NEW FILTER", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
+#plot log10 pval
+results_Intensities_valid$log_p <- (log(results_Intensities_valid$p,10)* -1)
+hist(results_Intensities_valid$log_p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 Protein - NEW FILTER", xlab = "-log(P-value) from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+
 pdf("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/2022_04_05_Histogram_Wilcoxon_Intensities_protein_SucGrad_filterWT_ITP.pdf")
 hist(results_Intensities_valid$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 Protein - NEW FILTER", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
@@ -666,7 +670,8 @@ Intensities_FCfilter_pval <- Intensities_filter_both_FC_UP %>%
   left_join(results_Intensities_valid)
 
 #let's see pval distribution
-hist(Intensities_FCfilter_pval$p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 Protein - filtered by FC previously", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+Intensities_FCfilter_pval$log_p <- (log(Intensities_FCfilter_pval$p,10)* -1)
+hist(Intensities_FCfilter_pval$log_p, breaks = 20, main="Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Spec Intensities from SucGrad F5&6 Protein - filtered by FC previously", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
 #filter by pval 0.05
 Intensities_FCfilter_pval_filter <- Intensities_FCfilter_pval %>%
