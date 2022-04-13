@@ -796,6 +796,7 @@ write.csv(ratiofiltered_50ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/20
 #Add fixed ratios (took out of log 2, flipped so WT:KO instead of KO:WT) from Michael's RNA Seq deSeq analysis
 ```{r}
 #Making a flow chart so folks can understand what I'm about to do
+#https://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html
 
 grViz(diagram = "digraph flowchart {
       
@@ -824,11 +825,15 @@ grViz(diagram = "digraph flowchart {
       tab14 [label = '@@14']
       tab15 [label = '@@15']
       tab16 [label = '@@16']
+      
+      
+      node [fontname = Helvetica, shape = rectange, color = White, style = filled] 
       tab17 [label = '@@17']
       tab18 [label = '@@18']
       tab19 [label = '@@19']
       tab20 [label = '@@20']
       tab21 [label = '@@21']
+      tab22 [label = '@@22']
 
 
       tab1 -> tab2;
@@ -847,14 +852,11 @@ grViz(diagram = "digraph flowchart {
       {tab9 tab12} -> tab15;
       {tab10 tab13} -> tab16;
       {tab14 tab15 tab16} -> tab17
-      tab17 -> tab18
-      tab18 -> tab19
-      tab19 -> tab20
-      tab20 -> tab21
+      tab17 -> {tab18 tab19 tab20 tab21 tab22}
       }
 
     
-      [1]: 'Mass Spec Analysis of Firre ChIRP'
+      [1]: 'Mass Spec Analysis 5.0 of Firre ChIRP'
       [2]: '50ng Sample Load Technical Replicate'
       [3]: '100ng Sample Load Technical Replicate'
       [4]: 'Ratio WT:KO >= 1.5'
@@ -870,14 +872,16 @@ grViz(diagram = "digraph flowchart {
       [14]: 'Combine 3WT and 0KO Genes from 50ng and 100ng'
       [15]: 'Combine 2WT and 0KO Genes from 50ng and 100ng'
       [16]: 'Combine 3WT and 1KO Genes from 50ng and 100ng'
-      [17]: 'Add 50ng&100ng combined ratios and pvalues'
-      [18]: 'Add Sucrose Gradient Ratios and KO checks'
-      [19]: 'Add Odd and Even Ratios and KO Checks from Jan2022 TV'
-      [20]: 'Add Odd and Event Ratios from Jan2022 Fede Data for both WT:KO and WT2h:KO'
-      [21]: 'Add Michaels RNA seq Ratios of KO to WT (reformatted to match my style) and Padjvalues'
+      [17]: 'Expand Comparison to Other Datasets'
+      [18]: '50ng&100ng combined ratios and pvalues'
+      [19]: 'Sucrose Gradient Ratios and KO checks'
+      [20]: 'Odd and Even Ratios and KO Checks from Jan2022 TV'
+      [21]: 'Odd and Even Ratios from Jan2022 Fede Data for both WT:KO and WT2h:KO'
+      [22]: 'Michaels RNA seq Ratios and Padjvalues'
       ")
 
 ```
+
 
 #Folks wanted a parametric test to confirm that my selections are not random. 
 ```{r}
@@ -897,3 +901,84 @@ dev.off()
 
 ```
 
+#Need to make my job easier by compiling all the other data into one csv
+#Other data = 50ng&100ngMarChIRP, SucGrad, Jan2022TV, Jan2022Fede, Michael's data
+#For the ChIRP experiments, have ratios and WT/KO checks
+```{r}
+#I already took out the first three and put them into this workspace. 
+##Notes
+#All intensities will have a +1
+#All ratios will be WT/KO
+
+#50ng&100ng MarChIRP
+#50ng&100ng MarChIRP with no filter = Intensities2_filteroutinput_nonzero
+#need to add WT and KO checks
+Intensities2_filteroutinput_nonzero_reorderedcolumns <- Intensities2_filteroutinput_nonzero
+Intensities2_filteroutinput_nonzero_reorderedcolumns <- Intensities2_filteroutinput_nonzero_reorderedcolumns[,c(1,2,4,7,9,3,5,6,8,10,11,12,13,14,15)]
+Intensities2_filteroutinput_nonzero_reorderedcolumns$wt_check <- rowSums(Intensities2_filteroutinput_nonzero_reorderedcolumns[,6:11] >1)
+Intensities2_filteroutinput_nonzero_reorderedcolumns$ko_check <- rowSums(Intensities2_filteroutinput_nonzero_reorderedcolumns[,2:5] >1)
+colnames(Intensities2_filteroutinput_nonzero_reorderedcolumns) <- paste(colnames(Intensities2_filteroutinput_nonzero_reorderedcolumns),"combinedMarChIRP",sep=".")
+#50ng&100ng MarChIRP is good to go!
+#Use Intensities2_filteroutinput_nonzero_reorderedcolumns
+
+#SucroseGradient Data 
+#Is ready to go. Did it previously. 
+Intensities_sucgrad_nonzero2 <- Intensities_sucgrad_nonzero
+colnames(Intensities_sucgrad_nonzero2) <- paste(colnames(Intensities_sucgrad_nonzero2),"combinedSucGrad",sep=".")
+#Use Intensities_sucgrad_nonzero2
+
+
+#Jan2022 TV ChIRP Data
+#Previously input the data as WT_intensities_mass_spec_Jan2022_TV and KO_intensities_mass_spec_Jan2022_TV
+Intensities_Jan2022TV <- full_join(KO_intensities_mass_spec_Jan2022_TV, WT_intensities_mass_spec_Jan2022_TV, by = "gene")
+Intensities_Jan2022TV <- Intensities_Jan2022TV %>% map_if(is.numeric, ~.+1)
+Intensities_Jan2022TV <- as.data.frame(Intensities_Jan2022TV)
+Intensities_Jan2022TV <- Intensities_Jan2022TV %>% mutate(evenratio = wt_0h_even_total_intensity.Jan2022/ko_0h_even_total_intensity.Jan2022)
+Intensities_Jan2022TV <- Intensities_Jan2022TV %>% mutate(oddratio = wt_0h_odd_total_intensity.Jan2022/ko_0h_odd_total_intensity.Jan2022)
+Intensities_Jan2022TV$wt_check <- rowSums(Intensities_Jan2022TV[,4:5] >1)
+Intensities_Jan2022TV$ko_check <- rowSums(Intensities_Jan2022TV[,2:3] >1)
+colnames(Intensities_Jan2022TV) <- paste(colnames(Intensities_Jan2022TV),"Jan2022TV",sep=".")
+#Use Intensities_Jan2022TV
+
+#Jan2022 Fede ChIRP Data
+mass_spec_Jan2022_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20220107_SCP_FAriel.csv") %>% clean_names()
+KO_intensities_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,14,16,18,20,22,24,26,28)]
+WT_intensities_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60)]
+Intensities_Jan2022_FA <- full_join(KO_intensities_mass_spec_Jan2022_FA, WT_intensities_mass_spec_Jan2022_FA, by = "gene")
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA%>% map_if(is.numeric, ~.+1)
+Intensities_Jan2022_FA <- as.data.frame(Intensities_Jan2022_FA)
+Intensities_Jan2022_FA$odd_wt_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(wt_0h_odd_1_total_intensity, wt_0h_odd_2_total_intensity, wt_0h_odd_3_total_intensity, wt_0h_odd_4_total_intensity)),)
+Intensities_Jan2022_FA$even_wt_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(wt_0h_even_1_total_intensity, wt_0h_even_2_total_intensity, wt_0h_even_3_total_intensity, wt_0h_even_4_total_intensity)),)
+Intensities_Jan2022_FA$odd_2h_wt_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(wt_2h_odd_1_total_intensity, wt_2h_odd_2_total_intensity, wt_2h_odd_3_total_intensity, wt_2h_odd_4_total_intensity)),)
+Intensities_Jan2022_FA$even_2h_wt_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(wt_2h_even_1_total_intensity,wt_2h_even_2_total_intensity,wt_2h_even_3_total_intensity,wt_2h_even_4_total_intensity)),)
+Intensities_Jan2022_FA$odd_ko_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(ko_odd_1_total_intensity, ko_odd_2_total_intensity, ko_odd_3_total_intensity, ko_odd_4_total_intensity)),)
+Intensities_Jan2022_FA$even_ko_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(ko_even_1_total_intensity, ko_even_2_total_intensity, ko_even_3_total_intensity, ko_even_4_total_intensity)),)
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA %>% mutate(odd_wt_ratio = odd_wt_mean/odd_ko_mean)
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA %>% mutate(even_wt_ratio = even_wt_mean/even_ko_mean)
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA %>% mutate(odd_2h_wt_ratio = odd_2h_wt_mean/odd_ko_mean)
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA %>% mutate(even_2h_wt_ratio = even_2h_wt_mean/even_ko_mean)
+Intensities_Jan2022_FA$even_wt_check <- rowSums(Intensities_Jan2022_FA[,10:13] >1)
+Intensities_Jan2022_FA$even_2h_wt_check <- rowSums(Intensities_Jan2022_FA[,18:21] >1)
+Intensities_Jan2022_FA$even_ko_check <- rowSums(Intensities_Jan2022_FA[,2:5] >1)
+Intensities_Jan2022_FA$odd_wt_check <- rowSums(Intensities_Jan2022_FA[,14:17] >1)
+Intensities_Jan2022_FA$odd_2h_wt_check <- rowSums(Intensities_Jan2022_FA[,22:25] >1)
+Intensities_Jan2022_FA$odd_ko_check <- rowSums(Intensities_Jan2022_FA[,6:9] >1)
+colnames(Intensities_Jan2022_FA) <- paste(colnames(Intensities_Jan2022_FA),"Fede_Jan2022",sep=".")
+#Use Intensities_Jan2022_FA
+
+#Michael's List
+Michael_RNASeq_WT_v_KO <- read.csv("/scratch/Shares/rinn/tenaya/ChChCh/firre_ko_vs_wt_mesc_deseq_results.csv") %>% clean_names()
+Michael_RNASeq_WT_v_KO$KO_WT_ratio ='^'(2,Michael_RNASeq_WT_v_KO$log2fold_change)
+Michael_RNASeq_WT_v_KO$WT_KO_ratio ='^'(Michael_RNASeq_WT_v_KO$KO_WT_ratio,-1)
+
+#Use Michael_RNASeq_WT_v_KO
+
+#Combining to one dataframe
+alldata_nofilter1 <- full_join(Intensities2_filteroutinput_nonzero_reorderedcolumns, Intensities_sucgrad_nonzero2, by = c("gene.combinedMarChIRP" = "gene.combinedSucGrad"))
+alldata_nofilter2 <- full_join(alldata_nofilter1,Intensities_Jan2022TV, by=c("gene.combinedMarChIRP" = "gene.Jan2022TV"))
+alldata_nofilter3 <- full_join(alldata_nofilter1, Intensities_Jan2022_FA, by=c("gene.combinedMarChIRP" = "gene.Fede_Jan2022"))
+all_data_nofilter_final <- full_join(alldata_nofilter1, Michael_RNASeq_WT_v_KO, by=c("gene.combinedMarChIRP" = "gene_name"))
+
+
+
+```
