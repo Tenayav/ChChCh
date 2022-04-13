@@ -18,6 +18,8 @@ library(VennDiagram)
 library(venneuler)
 library(eulerr)
 library(reshape)
+library(DiagrammeR)
+
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -778,8 +780,102 @@ write.csv(ratiofiltered_50ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/20
 ```
 
 
-#Let's add in the Jan2022 Kit data 
+#MassSpec Analysis 5.0
+#Noticed that one third of the 3 out of 6 had no entries whatsoever in 100ng
+#I think questioned whether to treat 50 ng and 100ng equally. 
+#So I am filter 50 ng and 100 ng separately based on a 1.5 ratio filter
+#Then combine both lists with ratios, pvalues, and KO checks based on three categories
+#The above will be taken from unfiltered combined dataset that I'll have to make
+#Category 1: 3/3 WT and 0/2 KO
+#Category 2: 2/3 WT and 0/2 KO
+#Category 3: 3/3 WT and 1/2 KO
+#Add combined (100ng and 50ng previously calculated) ratios, pvalues,
+#Add Suc Grad ratios, pvalues, WT check, KO check
+#Add ratios and KO check from both Even and odd Jan2022TV 
+#Add ratios and KO check from both Even and odd Jan2022FA (also for both WT:KO and 2h:KO)
+#Add fixed ratios (took out of log 2, flipped so WT:KO instead of KO:WT) from Michael's RNA Seq deSeq analysis
 ```{r}
+#Making a flow chart so folks can understand what I'm about to do
+
+grViz(diagram = "digraph flowchart {
+      
+      node [fontname = Helvetica, shape = rectange, color = White, style = filled]        
+      
+      tab1 [label = '@@1']
+      
+      node [fontname = Helvetica, shape = rectange, color = DeepSkyBlue, style = filled]
+      tab2 [label = '@@2']
+      tab4 [label = '@@4']
+      tab6 [label = '@@6']
+      tab8 [label = '@@8']
+      tab9 [label = '@@9']
+      tab10 [label = '@@10']
+      
+      
+      node [fontname = Helvetica, shape = rectange, color = Tomato1, style = filled]        
+      tab3 [label = '@@3']
+      tab5 [label = '@@5']
+      tab7 [label = '@@7']
+      tab11 [label = '@@11']
+      tab12 [label = '@@12']
+      tab13 [label = '@@13']
+      
+      node [fontname = Helvetica, shape = rectange, color = MediumPurple1, style = filled] 
+      tab14 [label = '@@14']
+      tab15 [label = '@@15']
+      tab16 [label = '@@16']
+      tab17 [label = '@@17']
+      tab18 [label = '@@18']
+      tab19 [label = '@@19']
+      tab20 [label = '@@20']
+      tab21 [label = '@@21']
+
+
+      tab1 -> tab2;
+      tab1 -> tab3;
+      tab2 -> tab4;
+      tab3 -> tab5;
+      tab4 -> tab6;
+      tab5 -> tab7;
+      tab6 -> tab8;
+      tab6 -> tab9;
+      tab6 -> tab10;
+      tab7 -> tab11;
+      tab7 -> tab12;
+      tab7 -> tab13;
+      {tab8 tab11} -> tab14;
+      {tab9 tab12} -> tab15;
+      {tab10 tab13} -> tab16;
+      {tab14 tab15 tab16} -> tab17
+      tab17 -> tab18
+      tab18 -> tab19
+      tab19 -> tab20
+      tab20 -> tab21
+      }
+
+    
+      [1]: 'Mass Spec Analysis of Firre ChIRP'
+      [2]: '50ng Sample Load Technical Replicate'
+      [3]: '100ng Sample Load Technical Replicate'
+      [4]: 'Ratio WT:KO >= 1.5'
+      [5]: 'Ratio WT:KO >= 1.5'
+      [6]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
+      [7]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
+      [8]: '3 WT and 0 KO'
+      [9]: '2 WT and 0 KO'
+      [10]: '3 WT and 1 KO'
+      [11]: '3 WT and 0 KO'
+      [12]: '2 WT and 0 KO'
+      [13]: '3 WT and 1 KO'
+      [14]: 'Combine 3WT and 0KO Genes from 50ng and 100ng'
+      [15]: 'Combine 2WT and 0KO Genes from 50ng and 100ng'
+      [16]: 'Combine 3WT and 1KO Genes from 50ng and 100ng'
+      [17]: 'Add 50ng&100ng combined ratios and pvalues'
+      [18]: 'Add Sucrose Gradient Ratios and KO checks'
+      [19]: 'Add Odd and Even Ratios and KO Checks from Jan2022 TV'
+      [20]: 'Add Odd and Event Ratios from Jan2022 Fede Data for both WT:KO and WT2h:KO'
+      [21]: 'Add Michaels RNA seq Ratios of KO to WT (reformatted to match my style) and Padjvalues'
+      ")
 
 ```
 
