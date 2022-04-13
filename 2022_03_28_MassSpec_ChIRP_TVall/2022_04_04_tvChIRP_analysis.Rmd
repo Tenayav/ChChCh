@@ -779,6 +779,63 @@ write.csv(ratiofiltered_50ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/20
 
 ```
 
+#But I need to be fair to the 100ng data. So here is the 100ng analysis. 
+```{r}
+Intensities_100ng_analysis <- Intensities_100ng
+Intensities_100ng_analysis <- Intensities_100ng_analysis[,c(1,2,4,3,5,6)]
+Intensities_100ng_inputfilter <- Intensities_100ng_analysis[rowSums(Intensities_100ng_analysis > 0) >= 2,]
+Intensities_100ng_inputfilter_nonzero <- Intensities_100ng_inputfilter %>% map_if(is.numeric, ~.+1)
+Intensities_100ng_inputfilter_nonzero <- as.data.frame(Intensities_100ng_inputfilter_nonzero)
+Intensities_100ng_inputfilter_nonzero$wt_mean <- rowMeans(subset(Intensities_100ng_inputfilter_nonzero, select = c(r2_wt_oe_intensity.100ng,r3_wt_oe_intensity.100ng,r4_wt_oe_intensity.100ng)),)
+Intensities_100ng_inputfilter_nonzero$ko_mean <- rowMeans(subset(Intensities_100ng_inputfilter_nonzero, select = c(r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities_100ng_inputfilter_nonzero <- Intensities_100ng_inputfilter_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_100ng_inputfilter_nonzero$logratio = log(Intensities_100ng_inputfilter_nonzero$ratio,10)
+
+#histogram of ratios from 100ng data
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_Histogram_logratio_100ngMar2022_ChIRP.pdf")
+hist(Intensities_100ng_inputfilter_nonzero$logratio, breaks = 20, main="(100 ng only) Frequency of Log (10) WT: KO Ratio \n of Mass Spec Intensities from Mar2022 100ng ChIRP", xlab = "Log (10) Ratio of WT: KO Intensities", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#t-test and wilcoxon test
+Intensities_100ng_inputfilter_nonzero$ttest_pvalue <- sapply(1:nrow(Intensities_100ng_inputfilter_nonzero), function(i) t.test(as.numeric(as.character(unlist(Intensities_100ng_inputfilter_nonzero[i,2:3]))), as.numeric(as.character(unlist(Intensities_100ng_inputfilter_nonzero[i,4:6]))))[c("p.value")])
+Intensities_100ng_inputfilter_nonzero$ttest_pvalue <- as.numeric(unlist(Intensities_100ng_inputfilter_nonzero$ttest_pvalue))
+Intensities_100ng_inputfilter_nonzero$wilcoxtest_pvalue <- sapply(1:nrow(Intensities_100ng_inputfilter_nonzero), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_100ng_inputfilter_nonzero[i,2:3]))), as.numeric(as.character(unlist(Intensities_100ng_inputfilter_nonzero[i,4:6]))))[c("p.value")])
+Intensities_100ng_inputfilter_nonzero$wilcoxtest_pvalue <- as.numeric(unlist(Intensities_100ng_inputfilter_nonzero$wilcoxtest_pvalue))
+Intensities_100ng_inputfilter_nonzero$wt_check <- rowSums(Intensities_100ng_inputfilter_nonzero[,4:6] >1)
+Intensities_100ng_inputfilter_nonzero$ko_check <- rowSums(Intensities_100ng_inputfilter_nonzero[,2:3] >1)
+
+#histograms of ttest and wilcoxon pvalues
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_Histogram_100ngMar2022ChIRP_Ttest_pvalues.pdf")
+hist(Intensities_100ng_inputfilter_nonzero$ttest_pvalue, breaks = 40, main="Frequency of Pvalues from a T-Test Comparing WT and KO\n of Mass Spec Intensities from 100ng Mar2022 ChIRP", xlab = "Pvalues from T-Test of WT to KO", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_Histogram_100ngMar2022ChIRP_Wilcoxon_pvalues.pdf")
+hist(Intensities_100ng_inputfilter_nonzero$wilcoxtest_pvalue, breaks = 40, main="Frequency of Pvalues from a Wilcoxon Test Comparing WT and KO\n of Mass Spec Intensities from 100ng Mar2022 ChIRP", xlab = "Pvalues from Wilcoxon Test of WT to KO", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#ratio >=1.5 cutoff
+ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(Intensities_100ng_inputfilter_nonzero, ratio > 1.5)
+genes_ratiofiltered_100ng_Mar2022ChIRP <- ratiofiltered_100ng_Mar2022ChIRP$gene
+pattern_to_search_ratiofiltered_100ngChIRP <- paste0(genes_ratiofiltered_100ng_Mar2022ChIRP, collapse = "$|^")
+pattern_to_search_ratiofiltered_100ngChIRP <- paste("^", pattern_to_search_ratiofiltered_100ngChIRP,"$",sep="")
+Intensities_100ng_ready <- Intensities_100ng_analysis[grepl(pattern_to_search_ratiofiltered_100ngChIRP, Intensities_100ng_analysis$gene),]
+Intensities_100ng_ready <- as.data.frame(t(Intensities_100ng_ready))
+Intensities_100ng_newcol <- c("genotype","KO", "KO", "WT","WT","WT")
+Intensities_100ng_ready<- cbind(Intensities_100ng_newcol,Intensities_100ng_ready)
+Intensities_100ng_ready<-Intensities_100ng_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_100ng_ready[] <- lapply(Intensities_100ng_ready, type.convert, as.is = TRUE)
+melted_Intensities_100ng_ready = melt(Intensities_100ng_ready)
+
+for (var in melted_Intensities_100ng_ready$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_13_100ng_boxwhiskers_ttest_wilcoxon//", var, "_100ng_ratiocutoff.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_100ng_ready[melted_Intensities_100ng_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+ dev.off()
+  }
+
+
+write.csv(ratiofiltered_100ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_100ng_ratiofiltered_Mar2022ChIRP.csv",row.names = TRUE)
+```
+
 
 #MassSpec Analysis 5.0
 #Noticed that one third of the 3 out of 6 had no entries whatsoever in 100ng
@@ -859,8 +916,8 @@ grViz(diagram = "digraph flowchart {
       [1]: 'Mass Spec Analysis 5.0 of Firre ChIRP'
       [2]: '50ng Sample Load Technical Replicate'
       [3]: '100ng Sample Load Technical Replicate'
-      [4]: 'Ratio WT:KO >= 1.5'
-      [5]: 'Ratio WT:KO >= 1.5'
+      [4]: 'Ratio WT:KO >= 1.5 (97 Genes)'
+      [5]: 'Ratio WT:KO >= 1.5 (299 Genes)'
       [6]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
       [7]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
       [8]: '3 WT and 0 KO'
@@ -880,6 +937,67 @@ grViz(diagram = "digraph flowchart {
       [22]: 'Michaels RNA seq Ratios and Padjvalues'
       ")
 
+```
+
+
+#Process Map of Mass Spec 4.0
+```{r}
+grViz(diagram = "digraph flowchart {
+      
+      node [fontname = Helvetica, shape = rectange, color = White, style = filled]        
+      tab1 [label = '@@1']
+      
+      node [fontname = Helvetica, shape = rectange, color = DeepSkyBlue, style = filled]
+      tab2 [label = '@@2']
+    
+      node [fontname = Helvetica, shape = rectange, color = Tomato1, style = filled]        
+      tab3 [label = '@@3']   
+      
+      node [fontname = Helvetica, shape = rectange, color = White, style = filled] 
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+      tab6 [label = '@@6']
+      tab7 [label = '@@7']
+      tab8 [label = '@@8']
+      tab9 [label = '@@9']
+      tab10 [label = '@@10']
+      tab11 [label = '@@11']
+      tab12 [label = '@@12']
+      tab13 [label = '@@13']
+      
+      node [fontname = Helvetica, shape = rectange, color = MediumPurple1, style = filled]
+      tab14 [label = '@@14']
+      
+
+      tab1 -> tab2;
+      tab1 -> tab3;
+      {tab2 tab3} -> tab4;
+      tab4 -> tab5;
+      tab5 -> tab6;
+      tab6 -> tab7;
+      tab7 -> tab8
+      tab8 -> tab9
+      tab9 -> {tab10 tab11 tab12 tab13};
+      {tab10 tab11 tab12 tab13} -> tab14
+      }
+
+    
+      [1]: 'Mass Spec Analysis 4.0 of Firre ChIRP'
+      [2]: '50ng Sample Load Technical Replicate'
+      [3]: '100ng Sample Load Technical Replicate'
+      [4]: 'Combine 50ng and 100ng data'
+      [5]: 'Ratio WT:KO >= 1.5 [517 genes]'
+      [6]: 'Cutoffs for 4 out of 6 WT Samples with Intensities above 0 [35 Genes]'
+      [7]: 'Selected Genes with No or 1 KO Intensity [13 Genes]'
+      [8]: 'Selected Proteins that are nuclear [7 Genes]'
+      [9]: 'Expand Comparison to Other Datasets'
+      [10]: 'Sucrose Gradient Ratios and KO checks'
+      [11]: 'Odd and Even Ratios and KO Checks from Jan2022 TV'
+      [12]: 'Odd and Even Ratios from Jan2022 Fede Data for both WT:KO and WT2h:KO'
+      [13]: 'Michaels RNA seq Ratios and Padjvalues'
+      [14]: '2 Promising Genes - Hmgb1 and Ddx39b '
+      
+      ")
 ```
 
 
@@ -979,6 +1097,16 @@ alldata_nofilter2 <- full_join(alldata_nofilter1,Intensities_Jan2022TV, by=c("ge
 alldata_nofilter3 <- full_join(alldata_nofilter1, Intensities_Jan2022_FA, by=c("gene.combinedMarChIRP" = "gene.Fede_Jan2022"))
 all_data_nofilter_final <- full_join(alldata_nofilter1, Michael_RNASeq_WT_v_KO, by=c("gene.combinedMarChIRP" = "gene_name"))
 
-
+write.csv(all_data_nofilter_final,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_alldata_ratios_pvalues_checks.csv",row.names = TRUE)
 
 ```
+
+#Now I need to extract 3 Wt 0KO from both 50 ng and 100ng
+#Then grep the data from everything for those genes
+```{r}
+
+```
+
+
+
+
