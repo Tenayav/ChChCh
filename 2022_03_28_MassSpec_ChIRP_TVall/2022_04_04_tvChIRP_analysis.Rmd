@@ -916,16 +916,16 @@ grViz(diagram = "digraph flowchart {
       [1]: 'Mass Spec Analysis 5.0 of Firre ChIRP'
       [2]: '50ng Sample Load Technical Replicate'
       [3]: '100ng Sample Load Technical Replicate'
-      [4]: 'Ratio WT:KO >= 1.5 (97 Genes)'
-      [5]: 'Ratio WT:KO >= 1.5 (299 Genes)'
+      [4]: 'Ratio WT:KO >= 1.5 (299 Genes)'
+      [5]: 'Ratio WT:KO >= 1.5 (97 Genes)'
       [6]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
       [7]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
-      [8]: '3 WT and 0 KO'
-      [9]: '2 WT and 0 KO'
-      [10]: '3 WT and 1 KO'
-      [11]: '3 WT and 0 KO'
-      [12]: '2 WT and 0 KO'
-      [13]: '3 WT and 1 KO'
+      [8]: '3 WT and 0 KO [23 Genes]'
+      [9]: '2 WT and 0 KO [30 Genes]'
+      [10]: '3 WT and 1 KO [19 Genes]'
+      [11]: '3 WT and 0 KO [5 Genes]'
+      [12]: '2 WT and 0 KO [8 Genes]'
+      [13]: '3 WT and 1 KO [4 Genes]'
       [14]: 'Combine 3WT and 0KO Genes from 50ng and 100ng'
       [15]: 'Combine 2WT and 0KO Genes from 50ng and 100ng'
       [16]: 'Combine 3WT and 1KO Genes from 50ng and 100ng'
@@ -1101,9 +1101,47 @@ write.csv(all_data_nofilter_final,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28
 
 ```
 
-#Now I need to extract 3 Wt 0KO from both 50 ng and 100ng
+#Now I need to extract 3 Wt 0 KO from both 50 ng and 100ng
 #Then grep the data from everything for those genes
 ```{r}
+#50 ng 3 WT 
+colnames(ratiofiltered_50ng_Mar2022ChIRP) <- paste(colnames(ratiofiltered_50ng_Mar2022ChIRP),"50ng",sep=".")
+#Use Intensities_Jan2022_FA
+wtcheck_3WT_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(ratiofiltered_50ng_Mar2022ChIRP, wt_check.50ng == 3)
+wtcheck_3WT_0KO_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(wtcheck_3WT_ratiofiltered_50ng_Mar2022ChIRP, ko_check.50ng == 0)
+wtcheck_3WT_1KO_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(wtcheck_3WT_ratiofiltered_50ng_Mar2022ChIRP, ko_check.50ng == 1)
+
+#50 ng 2 WT : 0 KO
+wtcheck_2WT_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(ratiofiltered_50ng_Mar2022ChIRP, wt_check.50ng == 2)
+wtcheck_2WT_0KO_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(wtcheck_2WT_ratiofiltered_50ng_Mar2022ChIRP, ko_check.50ng == 0)
+
+#100 ng 3WT
+colnames(ratiofiltered_100ng_Mar2022ChIRP) <- paste(colnames(ratiofiltered_100ng_Mar2022ChIRP),"100ng",sep=".")
+wtcheck_3WT_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(ratiofiltered_100ng_Mar2022ChIRP, wt_check.100ng == 3)
+wtcheck_3WT_0KO_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(wtcheck_3WT_ratiofiltered_100ng_Mar2022ChIRP, ko_check.100ng == 0)
+wtcheck_3WT_1KO_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(wtcheck_3WT_ratiofiltered_100ng_Mar2022ChIRP, ko_check.100ng == 1)
+
+#100 ng 2WT
+wtcheck_2WT_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(ratiofiltered_100ng_Mar2022ChIRP, wt_check.100ng == 2)
+wtcheck_2WT_0KO_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(wtcheck_2WT_ratiofiltered_100ng_Mar2022ChIRP, ko_check.100ng == 0)
+
+#Combining the data
+#3 WT and  0 KO Combined
+WT3_KOzero_50ng_100ng_Mar2022ChIRP <- full_join(wtcheck_3WT_0KO_ratiofiltered_50ng_Mar2022ChIRP, wtcheck_3WT_0KO_ratiofiltered_100ng_Mar2022ChIRP, by = c("gene.50ng"="gene.100ng"))
+
+#2 WT and 0 KO Combined
+WT2_KOzero_50ng_100ng_Mar2022ChIRP <- full_join(wtcheck_2WT_0KO_ratiofiltered_50ng_Mar2022ChIRP, wtcheck_2WT_0KO_ratiofiltered_100ng_Mar2022ChIRP, by = c("gene.50ng"="gene.100ng"))
+
+#3 WT and 1 KO Combined
+WT3_KOone_50ng_100ng_Mar2022ChIRP <- full_join(wtcheck_3WT_1KO_ratiofiltered_50ng_Mar2022ChIRP, wtcheck_3WT_1KO_ratiofiltered_100ng_Mar2022ChIRP, by = c("gene.50ng"="gene.100ng"))
+
+#Combining all combinations with the all_data
+alldata_WT3_KOzero_50ng_100ng_Mar2022ChIRP <- left_join(WT3_KOzero_50ng_100ng_Mar2022ChIRP,all_data_nofilter_final, by = c("gene.50ng"="gene.combinedMarChIRP"))
+alldata_WT2_KOzero_50ng_100ng_Mar2022ChIRP <- left_join(WT2_KOzero_50ng_100ng_Mar2022ChIRP,all_data_nofilter_final, by = c("gene.50ng"="gene.combinedMarChIRP"))
+alldata_WT3_KOone_50ng_100ng_Mar2022ChIRP <- left_join(WT3_KOone_50ng_100ng_Mar2022ChIRP,all_data_nofilter_final, by = c("gene.50ng"="gene.combinedMarChIRP"))
+write.csv(alldata_WT3_KOzero_50ng_100ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_alldata_3WT_0KO.csv",row.names = TRUE)
+write.csv(alldata_WT2_KOzero_50ng_100ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_alldata_2WT_0KO.csv",row.names = TRUE)
+write.csv(alldata_WT3_KOone_50ng_100ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_alldata_3WT_1KO.csv",row.names = TRUE)
 
 ```
 
