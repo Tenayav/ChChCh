@@ -1020,11 +1020,17 @@ dev.off()
 
 #50ng&100ng MarChIRP
 #50ng&100ng MarChIRP with no filter = Intensities2_filteroutinput_nonzero
-#need to add WT and KO checks
+#need to add WT and KO checks and pvalues
 Intensities2_filteroutinput_nonzero_reorderedcolumns <- Intensities2_filteroutinput_nonzero
 Intensities2_filteroutinput_nonzero_reorderedcolumns <- Intensities2_filteroutinput_nonzero_reorderedcolumns[,c(1,2,4,7,9,3,5,6,8,10,11,12,13,14,15)]
 Intensities2_filteroutinput_nonzero_reorderedcolumns$wt_check <- rowSums(Intensities2_filteroutinput_nonzero_reorderedcolumns[,6:11] >1)
 Intensities2_filteroutinput_nonzero_reorderedcolumns$ko_check <- rowSums(Intensities2_filteroutinput_nonzero_reorderedcolumns[,2:5] >1)
+#t-test and wilcoxon test
+Intensities2_filteroutinput_nonzero_reorderedcolumns$ttest_pvalue <- sapply(1:nrow(Intensities2_filteroutinput_nonzero_reorderedcolumns), function(i) t.test(as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns[i,2:5]))), as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns[i,6:11]))))[c("p.value")])
+Intensities2_filteroutinput_nonzero_reorderedcolumns$ttest_pvalue <- as.numeric(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns$ttest_pvalue))
+Intensities2_filteroutinput_nonzero_reorderedcolumns$wilcoxtest_pvalue <- sapply(1:nrow(Intensities2_filteroutinput_nonzero_reorderedcolumns), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns[i,2:5]))), as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns[i,6:11]))))[c("p.value")])
+Intensities2_filteroutinput_nonzero_reorderedcolumns$wilcoxtest_pvalue <- as.numeric(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns$wilcoxtest_pvalue))
+
 colnames(Intensities2_filteroutinput_nonzero_reorderedcolumns) <- paste(colnames(Intensities2_filteroutinput_nonzero_reorderedcolumns),"combinedMarChIRP",sep=".")
 #50ng&100ng MarChIRP is good to go!
 #Use Intensities2_filteroutinput_nonzero_reorderedcolumns
@@ -1045,6 +1051,10 @@ Intensities_Jan2022TV <- Intensities_Jan2022TV %>% mutate(evenratio = wt_0h_even
 Intensities_Jan2022TV <- Intensities_Jan2022TV %>% mutate(oddratio = wt_0h_odd_total_intensity.Jan2022/ko_0h_odd_total_intensity.Jan2022)
 Intensities_Jan2022TV$wt_check <- rowSums(Intensities_Jan2022TV[,4:5] >1)
 Intensities_Jan2022TV$ko_check <- rowSums(Intensities_Jan2022TV[,2:3] >1)
+#Intensities_Jan2022TV$ttest_pvalue <- sapply(1:nrow(Intensities_Jan2022TV), function(i) t.test(as.numeric(as.character(unlist(Intensities_Jan2022TV[i,2:3]))), as.numeric(as.character(unlist(Intensities_Jan2022TV[i,4:5]))))[c("p.value")])
+#Intensities_Jan2022TV$ttest_pvalue <- as.numeric(unlist(Intensities_Jan2022TV$ttest_pvalue))
+Intensities_Jan2022TV$wilcoxtest_pvalue <- sapply(1:nrow(Intensities_Jan2022TV), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022TV[i,2:3]))), as.numeric(as.character(unlist(Intensities_Jan2022TV[i,4:5]))))[c("p.value")])
+Intensities_Jan2022TV$wilcoxtest_pvalue <- as.numeric(unlist(Intensities_Jan2022TV$wilcoxtest_pvalue))
 colnames(Intensities_Jan2022TV) <- paste(colnames(Intensities_Jan2022TV),"Jan2022TV",sep=".")
 #Use Intensities_Jan2022TV
 
@@ -1071,6 +1081,19 @@ Intensities_Jan2022_FA$even_ko_check <- rowSums(Intensities_Jan2022_FA[,2:5] >1)
 Intensities_Jan2022_FA$odd_wt_check <- rowSums(Intensities_Jan2022_FA[,14:17] >1)
 Intensities_Jan2022_FA$odd_2h_wt_check <- rowSums(Intensities_Jan2022_FA[,22:25] >1)
 Intensities_Jan2022_FA$odd_ko_check <- rowSums(Intensities_Jan2022_FA[,6:9] >1)
+#Wilcoxontest for WT:KO
+Intensities_Jan2022_FA$wilcoxtest_wteven_pvalue <- sapply(1:nrow(Intensities_Jan2022_FA), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,10:13]))), as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,2:5]))))[c("p.value")])
+Intensities_Jan2022_FA$wilcoxtest_wteven_pvalue <- as.numeric(unlist(Intensities_Jan2022_FA$wilcoxtest_wteven_pvalue))
+
+Intensities_Jan2022_FA$wilcoxtest_wtodd_pvalue <- sapply(1:nrow(Intensities_Jan2022_FA), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,14:17]))), as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,6:9]))))[c("p.value")])
+Intensities_Jan2022_FA$wilcoxtest_wtodd_pvalue <- as.numeric(unlist(Intensities_Jan2022_FA$wilcoxtest_wtodd_pvalue))
+#Wilcoxon Test for 2h WT : KO
+Intensities_Jan2022_FA$wilcoxtest_2heven_pvalue <- sapply(1:nrow(Intensities_Jan2022_FA), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,18:21]))), as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,2:5]))))[c("p.value")])
+Intensities_Jan2022_FA$wilcoxtest_2heven_pvalue <- as.numeric(unlist(Intensities_Jan2022_FA$wilcoxtest_2heven_pvalue))
+
+Intensities_Jan2022_FA$wilcoxtest_2hodd_pvalue <- sapply(1:nrow(Intensities_Jan2022_FA), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,22:25]))), as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,6:9]))))[c("p.value")])
+Intensities_Jan2022_FA$wilcoxtest_2hodd_pvalue <- as.numeric(unlist(Intensities_Jan2022_FA$wilcoxtest_2hodd_pvalue))
+
 colnames(Intensities_Jan2022_FA) <- paste(colnames(Intensities_Jan2022_FA),"Fede_Jan2022",sep=".")
 #Use Intensities_Jan2022_FA
 
@@ -1142,12 +1165,37 @@ WTmean_50ng_100ng <- full_join(Intensities_50ng_inputfilter_nonzero,Intensities_
 #WTmean_50ng_100ng<- WTmean_50ng_100ng %>% replace_na(list(wt_mean.x = 1, wt_mean.y=1))
 WTmean_50ng_100ng$logwtmean.50ng = log(WTmean_50ng_100ng$wt_mean.x,10)
 WTmean_50ng_100ng$logwtmean.100ng = log(WTmean_50ng_100ng$wt_mean.y,10)
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_scatter_wtmean_50ng_100ng.pdf")
+WTmean_50ng_100ng$logkomean.50ng = log(WTmean_50ng_100ng$ko_mean.x,10)
+WTmean_50ng_100ng$logkomean.100ng = log(WTmean_50ng_100ng$ko_mean.y,10)
+WTmean_50ng_100ng <- WTmean_50ng_100ng %>% replace_na(list(logwtmean.50ng = 0, logwtmean.100ng = 0, logkomean.50ng = 0, logkomean.100ng = 0, logratio.x=0, logratio.y=0))
+
+#wt_mean plot
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_14_scatter_logwtmean_50ng_100ng.pdf")
 ggplot(WTmean_50ng_100ng, aes(x=logwtmean.50ng, y=logwtmean.100ng)) + 
   geom_point()+
-   geom_smooth(method=lm,  linetype="dashed", color="darkred", fill="blue")+
-  labs(title="Mean of WT Intensities 100ng vs. 50ng ",
+   geom_smooth(method=lm,  linetype="dashed", color="darkred", fill="lightgoldenrod")+
+  labs(title="Log Mean of WT Intensities 100ng vs. 50ng ",
        x="50ng Mean of WT Intensities", y = "100ng Mean of WT Intensities")+
+  theme_classic()  
+dev.off()
+
+#ko_mean plot
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_14_scatter_logkomean_50ng_100ng.pdf")
+ggplot(WTmean_50ng_100ng, aes(x=logkomean.50ng, y=logkomean.100ng)) + 
+  geom_point()+
+   geom_smooth(method=lm,  linetype="dashed", color="darkred", fill="lightgoldenrod")+
+  labs(title="Log Mean of KO Intensities 100ng vs. 50ng ",
+       x="50ng Mean of WT Intensities", y = "100ng Mean of WT Intensities")+
+  theme_classic()  
+dev.off()
+
+#logratio plot
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_14_scatter_logratio_50ng_100ng.pdf")
+ggplot(WTmean_50ng_100ng, aes(x=logratio.x, y=logratio.y)) + 
+  geom_point()+
+   geom_smooth(method=lm,  linetype="dashed", color="darkred", fill="lightgoldenrod")+
+  labs(title="Log Ratio of WT to KO Intensities 100ng vs. 50ng ",
+       x="50ng Log Ratio of WT:KO", y = "100ng Log Ratio of WT:KO")+
   theme_classic()  
 dev.off()
 
@@ -1155,14 +1203,10 @@ dev.off()
 
 # plot adding up all layers we have seen so far
 #https://biocorecrg.github.io/CRG_RIntroduction/volcano-plots.html
-Intensities2_filteroutinput_nonzero_reorderedcolumns2 <- Intensities2_filteroutinput_nonzero_reorderedcolumns
-Intensities2_filteroutinput_nonzero_reorderedcolumns2$ttest_pvalue <- sapply(1:nrow(Intensities2_filteroutinput_nonzero_reorderedcolumns2), function(i) t.test(as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2[i,2:5]))), as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2[i,6:11]))))[c("p.value")])
-Intensities2_filteroutinput_nonzero_reorderedcolumns2$ttest_pvalue <- as.numeric(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2$ttest_pvalue))
-Intensities2_filteroutinput_nonzero_reorderedcolumns2$wilcoxtest_pvalue <- sapply(1:nrow(Intensities2_filteroutinput_nonzero_reorderedcolumns2), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2[i,2:5]))), as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2[i,6:11]))))[c("p.value")])
-Intensities2_filteroutinput_nonzero_reorderedcolumns2$wilcoxtest_pvalue <- as.numeric(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2$wilcoxtest_pvalue))
+
 
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_volcano_plot_combinedLogRatio_vs_combined_ttest_pvalue.pdf")
-ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns2, aes(x=logratio.combinedMarChIRP, y=ttest_pvalue, label=gene.combinedMarChIRP)) +
+ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns, aes(x=logratio.combinedMarChIRP, y=-log10(ttest_pvalue.combinedMarChIRP), label=gene.combinedMarChIRP)) +
         geom_point() + 
         theme_minimal() +
         geom_text_repel() +
@@ -1172,7 +1216,7 @@ ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns2, aes(x=lograti
 dev.off()
 
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_volcano_plot_combinedLogRatio_vs_combined_wilcoxon_pvalue.pdf")
-ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns2, aes(x=logratio.combinedMarChIRP, y=wilcoxtest_pvalue, label=gene.combinedMarChIRP)) +
+ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns, aes(x=logratio.combinedMarChIRP, y=-log10(wilcoxtest_pvalue.combinedMarChIRP), label=gene.combinedMarChIRP)) +
         geom_point() + 
         theme_minimal() +
         geom_text_repel() +
