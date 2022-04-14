@@ -1094,8 +1094,8 @@ Michael_RNASeq_WT_v_KO$WT_KO_ratio ='^'(Michael_RNASeq_WT_v_KO$KO_WT_ratio,-1)
 #Combining to one dataframe
 alldata_nofilter1 <- full_join(Intensities2_filteroutinput_nonzero_reorderedcolumns, Intensities_sucgrad_nonzero2, by = c("gene.combinedMarChIRP" = "gene.combinedSucGrad"))
 alldata_nofilter2 <- full_join(alldata_nofilter1,Intensities_Jan2022TV, by=c("gene.combinedMarChIRP" = "gene.Jan2022TV"))
-alldata_nofilter3 <- full_join(alldata_nofilter1, Intensities_Jan2022_FA, by=c("gene.combinedMarChIRP" = "gene.Fede_Jan2022"))
-all_data_nofilter_final <- full_join(alldata_nofilter1, Michael_RNASeq_WT_v_KO, by=c("gene.combinedMarChIRP" = "gene_name"))
+alldata_nofilter3 <- full_join(alldata_nofilter2, Intensities_Jan2022_FA, by=c("gene.combinedMarChIRP" = "gene.Fede_Jan2022"))
+all_data_nofilter_final <- full_join(alldata_nofilter3, Michael_RNASeq_WT_v_KO, by=c("gene.combinedMarChIRP" = "gene_name"))
 
 write.csv(all_data_nofilter_final,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_alldata_ratios_pvalues_checks.csv",row.names = TRUE)
 
