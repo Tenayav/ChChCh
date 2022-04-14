@@ -19,7 +19,7 @@ library(venneuler)
 library(eulerr)
 library(reshape)
 library(DiagrammeR)
-
+library(ggrepel)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -1152,6 +1152,36 @@ ggplot(WTmean_50ng_100ng, aes(x=logwtmean.50ng, y=logwtmean.100ng)) +
 dev.off()
 
 #Volcano Plot of 
+
+# plot adding up all layers we have seen so far
+#https://biocorecrg.github.io/CRG_RIntroduction/volcano-plots.html
+Intensities2_filteroutinput_nonzero_reorderedcolumns2 <- Intensities2_filteroutinput_nonzero_reorderedcolumns
+Intensities2_filteroutinput_nonzero_reorderedcolumns2$ttest_pvalue <- sapply(1:nrow(Intensities2_filteroutinput_nonzero_reorderedcolumns2), function(i) t.test(as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2[i,2:5]))), as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2[i,6:11]))))[c("p.value")])
+Intensities2_filteroutinput_nonzero_reorderedcolumns2$ttest_pvalue <- as.numeric(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2$ttest_pvalue))
+Intensities2_filteroutinput_nonzero_reorderedcolumns2$wilcoxtest_pvalue <- sapply(1:nrow(Intensities2_filteroutinput_nonzero_reorderedcolumns2), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2[i,2:5]))), as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2[i,6:11]))))[c("p.value")])
+Intensities2_filteroutinput_nonzero_reorderedcolumns2$wilcoxtest_pvalue <- as.numeric(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns2$wilcoxtest_pvalue))
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_volcano_plot_combinedLogRatio_vs_combined_ttest_pvalue.pdf")
+ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns2, aes(x=logratio.combinedMarChIRP, y=ttest_pvalue, label=gene.combinedMarChIRP)) +
+        geom_point() + 
+        theme_minimal() +
+        geom_text_repel() +
+        scale_color_manual(values=c("blue", "black", "red")) +
+        geom_vline(xintercept=c(-0.6, 0.6), col="red") +
+        geom_hline(yintercept=-log10(0.05), col="red")
+dev.off()
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_volcano_plot_combinedLogRatio_vs_combined_wilcoxon_pvalue.pdf")
+ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns2, aes(x=logratio.combinedMarChIRP, y=wilcoxtest_pvalue, label=gene.combinedMarChIRP)) +
+        geom_point() + 
+        theme_minimal() +
+        geom_text_repel() +
+        scale_color_manual(values=c("blue", "black", "red")) +
+        geom_vline(xintercept=c(-0.6, 0.6), col="red") +
+        geom_hline(yintercept=-log10(0.05), col="red")
+dev.off()
+
+
 ```
 
 
