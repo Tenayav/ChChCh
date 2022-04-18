@@ -886,10 +886,12 @@ grViz(diagram = "digraph flowchart {
       tab14 [label = '@@14']
       tab15 [label = '@@15']
       tab16 [label = '@@16']
+      tab17 [label = '@@17']
       
       
       node [fontname = Helvetica, shape = rectange, color = DarkOliveGreen3, style = filled] 
-      tab17 [label = '@@17']
+      
+      tab18 [label = '@@18']
 
       tab1 -> tab2;
       tab1 -> tab3;
@@ -902,7 +904,8 @@ grViz(diagram = "digraph flowchart {
       {tab6 tab7} -> tab10;
       {tab8 tab9 tab10} -> tab11;
       tab11 -> {tab12 tab13 tab14 tab15 tab16};
-      {tab12 tab13 tab14 tab15 tab16} -> tab17
+      {tab12 tab13 tab14 tab15 tab16} -> tab17;
+      tab17 -> tab18
       }
 
     
@@ -913,16 +916,17 @@ grViz(diagram = "digraph flowchart {
       [5]: 'Ratio WT:KO >= 1.5 (97 Genes)'
       [6]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
       [7]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
-      [8]: 'Combine 3WT and 0KO Genes from 50ng (23 Genes) and 100ng (5 Genes)'
-      [9]: 'Combine 2WT and 0KO Genes from 50ng (30 Genes) and 100ng (8 Genes)'
-      [10]: 'Combine 3WT and 1KO Genes from 50ng (19 Genes) and 100ng (4 Genes)'
-      [11]: 'Expand Comparison to Other Datasets'
-      [12]: '50ng&100ng combined ratios and pvalues'
-      [13]: 'Sucrose Gradient Ratios and KO checks'
-      [14]: 'Odd and Even Ratios and KO Checks from Jan2022 TV'
-      [15]: 'Odd and Even Ratios from Jan2022 Fede Data for both WT:KO and WT2h:KO'
-      [16]: 'Michaels RNA seq Ratios and Padjvalues'
-      [17]: '# Promising Genes - '
+      [8]: 'Combine 3WT and 0KO Genes \\nfrom 50ng (23 Genes) and 100ng (5 Genes)'
+      [9]: 'Combine 2WT and 0KO Genes \\nfrom 50ng (30 Genes) and 100ng (8 Genes)'
+      [10]: 'Combine 3WT and 1KO Genes \\nfrom 50ng (19 Genes) and 100ng (4 Genes)'
+      [11]: 'Expand Comparison to Other Datasets \\n(ng Ratio >= 1.5, ng pvalue =<0.05)'
+      [12]: '50ng&100ng combined ratios (>= 1.5), \\npvalues (=< 0.05), and KO Check (=< 1)'
+      [13]: 'Sucrose Gradient Ratios \\n(>= 1.1) and pvalue (=<0.05)'
+      [14]: 'Odd and Even Ratios (>= 1.5) \\nand pvalue (=<0.05) \\nfrom Jan2022 TV'
+      [15]: 'Odd and Even Ratios \\nfrom Jan2022 Fede Data \\nfor both WT:KO (>= 1.1),  \\nUp in 2h:KO from WT:KO (WT:KO < 2h:KO), \\nand KO Check (=<2)'
+      [16]: 'Michaels RNA seq \\nRatios and Padjvalues'
+      [17]: 'True for 5 out of 12 Cutoffs (Average was ~3.7 out of 12)'
+      [18]:'# Promising Genes - 18 Genes'
       ")
 
 ```
@@ -1081,6 +1085,9 @@ Intensities_Jan2022_FA$even_ko_check <- rowSums(Intensities_Jan2022_FA[,2:5] >1)
 Intensities_Jan2022_FA$odd_wt_check <- rowSums(Intensities_Jan2022_FA[,14:17] >1)
 Intensities_Jan2022_FA$odd_2h_wt_check <- rowSums(Intensities_Jan2022_FA[,22:25] >1)
 Intensities_Jan2022_FA$odd_ko_check <- rowSums(Intensities_Jan2022_FA[,6:9] >1)
+Intensities_Jan2022_FA<- Intensities_Jan2022_FA[order(Intensities_Jan2022_FA$gene),] 
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA[-c(215:314),]
+
 #Wilcoxontest for WT:KO
 Intensities_Jan2022_FA$wilcoxtest_wteven_pvalue <- sapply(1:nrow(Intensities_Jan2022_FA), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,10:13]))), as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,2:5]))))[c("p.value")])
 Intensities_Jan2022_FA$wilcoxtest_wteven_pvalue <- as.numeric(unlist(Intensities_Jan2022_FA$wilcoxtest_wteven_pvalue))
