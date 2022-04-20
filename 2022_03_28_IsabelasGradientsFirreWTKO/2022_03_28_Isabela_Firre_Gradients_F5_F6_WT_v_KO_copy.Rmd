@@ -367,11 +367,49 @@ Intensities_filter_both_FC_UP <- Intensities_filter_both_FC %>%
 
 #save this - they are interesting genes because have intensity WT > KO
 write_csv(Intensities_filter_both_FC_UP, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/intensity_FC_upWT.csv")
+Intensities_filter_both_FC_UP <- read.csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/intensity_FC_upWT.csv")
 
+#there's a very distinguish group of genes with logFC > 10, let's see who they are
+Intensities_filter_both_FC_UP_high <- Intensities_filter_both_FC_UP %>%
+  filter(logratio_mean_2 > 10)
+#save this interesting list
+write.csv(Intensities_filter_both_FC_UP_high, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/intensity_FC_upWT_high.csv")
 
 Intensities_filter_both_FC_DOWN <- Intensities_filter_both_FC %>%
   filter(logratio_mean_2 <= -0.5849)
 #78
+```
+
+```{r - quick look at Chchch data}
+#now let's see if these 347 genes UP in WT appear in the Chchch data
+#read in raw data from ChChCh
+ch_50ng_raw <- read.csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_50ng_protein_ChIRP_5percentFDR_JRinn.csv")
+ch_100ng_raw <- read.csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_100ng_ChIRP_5percentFDR_JRinn_Results.csv")
+
+ch_50ng_grad <- intersect(Intensities_filter_both_FC_UP$gene, ch_50ng_raw$Gene)
+ch_50ng_grad <- as.data.frame(ch_50ng_grad)
+#245
+#let's see if there are reads
+colnames(ch_50ng_grad) <- c("Gene")
+ch_50ng_grad <- ch_50ng_grad %>%
+  left_join(ch_50ng_raw)
+#Ddb1 // Hspa5 // Rap1b
+
+ch_100ng_grad <- intersect(Intensities_filter_both_FC_UP$gene, ch_100ng_raw$Gene)
+ch_100ng_grad <- as.data.frame(ch_100ng_grad)
+#252
+colnames(ch_100ng_grad) <- c("Gene")
+ch_100ng_grad <- ch_100ng_grad %>%
+  left_join(ch_100ng_raw)
+
+ch_grad_both <- intersect(ch_50ng_grad$Gene, ch_100ng_grad$Gene)
+#217
+
+#now compare to Tenaya's filter 3 out of 6 in WT (Chchch data)
+#read in
+ch_filter_3of6 <- read.csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_11_pvalues_ttest_Wilcoxon_Intensities_3_out_of_6_Mar2022.csv")
+ch_filter_grad <- intersect(Intensities_filter_both_FC_UP$gene, ch_filter_3of6$gene)
+#3 genes
 ```
 
 Now let's compare with RNA-seq data from KO vs WT to be sure that the protein is low in the fractions because potentially binding to Firre and not because is not expressed anymore in the KO genotype at all
@@ -680,6 +718,30 @@ Intensities_FCfilter_pval_filter <- Intensities_FCfilter_pval %>%
 
 #save this list
 write_csv(Intensities_FCfilter_pval_filter, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/Intensities_FCfilter_pval_filter.csv")
+Intensities_FCfilter_pval_filter <- read.csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/Intensities_FCfilter_pval_filter.csv")
+
+#now let's see if these 45 genes appear in the Chchch data
+#read in raw data from ChChCh
+ch_50ng_raw <- read.csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_50ng_protein_ChIRP_5percentFDR_JRinn.csv")
+ch_100ng_raw <- read.csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_03_24_100ng_ChIRP_5percentFDR_JRinn_Results.csv")
+
+ch_50ng_grad <- intersect(Intensities_FCfilter_pval_filter$gene, ch_50ng_raw$Gene)
+ch_50ng_grad <- as.data.frame(ch_50ng_grad)
+#34
+#let's see if there are reads
+colnames(ch_50ng_grad) <- c("Gene")
+ch_50ng_grad <- ch_50ng_grad %>%
+  left_join(ch_50ng_raw)
+
+ch_100ng_grad <- intersect(Intensities_FCfilter_pval_filter$gene, ch_100ng_raw$Gene)
+ch_100ng_grad <- as.data.frame(ch_100ng_grad)
+#34
+colnames(ch_100ng_grad) <- c("Gene")
+ch_100ng_grad <- ch_100ng_grad %>%
+  left_join(ch_100ng_raw)
+
+ch_grad_both <- intersect(ch_50ng_grad$Gene, ch_100ng_grad$Gene)
+#31
 ```
 
 
@@ -881,7 +943,6 @@ intersect1.10 <- as.data.frame(intersect1.10)
 
 Now let's compare with RNA-seq data from KO vs WT to be sure that the protein is low in the fractions because potentially binding to Firre and not because is not expressed anymore in the KO genotype at all
 
-###WORKING HEREEEEEEE 
 ```{r - compare to RNA-seq data as a genotype background}
 #Michael gave me the table of DEG in KO vs WT mESC
 #read in
