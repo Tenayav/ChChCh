@@ -18,6 +18,8 @@ library(VennDiagram)
 library(venneuler)
 library(eulerr)
 library(reshape)
+library(DiagrammeR)
+library(ggrepel)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -145,58 +147,64 @@ Intensities_ratio_check_6_out_of_6_nonzero$ko_mean <- rowMeans(subset(Intensitie
 #Print a histogram of those ratios
 
 #1 out of 6
-Intensities_ratio_check_1_out_of_6_nonzero <- Intensities_ratio_check_1_out_of_6_nonzero %>% mutate(intensities_ratio1 = (r2_wt_oe_intensity.50ng/r2_ko_oe_intensity.50ng), intensities_ratio2=(r3_wt_oe_intensity.50ng/r3_ko_oe_intensity.50ng), intensities_ratio3 = (r4_wt_oe_intensity.50ng/ko_mean))
-Intensities_ratio_check_1_out_of_6_nonzero$ratio_mean <- rowMeans(subset(Intensities_ratio_check_1_out_of_6_nonzero, select = c(intensities_ratio1, intensities_ratio2,intensities_ratio3)),)
-Intensities_ratio_check_1_out_of_6_nonzero$logratio_mean = log(Intensities_ratio_check_1_out_of_6_nonzero$ratio_mean,10)
+Intensities_ratio_check_1_out_of_6_nonzero$wt_mean <- rowMeans(subset(Intensities_ratio_check_1_out_of_6_nonzero, select = c(r2_wt_oe_intensity.50ng, r3_wt_oe_intensity.50ng, r4_wt_oe_intensity.50ng, r2_wt_oe_intensity.100ng, r3_wt_oe_intensity.100ng, r4_wt_oe_intensity.100ng)),)
+Intensities_ratio_check_1_out_of_6_nonzero$ko_mean <- rowMeans(subset(Intensities_ratio_check_1_out_of_6_nonzero, select = c(r2_ko_oe_intensity.50ng, r3_ko_oe_intensity.50ng, r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities_ratio_check_1_out_of_6_nonzero <- Intensities_ratio_check_1_out_of_6_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_ratio_check_1_out_of_6_nonzero$logratio = log(Intensities_ratio_check_1_out_of_6_nonzero$ratio,10)
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_06_1outof6_Histogram_FoldChange_WT_KO_MassSpec_Mar2022TV.pdf")
-hist(Intensities_ratio_check_1_out_of_6_nonzero$logratio_mean, breaks = 50, main="(1 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+hist(Intensities_ratio_check_1_out_of_6_nonzero$logratio, breaks = 50, main="(1 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
 #2 out of 6
-Intensities_ratio_check_2_out_of_6_nonzero <- Intensities_ratio_check_2_out_of_6_nonzero %>% mutate(intensities_ratio1 = (r2_wt_oe_intensity.50ng/r2_ko_oe_intensity.50ng), intensities_ratio2=(r3_wt_oe_intensity.50ng/r3_ko_oe_intensity.50ng), intensities_ratio3 = (r4_wt_oe_intensity.50ng/ko_mean))
-Intensities_ratio_check_2_out_of_6_nonzero$ratio_mean <- rowMeans(subset(Intensities_ratio_check_2_out_of_6_nonzero, select = c(intensities_ratio1, intensities_ratio2,intensities_ratio3)),)
-Intensities_ratio_check_2_out_of_6_nonzero$logratio_mean = log(Intensities_ratio_check_2_out_of_6_nonzero$ratio_mean,10)
+Intensities_ratio_check_2_out_of_6_nonzero$wt_mean <- rowMeans(subset(Intensities_ratio_check_2_out_of_6_nonzero, select = c(r2_wt_oe_intensity.50ng, r3_wt_oe_intensity.50ng, r4_wt_oe_intensity.50ng, r2_wt_oe_intensity.100ng, r3_wt_oe_intensity.100ng, r4_wt_oe_intensity.100ng)),)
+Intensities_ratio_check_2_out_of_6_nonzero$ko_mean <- rowMeans(subset(Intensities_ratio_check_2_out_of_6_nonzero, select = c(r2_ko_oe_intensity.50ng, r3_ko_oe_intensity.50ng, r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities_ratio_check_2_out_of_6_nonzero <- Intensities_ratio_check_2_out_of_6_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_ratio_check_2_out_of_6_nonzero$logratio = log(Intensities_ratio_check_2_out_of_6_nonzero$ratio,10)
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_06_2outof6_Histogram_FoldChange_WT_KO_MassSpec_Mar2022TV.pdf")
-hist(Intensities_ratio_check_2_out_of_6_nonzero$logratio_mean, breaks = 50, main="(2 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+hist(Intensities_ratio_check_2_out_of_6_nonzero$logratio, breaks = 50, main="(2 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
 #3 out of 6
-Intensities_ratio_check_3_out_of_6_nonzero <- Intensities_ratio_check_3_out_of_6_nonzero %>% mutate(intensities_ratio1 = (r2_wt_oe_intensity.50ng/r2_ko_oe_intensity.50ng), intensities_ratio2=(r3_wt_oe_intensity.50ng/r3_ko_oe_intensity.50ng), intensities_ratio3 = (r4_wt_oe_intensity.50ng/ko_mean))
-Intensities_ratio_check_3_out_of_6_nonzero$ratio_mean <- rowMeans(subset(Intensities_ratio_check_3_out_of_6_nonzero, select = c(intensities_ratio1, intensities_ratio2,intensities_ratio3)),)
-Intensities_ratio_check_3_out_of_6_nonzero$logratio_mean = log(Intensities_ratio_check_3_out_of_6_nonzero$ratio_mean,10)
+Intensities_ratio_check_3_out_of_6_nonzero$wt_mean <- rowMeans(subset(Intensities_ratio_check_3_out_of_6_nonzero, select = c(r2_wt_oe_intensity.50ng, r3_wt_oe_intensity.50ng, r4_wt_oe_intensity.50ng, r2_wt_oe_intensity.100ng, r3_wt_oe_intensity.100ng, r4_wt_oe_intensity.100ng)),)
+Intensities_ratio_check_3_out_of_6_nonzero$ko_mean <- rowMeans(subset(Intensities_ratio_check_3_out_of_6_nonzero, select = c(r2_ko_oe_intensity.50ng, r3_ko_oe_intensity.50ng, r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities_ratio_check_3_out_of_6_nonzero <- Intensities_ratio_check_3_out_of_6_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_ratio_check_3_out_of_6_nonzero$logratio = log(Intensities_ratio_check_3_out_of_6_nonzero$ratio,10)
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_06_3outof6_Histogram_FoldChange_WT_KO_MassSpec_Mar2022TV.pdf")
-hist(Intensities_ratio_check_3_out_of_6_nonzero$logratio_mean, breaks = 50, main="(3 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+hist(Intensities_ratio_check_3_out_of_6_nonzero$logratio, breaks = 50, main="(3 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
 #4 out of 6
-Intensities_ratio_check_4_out_of_6_nonzero <- Intensities_ratio_check_4_out_of_6_nonzero %>% mutate(intensities_ratio1 = (r2_wt_oe_intensity.50ng/r2_ko_oe_intensity.50ng), intensities_ratio2=(r3_wt_oe_intensity.50ng/r3_ko_oe_intensity.50ng), intensities_ratio3 = (r4_wt_oe_intensity.50ng/ko_mean))
-Intensities_ratio_check_4_out_of_6_nonzero$ratio_mean <- rowMeans(subset(Intensities_ratio_check_4_out_of_6_nonzero, select = c(intensities_ratio1, intensities_ratio2,intensities_ratio3)),)
-Intensities_ratio_check_4_out_of_6_nonzero$logratio_mean = log(Intensities_ratio_check_4_out_of_6_nonzero$ratio_mean,10)
+Intensities_ratio_check_4_out_of_6_nonzero$wt_mean <- rowMeans(subset(Intensities_ratio_check_4_out_of_6_nonzero, select = c(r2_wt_oe_intensity.50ng, r3_wt_oe_intensity.50ng, r4_wt_oe_intensity.50ng, r2_wt_oe_intensity.100ng, r3_wt_oe_intensity.100ng, r4_wt_oe_intensity.100ng)),)
+Intensities_ratio_check_4_out_of_6_nonzero$ko_mean <- rowMeans(subset(Intensities_ratio_check_4_out_of_6_nonzero, select = c(r2_ko_oe_intensity.50ng, r3_ko_oe_intensity.50ng, r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities_ratio_check_4_out_of_6_nonzero <- Intensities_ratio_check_4_out_of_6_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_ratio_check_4_out_of_6_nonzero$logratio = log(Intensities_ratio_check_4_out_of_6_nonzero$ratio,10)
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_06_4outof6_Histogram_FoldChange_WT_KO_MassSpec_Mar2022TV.pdf")
-hist(Intensities_ratio_check_4_out_of_6_nonzero$logratio_mean, breaks = 50, main="(4 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+hist(Intensities_ratio_check_4_out_of_6_nonzero$logratio, breaks = 50, main="(4 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
 #5 out of 6
-Intensities_ratio_check_5_out_of_6_nonzero <- Intensities_ratio_check_5_out_of_6_nonzero %>% mutate(intensities_ratio1 = (r2_wt_oe_intensity.50ng/r2_ko_oe_intensity.50ng), intensities_ratio2=(r3_wt_oe_intensity.50ng/r3_ko_oe_intensity.50ng), intensities_ratio3 = (r4_wt_oe_intensity.50ng/ko_mean))
-Intensities_ratio_check_5_out_of_6_nonzero$ratio_mean <- rowMeans(subset(Intensities_ratio_check_5_out_of_6_nonzero, select = c(intensities_ratio1, intensities_ratio2,intensities_ratio3)),)
-Intensities_ratio_check_5_out_of_6_nonzero$logratio_mean = log(Intensities_ratio_check_5_out_of_6_nonzero$ratio_mean,10)
+Intensities_ratio_check_5_out_of_6_nonzero$wt_mean <- rowMeans(subset(Intensities_ratio_check_5_out_of_6_nonzero, select = c(r2_wt_oe_intensity.50ng, r3_wt_oe_intensity.50ng, r4_wt_oe_intensity.50ng, r2_wt_oe_intensity.100ng, r3_wt_oe_intensity.100ng, r4_wt_oe_intensity.100ng)),)
+Intensities_ratio_check_5_out_of_6_nonzero$ko_mean <- rowMeans(subset(Intensities_ratio_check_5_out_of_6_nonzero, select = c(r2_ko_oe_intensity.50ng, r3_ko_oe_intensity.50ng, r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities_ratio_check_5_out_of_6_nonzero <- Intensities_ratio_check_5_out_of_6_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_ratio_check_5_out_of_6_nonzero$logratio = log(Intensities_ratio_check_5_out_of_6_nonzero$ratio,10)
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_06_5outof6_Histogram_FoldChange_WT_KO_MassSpec_Mar2022TV.pdf")
-hist(Intensities_ratio_check_5_out_of_6_nonzero$logratio_mean, breaks = 50, main="(5 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+hist(Intensities_ratio_check_5_out_of_6_nonzero$logratio, breaks = 50, main="(5 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
 #6 out of 6
-Intensities_ratio_check_6_out_of_6_nonzero <- Intensities_ratio_check_6_out_of_6_nonzero %>% mutate(intensities_ratio1 = (r2_wt_oe_intensity.50ng/r2_ko_oe_intensity.50ng), intensities_ratio2=(r3_wt_oe_intensity.50ng/r3_ko_oe_intensity.50ng), intensities_ratio3 = (r4_wt_oe_intensity.50ng/ko_mean))
-Intensities_ratio_check_6_out_of_6_nonzero$ratio_mean <- rowMeans(subset(Intensities_ratio_check_6_out_of_6_nonzero, select = c(intensities_ratio1, intensities_ratio2,intensities_ratio3)),)
-Intensities_ratio_check_6_out_of_6_nonzero$logratio_mean = log(Intensities_ratio_check_6_out_of_6_nonzero$ratio_mean,10)
+Intensities_ratio_check_6_out_of_6_nonzero$wt_mean <- rowMeans(subset(Intensities_ratio_check_6_out_of_6_nonzero, select = c(r2_wt_oe_intensity.50ng, r3_wt_oe_intensity.50ng, r4_wt_oe_intensity.50ng, r2_wt_oe_intensity.100ng, r3_wt_oe_intensity.100ng, r4_wt_oe_intensity.100ng)),)
+Intensities_ratio_check_6_out_of_6_nonzero$ko_mean <- rowMeans(subset(Intensities_ratio_check_6_out_of_6_nonzero, select = c(r2_ko_oe_intensity.50ng, r3_ko_oe_intensity.50ng, r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities_ratio_check_6_out_of_6_nonzero <- Intensities_ratio_check_6_out_of_6_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_ratio_check_6_out_of_6_nonzero$logratio = log(Intensities_ratio_check_6_out_of_6_nonzero$ratio,10)
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_06_6outof6_Histogram_FoldChange_WT_KO_MassSpec_Mar2022TV.pdf")
-hist(Intensities_ratio_check_6_out_of_6_nonzero$logratio_mean, breaks = 50, main="(6 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+hist(Intensities_ratio_check_6_out_of_6_nonzero$logratio, breaks = 50, main="(6 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 protein", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
 dev.off()
 
 #Need to filter out those with ratios below 1.5
 #Getting ready for the Wilcoxon Test
 
 #1 out of 6
-Intensities_ratiovalid_1_out_of_6 <- dplyr::filter(Intensities_ratio_check_1_out_of_6_nonzero, ratio_mean > 1.1)
+Intensities_ratiovalid_1_out_of_6 <- dplyr::filter(Intensities_ratio_check_1_out_of_6_nonzero, ratio >= 1.5)
 intensities_validgenenames_1_out_of_6 <- Intensities_ratiovalid_1_out_of_6$gene
 pattern_to_search_1outof6 <- paste0(intensities_validgenenames_1_out_of_6, collapse = "$|^")
 pattern_to_search_1outof6 <- paste("^",pattern_to_search_1outof6,"$",sep="")
@@ -208,7 +216,7 @@ Intensities_1_out_of_6_ready<-Intensities_1_out_of_6_ready %>% row_to_names (row
 Intensities_1_out_of_6_ready[] <- lapply(Intensities_1_out_of_6_ready, type.convert, as.is = TRUE)
 
 #2 out of 6
-Intensities_ratiovalid_2_out_of_6 <- dplyr::filter(Intensities_ratio_check_2_out_of_6_nonzero, ratio_mean > 1.1)
+Intensities_ratiovalid_2_out_of_6 <- dplyr::filter(Intensities_ratio_check_2_out_of_6_nonzero, ratio >= 1.5)
 intensities_validgenenames_2_out_of_6 <- Intensities_ratiovalid_2_out_of_6$gene
 pattern_to_search_2outof6 <- paste0(intensities_validgenenames_2_out_of_6, collapse = "$|^")
 pattern_to_search_2outof6 <- paste("^",pattern_to_search_2outof6,"$",sep="")
@@ -219,7 +227,7 @@ Intensities_2_out_of_6_ready<-Intensities_2_out_of_6_ready %>% row_to_names (row
 Intensities_2_out_of_6_ready[] <- lapply(Intensities_2_out_of_6_ready, type.convert, as.is = TRUE)
 
 #3 out of 6
-Intensities_ratiovalid_3_out_of_6 <- dplyr::filter(Intensities_ratio_check_3_out_of_6_nonzero, ratio_mean > 1.1)
+Intensities_ratiovalid_3_out_of_6 <- dplyr::filter(Intensities_ratio_check_3_out_of_6_nonzero, ratio >= 1.5)
 intensities_validgenenames_3_out_of_6 <- Intensities_ratiovalid_3_out_of_6$gene
 pattern_to_search_3outof6 <- paste0(intensities_validgenenames_3_out_of_6, collapse = "$|^")
 pattern_to_search_3outof6 <- paste("^",pattern_to_search_3outof6,"$",sep="")
@@ -230,7 +238,7 @@ Intensities_3_out_of_6_ready<-Intensities_3_out_of_6_ready %>% row_to_names (row
 Intensities_3_out_of_6_ready[] <- lapply(Intensities_3_out_of_6_ready, type.convert, as.is = TRUE)
 
 #4 out of 6
-Intensities_ratiovalid_4_out_of_6 <- dplyr::filter(Intensities_ratio_check_4_out_of_6_nonzero, ratio_mean > 1.1)
+Intensities_ratiovalid_4_out_of_6 <- dplyr::filter(Intensities_ratio_check_4_out_of_6_nonzero, ratio >= 1.5)
 intensities_validgenenames_4_out_of_6 <- Intensities_ratiovalid_4_out_of_6$gene
 pattern_to_search_4outof6 <- paste0(intensities_validgenenames_4_out_of_6, collapse = "$|^")
 pattern_to_search_4outof6 <- paste("^",pattern_to_search_4outof6,"$",sep="")
@@ -241,7 +249,7 @@ Intensities_4_out_of_6_ready<-Intensities_4_out_of_6_ready %>% row_to_names (row
 Intensities_4_out_of_6_ready[] <- lapply(Intensities_4_out_of_6_ready, type.convert, as.is = TRUE)
 
 #5 out of 6
-Intensities_ratiovalid_5_out_of_6 <- dplyr::filter(Intensities_ratio_check_5_out_of_6_nonzero, ratio_mean > 1.1)
+Intensities_ratiovalid_5_out_of_6 <- dplyr::filter(Intensities_ratio_check_5_out_of_6_nonzero, ratio >= 1.5)
 intensities_validgenenames_5_out_of_6 <- Intensities_ratiovalid_5_out_of_6$gene
 pattern_to_search_5outof6 <- paste0(intensities_validgenenames_5_out_of_6, collapse = "$|^")
 pattern_to_search_5outof6 <- paste("^",pattern_to_search_5outof6,"$",sep="")
@@ -252,7 +260,7 @@ Intensities_5_out_of_6_ready<-Intensities_5_out_of_6_ready %>% row_to_names (row
 Intensities_5_out_of_6_ready[] <- lapply(Intensities_5_out_of_6_ready, type.convert, as.is = TRUE)
 
 #6 out of 6
-Intensities_ratiovalid_6_out_of_6 <- dplyr::filter(Intensities_ratio_check_6_out_of_6_nonzero, ratio_mean > 1.1)
+Intensities_ratiovalid_6_out_of_6 <- dplyr::filter(Intensities_ratio_check_6_out_of_6_nonzero, ratio >= 1.5)
 intensities_validgenenames_6_out_of_6 <- Intensities_ratiovalid_6_out_of_6$gene
 pattern_to_search_6outof6 <- paste0(intensities_validgenenames_6_out_of_6, collapse = "$|^")
 pattern_to_search_6outof6 <- paste("^",pattern_to_search_6outof6,"$",sep="")
@@ -282,7 +290,7 @@ test.fun1 <- function(Intensities_1_out_of_6_ready, col) {
 
  c1 <- combn(unique(Intensities_1_out_of_6_ready$genotype),2)
  sigs1 <- list()
- for(i in 1:ncol(c2)) {
+ for(i in 1:ncol(c1)) {
     sigs1[[i]] <- wilcox.test(
                    Intensities_1_out_of_6_ready[Intensities_1_out_of_6_ready$genotype == c1[1,i],col],
                    Intensities_1_out_of_6_ready[Intensities_1_out_of_6_ready$genotype == c1[2,i],col], exact=FALSE
@@ -298,7 +306,7 @@ test.fun1 <- function(Intensities_1_out_of_6_ready, col) {
 }
 
 
-tests_Intensities_1_out_of_6_Mar2022 <- lapply(colnames(Intensities_1_out_of_6_ready)[-1],function(x) test.fun2(Intensities_1_out_of_6_ready,x))
+tests_Intensities_1_out_of_6_Mar2022 <- lapply(colnames(Intensities_1_out_of_6_ready)[-1],function(x) test.fun1(Intensities_1_out_of_6_ready,x))
 names(tests_Intensities_1_out_of_6_Mar2022) <- colnames(Intensities_1_out_of_6_ready)[-1]
 results_Intensities_1_out_of_6_Mar2022 <- do.call(rbind.data.frame, tests_Intensities_1_out_of_6_Mar2022)
 write.csv(results_Intensities_1_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_results_Intensities_1_out_of_6_Mar2022.csv",row.names = TRUE)
@@ -443,7 +451,7 @@ write.csv(results_Intensities_6_out_of_6_Mar2022,"/scratch/Shares/rinn/tenaya/Ch
 
 #Histogram of p-values
 ```{r}
-hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
+#hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE) 
 
 #1 out of 6
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_1_out_of_6_MassSpec_Mar2022TV.pdf")
@@ -462,17 +470,17 @@ dev.off()
 
 #4 out of 6
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_4_out_of_6_MassSpec_Mar2022TV.pdf")
-hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
+hist(results_Intensities_4_out_of_6_Mar2022$p, breaks = 20, main="(4 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
 dev.off()
 
 #5 out of 6
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_1_out_of_6_MassSpec_Mar2022TV.pdf")
-hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_5_out_of_6_MassSpec_Mar2022TV.pdf")
+hist(results_Intensities_5_out_of_6_Mar2022$p, breaks = 20, main="(5 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
 dev.off()
 
 #6 out of 6
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_1_out_of_6_MassSpec_Mar2022TV.pdf")
-hist(results_Intensities_1_out_of_6_Mar2022$p, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_07_Histogram_Wilcoxon_Intensities_6_out_of_6_MassSpec_Mar2022TV.pdf")
+hist(results_Intensities_6_out_of_6_Mar2022$p, breaks = 20, main="(6 out of 6) Frequency of Wilcoxon Rank Sum Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein", xlab = "P-value from Wilcoxon Rank Sum Test", ylab = "Frequency of Genes", labels=TRUE)
 dev.off()
 
 
@@ -481,9 +489,10 @@ dev.off()
 
 #Grabbing genes that have large fold changes and making ggplots of them with t-tests and wilcoxon test
 #https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html
+#I silenced the ggplots for 1, 2, and 3 out of 6 because I want the script to run faster and we don't need them right now. 
 ```{r}
 #1 out of 6
-Logratio_filteredgenes_1_out_of_6 <- dplyr::filter(Intensities_ratio_check_1_out_of_6_nonzero, logratio_mean > 0.68)
+Logratio_filteredgenes_1_out_of_6 <- dplyr::filter(Intensities_ratio_check_1_out_of_6_nonzero, ratio > 1.5)
 genes_Logratio_filtered_1_out_of_6 <- Logratio_filteredgenes_1_out_of_6$gene
 pattern_to_search_logratio_1outof6 <- paste0(genes_Logratio_filtered_1_out_of_6, collapse = "$|^")
 pattern_to_search_logratio_1outof6 <- paste("^", pattern_to_search_logratio_1outof6,"$",sep="")
@@ -498,12 +507,12 @@ for (var in melted_Intensities_logratio_1_out_of_6_ready$variable) {
  
   pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_1_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
   print(ggboxplot(melted_Intensities_logratio_1_out_of_6_ready[melted_Intensities_logratio_1_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
-  dev.off()
+ dev.off()
   }
 
 
 #2 out of 6
-Logratio_filteredgenes_2_out_of_6 <- dplyr::filter(Intensities_ratio_check_2_out_of_6_nonzero, logratio_mean > 0.68)
+Logratio_filteredgenes_2_out_of_6 <- dplyr::filter(Intensities_ratio_check_2_out_of_6_nonzero, ratio > 1.5)
 genes_Logratio_filtered_2_out_of_6 <- Logratio_filteredgenes_2_out_of_6$gene
 pattern_to_search_logratio_2outof6 <- paste0(genes_Logratio_filtered_2_out_of_6, collapse = "$|^")
 pattern_to_search_logratio_2outof6 <- paste("^", pattern_to_search_logratio_2outof6,"$",sep="")
@@ -516,14 +525,14 @@ melted_Intensities_logratio_2_out_of_6_ready = melt(Intensities_logratio_2_out_o
 
 for (var in melted_Intensities_logratio_2_out_of_6_ready$variable) { 
  
-  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_2_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
-  print(ggboxplot(melted_Intensities_logratio_2_out_of_6_ready[melted_Intensities_logratio_2_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
-  dev.off()
-  }
+ pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_2_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
+ print(ggboxplot(melted_Intensities_logratio_2_out_of_6_ready[melted_Intensities_logratio_2_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+ dev.off()
+ }
 
 
 #3 out of 6
-Logratio_filteredgenes_3_out_of_6 <- dplyr::filter(Intensities_ratio_check_3_out_of_6_nonzero, logratio_mean > 0.68)
+Logratio_filteredgenes_3_out_of_6 <- dplyr::filter(Intensities_ratio_check_3_out_of_6_nonzero, ratio > 1.5)
 genes_Logratio_filtered_3_out_of_6 <- Logratio_filteredgenes_3_out_of_6$gene
 pattern_to_search_logratio_3outof6 <- paste0(genes_Logratio_filtered_3_out_of_6, collapse = "$|^")
 pattern_to_search_logratio_3outof6 <- paste("^", pattern_to_search_logratio_3outof6,"$",sep="")
@@ -537,13 +546,13 @@ melted_Intensities_logratio_3_out_of_6_ready = melt(Intensities_logratio_3_out_o
 for (var in melted_Intensities_logratio_3_out_of_6_ready$variable) { 
  
   pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_08_logratio_cutoff_genes_3_out_of_6//", var, "_ratiocutoff.pdf", sep=""))
-  print(ggboxplot(melted_Intensities_logratio_3_out_of_6_ready[melted_Intensities_logratio_3_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+ print(ggboxplot(melted_Intensities_logratio_3_out_of_6_ready[melted_Intensities_logratio_3_out_of_6_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
   dev.off()
-  }
+ }
 
 
 #4 out of 6
-Logratio_filteredgenes_4_out_of_6 <- dplyr::filter(Intensities_ratio_check_4_out_of_6_nonzero, logratio_mean > 0.68)
+Logratio_filteredgenes_4_out_of_6 <- dplyr::filter(Intensities_ratio_check_4_out_of_6_nonzero, ratio > 1.5)
 genes_Logratio_filtered_4_out_of_6 <- Logratio_filteredgenes_4_out_of_6$gene
 pattern_to_search_logratio_4outof6 <- paste0(genes_Logratio_filtered_4_out_of_6, collapse = "$|^")
 pattern_to_search_logratio_4outof6 <- paste("^", pattern_to_search_logratio_4outof6,"$",sep="")
@@ -562,7 +571,7 @@ for (var in melted_Intensities_logratio_4_out_of_6_ready$variable) {
   }
 
 #5 out of 6
-Logratio_filteredgenes_5_out_of_6 <- dplyr::filter(Intensities_ratio_check_5_out_of_6_nonzero, logratio_mean > 0.68)
+Logratio_filteredgenes_5_out_of_6 <- dplyr::filter(Intensities_ratio_check_5_out_of_6_nonzero, ratio > 1.5)
 genes_Logratio_filtered_5_out_of_6 <- Logratio_filteredgenes_5_out_of_6$gene
 pattern_to_search_logratio_5outof6 <- paste0(genes_Logratio_filtered_5_out_of_6, collapse = "$|^")
 pattern_to_search_logratio_5outof6 <- paste("^", pattern_to_search_logratio_5outof6,"$",sep="")
@@ -582,7 +591,7 @@ for (var in melted_Intensities_logratio_5_out_of_6_ready$variable) {
 
 
 #6 out of 6
-Logratio_filteredgenes_6_out_of_6 <- dplyr::filter(Intensities_ratio_check_6_out_of_6_nonzero, logratio_mean > 0.68)
+Logratio_filteredgenes_6_out_of_6 <- dplyr::filter(Intensities_ratio_check_6_out_of_6_nonzero, ratio > 1.5)
 genes_Logratio_filtered_6_out_of_6 <- Logratio_filteredgenes_6_out_of_6$gene
 pattern_to_search_logratio_6outof6 <- paste0(genes_Logratio_filtered_6_out_of_6, collapse = "$|^")
 pattern_to_search_logratio_6outof6 <- paste("^", pattern_to_search_logratio_6outof6,"$",sep="")
@@ -604,8 +613,22 @@ for (var in melted_Intensities_logratio_6_out_of_6_ready$variable) {
 
 
 #ttest and wilcoxon test in one csv
-##I'm narrowing my focus to 4 out of 6 and up.
+##I'm narrowing my focus to 3 out of 6 and up.
 ```{r}
+#3 out of 6
+Logratio_filteredgenes_3_out_of_6$ttest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_3_out_of_6), function(i) t.test(as.numeric(as.character(unlist(Logratio_filteredgenes_3_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_3_out_of_6[i,8:11]))))[c("p.value")])
+Logratio_filteredgenes_3_out_of_6$wilcoxtest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_3_out_of_6), function(i) wilcox.test(as.numeric(as.character(unlist(Logratio_filteredgenes_3_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_3_out_of_6[i,8:11]))))[c("p.value")])
+Logratio_filteredgenes_3_out_of_6$ttest_pvalue <- as.numeric(unlist(Logratio_filteredgenes_3_out_of_6$ttest_pvalue))
+Logratio_filteredgenes_3_out_of_6$wilcoxtest_pvalue <- as.numeric(unlist(Logratio_filteredgenes_3_out_of_6$wilcoxtest_pvalue))
+Logratio_filteredgenes_3_out_of_6$ko_check <- rowSums(Logratio_filteredgenes_3_out_of_6[,8:11] > 2)
+write.csv(Logratio_filteredgenes_3_out_of_6,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_pvalues_ttest_Wilcoxon_Intensities_3_out_of_6_Mar2022.csv",row.names = TRUE)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_Histogram_Ttest_pvalues_3_out_of_6_and_RatioCutoff_MassSpec_Mar2022TV.pdf")
+hist(Logratio_filteredgenes_3_out_of_6$ttest_pvalue, breaks = 20, main="(3 out of 6) Frequency of T-Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein and with Ratio Cutoff", xlab = "P-value from T-Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_11_Histogram_Wilcoxon_test_pvalues_3_out_of_6_and_RatioCutoff_MassSpec_Mar2022TV.pdf")
+hist(Logratio_filteredgenes_3_out_of_6$wilcoxtest_pvalue, breaks = 20, main="(3 out of 6) Frequency of Wilcoxon Test P-values \nComparing KO with WT Mass Intensities from TVkitMar2022 protein and with Ratio Cutoff", xlab = "P-value from T-Test", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
 #4 out of 6
 Logratio_filteredgenes_4_out_of_6$ttest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_4_out_of_6), function(i) t.test(as.numeric(as.character(unlist(Logratio_filteredgenes_4_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_4_out_of_6[i,8:11]))))[c("p.value")])
 Logratio_filteredgenes_4_out_of_6$wilcoxtest_pvalue <- sapply(1:nrow(Logratio_filteredgenes_4_out_of_6), function(i) wilcox.test(as.numeric(as.character(unlist(Logratio_filteredgenes_4_out_of_6[i,2:7]))), as.numeric(as.character(unlist(Logratio_filteredgenes_4_out_of_6[i,8:11]))))[c("p.value")])
@@ -675,13 +698,542 @@ Intensities_sucgrad_nonzero$ko_mean <- rowMeans(subset(Intensities_sucgrad_nonze
 Intensities_sucgrad_nonzero <- Intensities_sucgrad_nonzero %>% mutate(ratio = wt_mean/ko_mean)
 Intensities_sucgrad_nonzero$logratio = log(Intensities_sucgrad_nonzero$ratio,10)
 
+#histogram of all suc grad ratios
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_12_Histogram_Suc_Grad_Ratio.pdf")
+hist(Intensities_sucgrad_nonzero$logratio, breaks = 20, main="Frequency of Log (10) WT: KO Ratio \n of Mass Spec Intensities from Sucrose Gradient Fractions 5 and 6", xlab = "Log (10) Ratio of WT: KO Intensities", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
 #ttest failed so only did Wilcoxon test
 Intensities_sucgrad_nonzero$wilcoxtest_pvalue <- sapply(1:nrow(Intensities_sucgrad_nonzero), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_sucgrad_nonzero[i,2:5]))), as.numeric(as.character(unlist(Intensities_sucgrad_nonzero[i,6:9]))))[c("p.value")])
 Intensities_sucgrad_nonzero$wilcoxtest_pvalue <- as.numeric(unlist(Intensities_sucgrad_nonzero$wilcoxtest_pvalue))
 Intensities_sucgrad_nonzero$wt_check <- rowSums(Intensities_sucgrad_nonzero[,6:9] >1)
 Intensities_sucgrad_nonzero$ko_check <- rowSums(Intensities_sucgrad_nonzero[,2:5] >1)
 
+#Histogram of all suc grad wilcoxon pvalues
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_12_Histogram_Suc_Grad_Wilcoxon_pvalues.pdf")
+hist(Intensities_sucgrad_nonzero$wilcoxtest_pvalue, breaks = 40, main="Frequency of Pvalues from a Wilcoxon Test Comparing WT and KO\n of Mass Spec Intensities from Sucrose Gradient Combined Fractions 5 and 6", xlab = "Pvalues from Wilcoxon Test of WT to KO", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
 #Compare to 4 out of 6
 MarChIRP_SucGrad_data_4_out_of_6 <- Logratio_filteredgenes_4_out_of_6 %>% left_join(Intensities_sucgrad_nonzero,by="gene")
+write.csv(MarChIRP_SucGrad_data_4_out_of_6,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_12_SucGrad_plus_results_Intensities_4_out_of_6_Mar2022.csv",row.names = TRUE)
 
 ```
+
+#Checking out the idea that the 100ng data may be dragging me down
+```{r}
+Intensities_50ng_analysis <- Intensities_50ng
+Intensities_50ng_analysis <- Intensities_50ng_analysis[,c(1,2,4,3,5,6)]
+Intensities_50ng_inputfilter <- Intensities_50ng_analysis[rowSums(Intensities_50ng_analysis > 0) >= 2,]
+Intensities_50ng_inputfilter_nonzero <- Intensities_50ng_inputfilter %>% map_if(is.numeric, ~.+1)
+Intensities_50ng_inputfilter_nonzero <- as.data.frame(Intensities_50ng_inputfilter_nonzero)
+Intensities_50ng_inputfilter_nonzero$wt_mean <- rowMeans(subset(Intensities_50ng_inputfilter_nonzero, select = c(r2_wt_oe_intensity.50ng,r3_wt_oe_intensity.50ng,r4_wt_oe_intensity.50ng)),)
+Intensities_50ng_inputfilter_nonzero$ko_mean <- rowMeans(subset(Intensities_50ng_inputfilter_nonzero, select = c(r2_ko_oe_intensity.50ng, r3_ko_oe_intensity.50ng)),)
+Intensities_50ng_inputfilter_nonzero <- Intensities_50ng_inputfilter_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_50ng_inputfilter_nonzero$logratio = log(Intensities_50ng_inputfilter_nonzero$ratio,10)
+
+#histogram of ratios from 50ng data
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_12_Histogram_logratio_50ngMar2022_ChIRP.pdf")
+hist(Intensities_50ng_inputfilter_nonzero$logratio, breaks = 20, main="(50 ng only) Frequency of Log (10) WT: KO Ratio \n of Mass Spec Intensities from Mar2022 50ng ChIRP", xlab = "Log (10) Ratio of WT: KO Intensities", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#t-test and wilcoxon test
+Intensities_50ng_inputfilter_nonzero$ttest_pvalue <- sapply(1:nrow(Intensities_50ng_inputfilter_nonzero), function(i) t.test(as.numeric(as.character(unlist(Intensities_50ng_inputfilter_nonzero[i,2:3]))), as.numeric(as.character(unlist(Intensities_50ng_inputfilter_nonzero[i,4:6]))))[c("p.value")])
+Intensities_50ng_inputfilter_nonzero$ttest_pvalue <- as.numeric(unlist(Intensities_50ng_inputfilter_nonzero$ttest_pvalue))
+Intensities_50ng_inputfilter_nonzero$wilcoxtest_pvalue <- sapply(1:nrow(Intensities_50ng_inputfilter_nonzero), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_50ng_inputfilter_nonzero[i,2:3]))), as.numeric(as.character(unlist(Intensities_50ng_inputfilter_nonzero[i,4:6]))))[c("p.value")])
+Intensities_50ng_inputfilter_nonzero$wilcoxtest_pvalue <- as.numeric(unlist(Intensities_50ng_inputfilter_nonzero$wilcoxtest_pvalue))
+Intensities_50ng_inputfilter_nonzero$wt_check <- rowSums(Intensities_50ng_inputfilter_nonzero[,4:6] >1)
+Intensities_50ng_inputfilter_nonzero$ko_check <- rowSums(Intensities_50ng_inputfilter_nonzero[,2:3] >1)
+
+#histograms of ttest and wilcoxon pvalues
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_12_Histogram_50ngMar2022ChIRP_Ttest_pvalues.pdf")
+hist(Intensities_50ng_inputfilter_nonzero$ttest_pvalue, breaks = 40, main="Frequency of Pvalues from a T-Test Comparing WT and KO\n of Mass Spec Intensities from 50ng Mar2022 ChIRP", xlab = "Pvalues from T-Test of WT to KO", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_12_Histogram_50ngMar2022ChIRP_Wilcoxon_pvalues.pdf")
+hist(Intensities_50ng_inputfilter_nonzero$wilcoxtest_pvalue, breaks = 40, main="Frequency of Pvalues from a Wilcoxon Test Comparing WT and KO\n of Mass Spec Intensities from 50ng Mar2022 ChIRP", xlab = "Pvalues from Wilcoxon Test of WT to KO", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#ratio >=1.5 cutoff
+ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(Intensities_50ng_inputfilter_nonzero, ratio > 1.5)
+genes_ratiofiltered_50ng_Mar2022ChIRP <- ratiofiltered_50ng_Mar2022ChIRP$gene
+pattern_to_search_ratiofiltered_50ngChIRP <- paste0(genes_ratiofiltered_50ng_Mar2022ChIRP, collapse = "$|^")
+pattern_to_search_ratiofiltered_50ngChIRP <- paste("^", pattern_to_search_ratiofiltered_50ngChIRP,"$",sep="")
+Intensities_50ng_ready <- Intensities_50ng_analysis[grepl(pattern_to_search_ratiofiltered_50ngChIRP, Intensities_50ng_analysis$gene),]
+Intensities_50ng_ready <- as.data.frame(t(Intensities_50ng_ready))
+Intensities_50ng_newcol <- c("genotype","KO", "KO", "WT","WT","WT")
+Intensities_50ng_ready<- cbind(Intensities_50ng_newcol,Intensities_50ng_ready)
+Intensities_50ng_ready<-Intensities_50ng_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_50ng_ready[] <- lapply(Intensities_50ng_ready, type.convert, as.is = TRUE)
+melted_Intensities_50ng_ready = melt(Intensities_50ng_ready)
+
+for (var in melted_Intensities_50ng_ready$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_12_50ng_boxwhiskers_ttest_wilcoxon//", var, "_50ng_ratiocutoff.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_50ng_ready[melted_Intensities_50ng_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+ dev.off()
+  }
+
+
+write.csv(ratiofiltered_50ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_12_50ng_ratiofiltered_Mar2022ChIRP.csv",row.names = TRUE)
+
+
+```
+
+#But I need to be fair to the 100ng data. So here is the 100ng analysis. 
+```{r}
+Intensities_100ng_analysis <- Intensities_100ng
+Intensities_100ng_analysis <- Intensities_100ng_analysis[,c(1,2,4,3,5,6)]
+Intensities_100ng_inputfilter <- Intensities_100ng_analysis[rowSums(Intensities_100ng_analysis > 0) >= 2,]
+Intensities_100ng_inputfilter_nonzero <- Intensities_100ng_inputfilter %>% map_if(is.numeric, ~.+1)
+Intensities_100ng_inputfilter_nonzero <- as.data.frame(Intensities_100ng_inputfilter_nonzero)
+Intensities_100ng_inputfilter_nonzero$wt_mean <- rowMeans(subset(Intensities_100ng_inputfilter_nonzero, select = c(r2_wt_oe_intensity.100ng,r3_wt_oe_intensity.100ng,r4_wt_oe_intensity.100ng)),)
+Intensities_100ng_inputfilter_nonzero$ko_mean <- rowMeans(subset(Intensities_100ng_inputfilter_nonzero, select = c(r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities_100ng_inputfilter_nonzero <- Intensities_100ng_inputfilter_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_100ng_inputfilter_nonzero$logratio = log(Intensities_100ng_inputfilter_nonzero$ratio,10)
+
+#histogram of ratios from 100ng data
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_Histogram_logratio_100ngMar2022_ChIRP.pdf")
+hist(Intensities_100ng_inputfilter_nonzero$logratio, breaks = 20, main="(100 ng only) Frequency of Log (10) WT: KO Ratio \n of Mass Spec Intensities from Mar2022 100ng ChIRP", xlab = "Log (10) Ratio of WT: KO Intensities", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#t-test and wilcoxon test
+Intensities_100ng_inputfilter_nonzero$ttest_pvalue <- sapply(1:nrow(Intensities_100ng_inputfilter_nonzero), function(i) t.test(as.numeric(as.character(unlist(Intensities_100ng_inputfilter_nonzero[i,2:3]))), as.numeric(as.character(unlist(Intensities_100ng_inputfilter_nonzero[i,4:6]))))[c("p.value")])
+Intensities_100ng_inputfilter_nonzero$ttest_pvalue <- as.numeric(unlist(Intensities_100ng_inputfilter_nonzero$ttest_pvalue))
+Intensities_100ng_inputfilter_nonzero$wilcoxtest_pvalue <- sapply(1:nrow(Intensities_100ng_inputfilter_nonzero), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_100ng_inputfilter_nonzero[i,2:3]))), as.numeric(as.character(unlist(Intensities_100ng_inputfilter_nonzero[i,4:6]))))[c("p.value")])
+Intensities_100ng_inputfilter_nonzero$wilcoxtest_pvalue <- as.numeric(unlist(Intensities_100ng_inputfilter_nonzero$wilcoxtest_pvalue))
+Intensities_100ng_inputfilter_nonzero$wt_check <- rowSums(Intensities_100ng_inputfilter_nonzero[,4:6] >1)
+Intensities_100ng_inputfilter_nonzero$ko_check <- rowSums(Intensities_100ng_inputfilter_nonzero[,2:3] >1)
+
+#histograms of ttest and wilcoxon pvalues
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_Histogram_100ngMar2022ChIRP_Ttest_pvalues.pdf")
+hist(Intensities_100ng_inputfilter_nonzero$ttest_pvalue, breaks = 40, main="Frequency of Pvalues from a T-Test Comparing WT and KO\n of Mass Spec Intensities from 100ng Mar2022 ChIRP", xlab = "Pvalues from T-Test of WT to KO", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_Histogram_100ngMar2022ChIRP_Wilcoxon_pvalues.pdf")
+hist(Intensities_100ng_inputfilter_nonzero$wilcoxtest_pvalue, breaks = 40, main="Frequency of Pvalues from a Wilcoxon Test Comparing WT and KO\n of Mass Spec Intensities from 100ng Mar2022 ChIRP", xlab = "Pvalues from Wilcoxon Test of WT to KO", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+#ratio >=1.5 cutoff
+ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(Intensities_100ng_inputfilter_nonzero, ratio > 1.5)
+genes_ratiofiltered_100ng_Mar2022ChIRP <- ratiofiltered_100ng_Mar2022ChIRP$gene
+pattern_to_search_ratiofiltered_100ngChIRP <- paste0(genes_ratiofiltered_100ng_Mar2022ChIRP, collapse = "$|^")
+pattern_to_search_ratiofiltered_100ngChIRP <- paste("^", pattern_to_search_ratiofiltered_100ngChIRP,"$",sep="")
+Intensities_100ng_ready <- Intensities_100ng_analysis[grepl(pattern_to_search_ratiofiltered_100ngChIRP, Intensities_100ng_analysis$gene),]
+Intensities_100ng_ready <- as.data.frame(t(Intensities_100ng_ready))
+Intensities_100ng_newcol <- c("genotype","KO", "KO", "WT","WT","WT")
+Intensities_100ng_ready<- cbind(Intensities_100ng_newcol,Intensities_100ng_ready)
+Intensities_100ng_ready<-Intensities_100ng_ready %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_100ng_ready[] <- lapply(Intensities_100ng_ready, type.convert, as.is = TRUE)
+melted_Intensities_100ng_ready = melt(Intensities_100ng_ready)
+
+for (var in melted_Intensities_100ng_ready$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_13_100ng_boxwhiskers_ttest_wilcoxon//", var, "_100ng_ratiocutoff.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_100ng_ready[melted_Intensities_100ng_ready$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+ dev.off()
+  }
+
+
+write.csv(ratiofiltered_100ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_100ng_ratiofiltered_Mar2022ChIRP.csv",row.names = TRUE)
+```
+
+
+#MassSpec Analysis 5.0
+#Noticed that one third of the 3 out of 6 had no entries whatsoever in 100ng
+#I think questioned whether to treat 50 ng and 100ng equally. 
+#So I am filter 50 ng and 100 ng separately based on a 1.5 ratio filter
+#Then combine both lists with ratios, pvalues, and KO checks based on three categories
+#The above will be taken from unfiltered combined dataset that I'll have to make
+#Category 1: 3/3 WT and 0/2 KO
+#Category 2: 2/3 WT and 0/2 KO
+#Category 3: 3/3 WT and 1/2 KO
+#Add combined (100ng and 50ng previously calculated) ratios, pvalues,
+#Add Suc Grad ratios, pvalues, WT check, KO check
+#Add ratios and KO check from both Even and odd Jan2022TV 
+#Add ratios and KO check from both Even and odd Jan2022FA (also for both WT:KO and 2h:KO)
+#Add fixed ratios (took out of log 2, flipped so WT:KO instead of KO:WT) from Michael's RNA Seq deSeq analysis
+```{r}
+#Making a flow chart so folks can understand what I'm about to do
+#https://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html
+
+grViz(diagram = "digraph flowchart {
+      
+      node [fontname = Helvetica, shape = rectange, color = White, style = filled]        
+      
+      tab1 [label = '@@1']
+      
+      node [fontname = Helvetica, shape = rectange, color = DeepSkyBlue, style = filled]
+      tab2 [label = '@@2']
+      tab4 [label = '@@4']
+      tab6 [label = '@@6']
+      
+      
+      node [fontname = Helvetica, shape = rectange, color = Tomato1, style = filled]        
+      tab3 [label = '@@3']
+      tab5 [label = '@@5']
+      tab7 [label = '@@7']
+
+      
+      node [fontname = Helvetica, shape = rectange, color = MediumPurple1, style = filled] 
+      tab8 [label = '@@8']
+      tab9 [label = '@@9']
+      tab10 [label = '@@10']
+      
+      
+      node [fontname = Helvetica, shape = rectange, color = White, style = filled] 
+      tab11 [label = '@@11']
+      tab12 [label = '@@12']
+      tab13 [label = '@@13']
+      tab14 [label = '@@14']
+      tab15 [label = '@@15']
+      tab16 [label = '@@16']
+      tab17 [label = '@@17']
+      
+      
+      node [fontname = Helvetica, shape = rectange, color = DarkOliveGreen3, style = filled] 
+      
+      tab18 [label = '@@18']
+
+      tab1 -> tab2;
+      tab1 -> tab3;
+      tab2 -> tab4;
+      tab3 -> tab5;
+      tab4 -> tab6;
+      tab5 -> tab7;
+      {tab6 tab7} -> tab8;
+      {tab6 tab7} -> tab9;
+      {tab6 tab7} -> tab10;
+      {tab8 tab9 tab10} -> tab11;
+      tab11 -> {tab12 tab13 tab14 tab15 tab16};
+      {tab12 tab13 tab14 tab15 tab16} -> tab17;
+      tab17 -> tab18
+      }
+
+    
+      [1]: 'Mass Spec Analysis 5.0 of Firre ChIRP'
+      [2]: '50ng Sample Load Technical Replicate'
+      [3]: '100ng Sample Load Technical Replicate'
+      [4]: 'Ratio WT:KO >= 1.5 (299 Genes)'
+      [5]: 'Ratio WT:KO >= 1.5 (97 Genes)'
+      [6]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
+      [7]: 'Cutoffs for # of WT and KO Samples with Intensities above 0'
+      [8]: 'Combine 3WT and 0KO Genes \\nfrom 50ng (23 Genes) and 100ng (5 Genes)'
+      [9]: 'Combine 2WT and 0KO Genes \\nfrom 50ng (30 Genes) and 100ng (8 Genes)'
+      [10]: 'Combine 3WT and 1KO Genes \\nfrom 50ng (19 Genes) and 100ng (4 Genes)'
+      [11]: 'Expand Comparison to Other Datasets \\n(ng Ratio >= 1.5, ng pvalue =<0.05)'
+      [12]: '50ng&100ng combined ratios (>= 1.5), \\npvalues (=< 0.05), and KO Check (=< 1)'
+      [13]: 'Sucrose Gradient Ratios \\n(>= 1.1) and pvalue (=<0.05)'
+      [14]: 'Odd and Even Ratios (>= 1.5) \\nand pvalue (=<0.05) \\nfrom Jan2022 TV'
+      [15]: 'Odd and Even Ratios \\nfrom Jan2022 Fede Data \\nfor both WT:KO (>= 1.1),  \\nUp in 2h:KO from WT:KO (WT:KO < 2h:KO), \\nand KO Check (=<2)'
+      [16]: 'Michaels RNA seq \\nRatios and Padjvalues'
+      [17]: 'True for 5 out of 12 Cutoffs (Average was ~3.7 out of 12)'
+      [18]:'# Promising Genes - 18 Genes'
+      ")
+
+```
+
+
+#Process Map of Mass Spec 4.0
+```{r}
+grViz(diagram = "digraph flowchart {
+      
+      node [fontname = Helvetica, shape = rectange, color = White, style = filled]        
+      tab1 [label = '@@1']
+      
+      node [fontname = Helvetica, shape = rectange, color = DeepSkyBlue, style = filled]
+      tab2 [label = '@@2']
+    
+      node [fontname = Helvetica, shape = rectange, color = Tomato1, style = filled]        
+      tab3 [label = '@@3']   
+      
+      node [fontname = Helvetica, shape = rectange, color = MediumPurple1, style = filled]
+      tab4 [label = '@@4']
+      
+      node [fontname = Helvetica, shape = rectange, color = White, style = filled] 
+      tab5 [label = '@@5']
+      tab6 [label = '@@6']
+      tab7 [label = '@@7']
+      tab8 [label = '@@8']
+      tab9 [label = '@@9']
+      tab10 [label = '@@10']
+      tab11 [label = '@@11']
+      tab12 [label = '@@12']
+      tab13 [label = '@@13']
+      
+      node [fontname = Helvetica, shape = rectange, color = DarkOliveGreen3, style = filled]
+      tab14 [label = '@@14']
+      
+
+      tab1 -> tab2;
+      tab1 -> tab3;
+      {tab2 tab3} -> tab4;
+      tab4 -> tab5;
+      tab5 -> tab6;
+      tab6 -> tab7;
+      tab7 -> tab8
+      tab8 -> tab9
+      tab9 -> {tab10 tab11 tab12 tab13};
+      {tab10 tab11 tab12 tab13} -> tab14
+      }
+
+    
+      [1]: 'Mass Spec Analysis 4.0 of Firre ChIRP'
+      [2]: '50ng Sample Load Technical Replicate'
+      [3]: '100ng Sample Load Technical Replicate'
+      [4]: 'Combine 50ng and 100ng data'
+      [5]: 'Ratio WT:KO >= 1.5 [517 genes]'
+      [6]: 'Cutoffs for 4 out of 6 WT Samples with Intensities above 0 [35 Genes]'
+      [7]: 'Selected Genes with No or 1 KO Intensity [13 Genes]'
+      [8]: 'Selected Proteins that are nuclear [7 Genes]'
+      [9]: 'Expand Comparison to Other Datasets'
+      [10]: 'Sucrose Gradient Ratios and KO checks'
+      [11]: 'Odd and Even Ratios and KO Checks from Jan2022 TV'
+      [12]: 'Odd and Even Ratios from Jan2022 Fede Data for both WT:KO and WT2h:KO'
+      [13]: 'Michaels RNA seq Ratios and Padjvalues'
+      [14]: '2 Promising Genes - Hmgb1 and Ddx39b '
+      
+      ")
+```
+
+
+#Folks wanted a parametric test to confirm that my selections are not random. 
+```{r}
+#first I want to show the log ratios of all samples that at least one intensity in either KO or WT. 
+Intensities2 <- Intensities
+Intensities2 <- Intensities2 %>% replace_na(list(r2_ko_oe_intensity.50ng = 0, r2_wt_oe_intensity.50ng = 0, r3_ko_oe_intensity.50ng = 0, r3_wt_oe_intensity.50ng = 0, r4_wt_oe_intensity.50ng=0, r2_ko_oe_intensity.100ng=0, r2_wt_oe_intensity.100ng=0, r3_ko_oe_intensity.100ng=0, r3_wt_oe_intensity.100ng=0, r4_wt_oe_intensity.100ng=0))
+Intensities2_filteroutinput<- Intensities2[rowSums(Intensities2 > 0) >= 2,]
+Intensities2_filteroutinput_nonzero <- Intensities2_filteroutinput %>% map_if(is.numeric, ~.+1)
+Intensities2_filteroutinput_nonzero <- as.data.frame(Intensities2_filteroutinput_nonzero)
+Intensities2_filteroutinput_nonzero$wt_mean <- rowMeans(subset(Intensities2_filteroutinput_nonzero, select = c(r2_wt_oe_intensity.50ng, r3_wt_oe_intensity.50ng, r4_wt_oe_intensity.50ng, r2_wt_oe_intensity.100ng, r3_wt_oe_intensity.100ng, r4_wt_oe_intensity.100ng)),)
+Intensities2_filteroutinput_nonzero$ko_mean <- rowMeans(subset(Intensities2_filteroutinput_nonzero, select = c(r2_ko_oe_intensity.50ng, r3_ko_oe_intensity.50ng, r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities2_filteroutinput_nonzero <- Intensities2_filteroutinput_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities2_filteroutinput_nonzero$logratio = log(Intensities2_filteroutinput_nonzero$ratio,10)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_12_Histogram_AllGenes_FirreChIRP_Mar2022_Ratio.pdf")
+hist(Intensities2_filteroutinput_nonzero$logratio, breaks = 40, main="Frequency of Log (10) WT: KO Ratio \n of Mass Spec Intensities from Firre ChIRP Mar2022", xlab = "Log (10) Ratio of WT: KO Intensities", ylab = "Frequency of Genes", labels=TRUE)
+dev.off()
+
+```
+
+#Need to make my job easier by compiling all the other data into one csv
+#Other data = 50ng&100ngMarChIRP, SucGrad, Jan2022TV, Jan2022Fede, Michael's data
+#For the ChIRP experiments, have ratios and WT/KO checks
+```{r}
+#I already took out the first three and put them into this workspace. 
+##Notes
+#All intensities will have a +1
+#All ratios will be WT/KO
+
+#50ng&100ng MarChIRP
+#50ng&100ng MarChIRP with no filter = Intensities2_filteroutinput_nonzero
+#need to add WT and KO checks and pvalues
+Intensities2_filteroutinput_nonzero_reorderedcolumns <- Intensities2_filteroutinput_nonzero
+Intensities2_filteroutinput_nonzero_reorderedcolumns <- Intensities2_filteroutinput_nonzero_reorderedcolumns[,c(1,2,4,7,9,3,5,6,8,10,11,12,13,14,15)]
+Intensities2_filteroutinput_nonzero_reorderedcolumns$wt_check <- rowSums(Intensities2_filteroutinput_nonzero_reorderedcolumns[,6:11] >1)
+Intensities2_filteroutinput_nonzero_reorderedcolumns$ko_check <- rowSums(Intensities2_filteroutinput_nonzero_reorderedcolumns[,2:5] >1)
+#t-test and wilcoxon test
+Intensities2_filteroutinput_nonzero_reorderedcolumns$ttest_pvalue <- sapply(1:nrow(Intensities2_filteroutinput_nonzero_reorderedcolumns), function(i) t.test(as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns[i,2:5]))), as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns[i,6:11]))))[c("p.value")])
+Intensities2_filteroutinput_nonzero_reorderedcolumns$ttest_pvalue <- as.numeric(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns$ttest_pvalue))
+Intensities2_filteroutinput_nonzero_reorderedcolumns$wilcoxtest_pvalue <- sapply(1:nrow(Intensities2_filteroutinput_nonzero_reorderedcolumns), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns[i,2:5]))), as.numeric(as.character(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns[i,6:11]))))[c("p.value")])
+Intensities2_filteroutinput_nonzero_reorderedcolumns$wilcoxtest_pvalue <- as.numeric(unlist(Intensities2_filteroutinput_nonzero_reorderedcolumns$wilcoxtest_pvalue))
+
+colnames(Intensities2_filteroutinput_nonzero_reorderedcolumns) <- paste(colnames(Intensities2_filteroutinput_nonzero_reorderedcolumns),"combinedMarChIRP",sep=".")
+#50ng&100ng MarChIRP is good to go!
+#Use Intensities2_filteroutinput_nonzero_reorderedcolumns
+
+#SucroseGradient Data 
+#Is ready to go. Did it previously. 
+Intensities_sucgrad_nonzero2 <- Intensities_sucgrad_nonzero
+colnames(Intensities_sucgrad_nonzero2) <- paste(colnames(Intensities_sucgrad_nonzero2),"combinedSucGrad",sep=".")
+#Use Intensities_sucgrad_nonzero2
+
+
+#Jan2022 TV ChIRP Data
+#Previously input the data as WT_intensities_mass_spec_Jan2022_TV and KO_intensities_mass_spec_Jan2022_TV
+Intensities_Jan2022TV <- full_join(KO_intensities_mass_spec_Jan2022_TV, WT_intensities_mass_spec_Jan2022_TV, by = "gene")
+Intensities_Jan2022TV <- Intensities_Jan2022TV %>% map_if(is.numeric, ~.+1)
+Intensities_Jan2022TV <- as.data.frame(Intensities_Jan2022TV)
+Intensities_Jan2022TV <- Intensities_Jan2022TV %>% mutate(evenratio = wt_0h_even_total_intensity.Jan2022/ko_0h_even_total_intensity.Jan2022)
+Intensities_Jan2022TV <- Intensities_Jan2022TV %>% mutate(oddratio = wt_0h_odd_total_intensity.Jan2022/ko_0h_odd_total_intensity.Jan2022)
+Intensities_Jan2022TV$wt_check <- rowSums(Intensities_Jan2022TV[,4:5] >1)
+Intensities_Jan2022TV$ko_check <- rowSums(Intensities_Jan2022TV[,2:3] >1)
+#Intensities_Jan2022TV$ttest_pvalue <- sapply(1:nrow(Intensities_Jan2022TV), function(i) t.test(as.numeric(as.character(unlist(Intensities_Jan2022TV[i,2:3]))), as.numeric(as.character(unlist(Intensities_Jan2022TV[i,4:5]))))[c("p.value")])
+#Intensities_Jan2022TV$ttest_pvalue <- as.numeric(unlist(Intensities_Jan2022TV$ttest_pvalue))
+Intensities_Jan2022TV$wilcoxtest_pvalue <- sapply(1:nrow(Intensities_Jan2022TV), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022TV[i,2:3]))), as.numeric(as.character(unlist(Intensities_Jan2022TV[i,4:5]))))[c("p.value")])
+Intensities_Jan2022TV$wilcoxtest_pvalue <- as.numeric(unlist(Intensities_Jan2022TV$wilcoxtest_pvalue))
+colnames(Intensities_Jan2022TV) <- paste(colnames(Intensities_Jan2022TV),"Jan2022TV",sep=".")
+#Use Intensities_Jan2022TV
+
+#Jan2022 Fede ChIRP Data
+mass_spec_Jan2022_FA <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis/20220107_SCP_FAriel.csv") %>% clean_names()
+KO_intensities_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,14,16,18,20,22,24,26,28)]
+WT_intensities_mass_spec_Jan2022_FA <- mass_spec_Jan2022_FA[,c(4,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60)]
+Intensities_Jan2022_FA <- full_join(KO_intensities_mass_spec_Jan2022_FA, WT_intensities_mass_spec_Jan2022_FA, by = "gene")
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA%>% map_if(is.numeric, ~.+1)
+Intensities_Jan2022_FA <- as.data.frame(Intensities_Jan2022_FA)
+Intensities_Jan2022_FA$odd_wt_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(wt_0h_odd_1_total_intensity, wt_0h_odd_2_total_intensity, wt_0h_odd_3_total_intensity, wt_0h_odd_4_total_intensity)),)
+Intensities_Jan2022_FA$even_wt_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(wt_0h_even_1_total_intensity, wt_0h_even_2_total_intensity, wt_0h_even_3_total_intensity, wt_0h_even_4_total_intensity)),)
+Intensities_Jan2022_FA$odd_2h_wt_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(wt_2h_odd_1_total_intensity, wt_2h_odd_2_total_intensity, wt_2h_odd_3_total_intensity, wt_2h_odd_4_total_intensity)),)
+Intensities_Jan2022_FA$even_2h_wt_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(wt_2h_even_1_total_intensity,wt_2h_even_2_total_intensity,wt_2h_even_3_total_intensity,wt_2h_even_4_total_intensity)),)
+Intensities_Jan2022_FA$odd_ko_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(ko_odd_1_total_intensity, ko_odd_2_total_intensity, ko_odd_3_total_intensity, ko_odd_4_total_intensity)),)
+Intensities_Jan2022_FA$even_ko_mean <- rowMeans(subset(Intensities_Jan2022_FA, select = c(ko_even_1_total_intensity, ko_even_2_total_intensity, ko_even_3_total_intensity, ko_even_4_total_intensity)),)
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA %>% mutate(odd_wt_ratio = odd_wt_mean/odd_ko_mean)
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA %>% mutate(even_wt_ratio = even_wt_mean/even_ko_mean)
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA %>% mutate(odd_2h_wt_ratio = odd_2h_wt_mean/odd_ko_mean)
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA %>% mutate(even_2h_wt_ratio = even_2h_wt_mean/even_ko_mean)
+Intensities_Jan2022_FA$even_wt_check <- rowSums(Intensities_Jan2022_FA[,10:13] >1)
+Intensities_Jan2022_FA$even_2h_wt_check <- rowSums(Intensities_Jan2022_FA[,18:21] >1)
+Intensities_Jan2022_FA$even_ko_check <- rowSums(Intensities_Jan2022_FA[,2:5] >1)
+Intensities_Jan2022_FA$odd_wt_check <- rowSums(Intensities_Jan2022_FA[,14:17] >1)
+Intensities_Jan2022_FA$odd_2h_wt_check <- rowSums(Intensities_Jan2022_FA[,22:25] >1)
+Intensities_Jan2022_FA$odd_ko_check <- rowSums(Intensities_Jan2022_FA[,6:9] >1)
+Intensities_Jan2022_FA<- Intensities_Jan2022_FA[order(Intensities_Jan2022_FA$gene),] 
+Intensities_Jan2022_FA <- Intensities_Jan2022_FA[-c(215:314),]
+
+#Wilcoxontest for WT:KO
+Intensities_Jan2022_FA$wilcoxtest_wteven_pvalue <- sapply(1:nrow(Intensities_Jan2022_FA), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,10:13]))), as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,2:5]))))[c("p.value")])
+Intensities_Jan2022_FA$wilcoxtest_wteven_pvalue <- as.numeric(unlist(Intensities_Jan2022_FA$wilcoxtest_wteven_pvalue))
+
+Intensities_Jan2022_FA$wilcoxtest_wtodd_pvalue <- sapply(1:nrow(Intensities_Jan2022_FA), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,14:17]))), as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,6:9]))))[c("p.value")])
+Intensities_Jan2022_FA$wilcoxtest_wtodd_pvalue <- as.numeric(unlist(Intensities_Jan2022_FA$wilcoxtest_wtodd_pvalue))
+#Wilcoxon Test for 2h WT : KO
+Intensities_Jan2022_FA$wilcoxtest_2heven_pvalue <- sapply(1:nrow(Intensities_Jan2022_FA), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,18:21]))), as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,2:5]))))[c("p.value")])
+Intensities_Jan2022_FA$wilcoxtest_2heven_pvalue <- as.numeric(unlist(Intensities_Jan2022_FA$wilcoxtest_2heven_pvalue))
+
+Intensities_Jan2022_FA$wilcoxtest_2hodd_pvalue <- sapply(1:nrow(Intensities_Jan2022_FA), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,22:25]))), as.numeric(as.character(unlist(Intensities_Jan2022_FA[i,6:9]))))[c("p.value")])
+Intensities_Jan2022_FA$wilcoxtest_2hodd_pvalue <- as.numeric(unlist(Intensities_Jan2022_FA$wilcoxtest_2hodd_pvalue))
+
+colnames(Intensities_Jan2022_FA) <- paste(colnames(Intensities_Jan2022_FA),"Fede_Jan2022",sep=".")
+#Use Intensities_Jan2022_FA
+
+#Michael's List
+Michael_RNASeq_WT_v_KO <- read.csv("/scratch/Shares/rinn/tenaya/ChChCh/firre_ko_vs_wt_mesc_deseq_results.csv") %>% clean_names()
+Michael_RNASeq_WT_v_KO$KO_WT_ratio ='^'(2,Michael_RNASeq_WT_v_KO$log2fold_change)
+Michael_RNASeq_WT_v_KO$WT_KO_ratio ='^'(Michael_RNASeq_WT_v_KO$KO_WT_ratio,-1)
+
+#Use Michael_RNASeq_WT_v_KO
+
+#Combining to one dataframe
+alldata_nofilter1 <- full_join(Intensities2_filteroutinput_nonzero_reorderedcolumns, Intensities_sucgrad_nonzero2, by = c("gene.combinedMarChIRP" = "gene.combinedSucGrad"))
+alldata_nofilter2 <- full_join(alldata_nofilter1,Intensities_Jan2022TV, by=c("gene.combinedMarChIRP" = "gene.Jan2022TV"))
+alldata_nofilter3 <- full_join(alldata_nofilter2, Intensities_Jan2022_FA, by=c("gene.combinedMarChIRP" = "gene.Fede_Jan2022"))
+all_data_nofilter_final <- full_join(alldata_nofilter3, Michael_RNASeq_WT_v_KO, by=c("gene.combinedMarChIRP" = "gene_name"))
+
+write.csv(all_data_nofilter_final,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_alldata_ratios_pvalues_checks.csv",row.names = TRUE)
+
+```
+
+#Now I need to extract 3 Wt 0 KO from both 50 ng and 100ng
+#Then grep the data from everything for those genes
+```{r}
+#50 ng 3 WT 
+colnames(ratiofiltered_50ng_Mar2022ChIRP) <- paste(colnames(ratiofiltered_50ng_Mar2022ChIRP),"50ng",sep=".")
+#Use Intensities_Jan2022_FA
+wtcheck_3WT_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(ratiofiltered_50ng_Mar2022ChIRP, wt_check.50ng == 3)
+wtcheck_3WT_0KO_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(wtcheck_3WT_ratiofiltered_50ng_Mar2022ChIRP, ko_check.50ng == 0)
+wtcheck_3WT_1KO_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(wtcheck_3WT_ratiofiltered_50ng_Mar2022ChIRP, ko_check.50ng == 1)
+
+#50 ng 2 WT : 0 KO
+wtcheck_2WT_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(ratiofiltered_50ng_Mar2022ChIRP, wt_check.50ng == 2)
+wtcheck_2WT_0KO_ratiofiltered_50ng_Mar2022ChIRP <- dplyr::filter(wtcheck_2WT_ratiofiltered_50ng_Mar2022ChIRP, ko_check.50ng == 0)
+
+#100 ng 3WT
+colnames(ratiofiltered_100ng_Mar2022ChIRP) <- paste(colnames(ratiofiltered_100ng_Mar2022ChIRP),"100ng",sep=".")
+wtcheck_3WT_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(ratiofiltered_100ng_Mar2022ChIRP, wt_check.100ng == 3)
+wtcheck_3WT_0KO_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(wtcheck_3WT_ratiofiltered_100ng_Mar2022ChIRP, ko_check.100ng == 0)
+wtcheck_3WT_1KO_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(wtcheck_3WT_ratiofiltered_100ng_Mar2022ChIRP, ko_check.100ng == 1)
+
+#100 ng 2WT
+wtcheck_2WT_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(ratiofiltered_100ng_Mar2022ChIRP, wt_check.100ng == 2)
+wtcheck_2WT_0KO_ratiofiltered_100ng_Mar2022ChIRP <- dplyr::filter(wtcheck_2WT_ratiofiltered_100ng_Mar2022ChIRP, ko_check.100ng == 0)
+
+#Combining the data
+#3 WT and  0 KO Combined
+WT3_KOzero_50ng_100ng_Mar2022ChIRP <- full_join(wtcheck_3WT_0KO_ratiofiltered_50ng_Mar2022ChIRP, wtcheck_3WT_0KO_ratiofiltered_100ng_Mar2022ChIRP, by = c("gene.50ng"="gene.100ng"))
+
+#2 WT and 0 KO Combined
+WT2_KOzero_50ng_100ng_Mar2022ChIRP <- full_join(wtcheck_2WT_0KO_ratiofiltered_50ng_Mar2022ChIRP, wtcheck_2WT_0KO_ratiofiltered_100ng_Mar2022ChIRP, by = c("gene.50ng"="gene.100ng"))
+
+#3 WT and 1 KO Combined
+WT3_KOone_50ng_100ng_Mar2022ChIRP <- full_join(wtcheck_3WT_1KO_ratiofiltered_50ng_Mar2022ChIRP, wtcheck_3WT_1KO_ratiofiltered_100ng_Mar2022ChIRP, by = c("gene.50ng"="gene.100ng"))
+
+#Combining all combinations with the all_data
+alldata_WT3_KOzero_50ng_100ng_Mar2022ChIRP <- left_join(WT3_KOzero_50ng_100ng_Mar2022ChIRP,all_data_nofilter_final, by = c("gene.50ng"="gene.combinedMarChIRP"))
+alldata_WT2_KOzero_50ng_100ng_Mar2022ChIRP <- left_join(WT2_KOzero_50ng_100ng_Mar2022ChIRP,all_data_nofilter_final, by = c("gene.50ng"="gene.combinedMarChIRP"))
+alldata_WT3_KOone_50ng_100ng_Mar2022ChIRP <- left_join(WT3_KOone_50ng_100ng_Mar2022ChIRP,all_data_nofilter_final, by = c("gene.50ng"="gene.combinedMarChIRP"))
+write.csv(alldata_WT3_KOzero_50ng_100ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_alldata_3WT_0KO.csv",row.names = TRUE)
+write.csv(alldata_WT2_KOzero_50ng_100ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_alldata_2WT_0KO.csv",row.names = TRUE)
+write.csv(alldata_WT3_KOone_50ng_100ng_Mar2022ChIRP,"/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_alldata_3WT_1KO.csv",row.names = TRUE)
+
+```
+
+#Michael asked for a few graphs
+```{r}
+#Scatterplot of WT mean intensities
+WTmean_50ng_100ng <- full_join(Intensities_50ng_inputfilter_nonzero,Intensities_100ng_inputfilter_nonzero,by="gene")
+#WTmean_50ng_100ng<- WTmean_50ng_100ng %>% replace_na(list(wt_mean.x = 1, wt_mean.y=1))
+WTmean_50ng_100ng$logwtmean.50ng = log(WTmean_50ng_100ng$wt_mean.x,10)
+WTmean_50ng_100ng$logwtmean.100ng = log(WTmean_50ng_100ng$wt_mean.y,10)
+WTmean_50ng_100ng$logkomean.50ng = log(WTmean_50ng_100ng$ko_mean.x,10)
+WTmean_50ng_100ng$logkomean.100ng = log(WTmean_50ng_100ng$ko_mean.y,10)
+WTmean_50ng_100ng <- WTmean_50ng_100ng %>% replace_na(list(logwtmean.50ng = 0, logwtmean.100ng = 0, logkomean.50ng = 0, logkomean.100ng = 0, logratio.x=0, logratio.y=0))
+
+#wt_mean plot
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_14_scatter_logwtmean_50ng_100ng.pdf")
+ggplot(WTmean_50ng_100ng, aes(x=logwtmean.50ng, y=logwtmean.100ng)) + 
+  geom_point()+
+   geom_smooth(method=lm,  linetype="dashed", color="darkred", fill="lightgoldenrod")+
+  labs(title="Log Mean of WT Intensities 100ng vs. 50ng ",
+       x="50ng Mean of WT Intensities", y = "100ng Mean of WT Intensities")+
+  theme_classic()  
+dev.off()
+
+#ko_mean plot
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_14_scatter_logkomean_50ng_100ng.pdf")
+ggplot(WTmean_50ng_100ng, aes(x=logkomean.50ng, y=logkomean.100ng)) + 
+  geom_point()+
+   geom_smooth(method=lm,  linetype="dashed", color="darkred", fill="lightgoldenrod")+
+  labs(title="Log Mean of KO Intensities 100ng vs. 50ng ",
+       x="50ng Mean of WT Intensities", y = "100ng Mean of WT Intensities")+
+  theme_classic()  
+dev.off()
+
+#logratio plot
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_14_scatter_logratio_50ng_100ng.pdf")
+ggplot(WTmean_50ng_100ng, aes(x=logratio.x, y=logratio.y)) + 
+  geom_point()+
+   geom_smooth(method=lm,  linetype="dashed", color="darkred", fill="lightgoldenrod")+
+  labs(title="Log Ratio of WT to KO Intensities 100ng vs. 50ng ",
+       x="50ng Log Ratio of WT:KO", y = "100ng Log Ratio of WT:KO")+
+  theme_classic()  
+dev.off()
+
+#Volcano Plot of 
+
+# plot adding up all layers we have seen so far
+#https://biocorecrg.github.io/CRG_RIntroduction/volcano-plots.html
+
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_volcano_plot_combinedLogRatio_vs_combined_ttest_pvalue.pdf")
+ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns, aes(x=logratio.combinedMarChIRP, y=-log10(ttest_pvalue.combinedMarChIRP), label=gene.combinedMarChIRP)) +
+        geom_point() + 
+        theme_minimal() +
+        geom_text_repel() +
+        scale_color_manual(values=c("blue", "black", "red")) +
+        geom_vline(xintercept=c(-0.6, 0.6), col="red") +
+        geom_hline(yintercept=-log10(0.05), col="red")
+dev.off()
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_13_volcano_plot_combinedLogRatio_vs_combined_wilcoxon_pvalue.pdf")
+ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns, aes(x=logratio.combinedMarChIRP, y=-log10(wilcoxtest_pvalue.combinedMarChIRP), label=gene.combinedMarChIRP)) +
+        geom_point() + 
+        theme_minimal() +
+        geom_text_repel() +
+        scale_color_manual(values=c("blue", "black", "red")) +
+        geom_vline(xintercept=c(-0.6, 0.6), col="red") +
+        geom_hline(yintercept=-log10(0.05), col="red")
+dev.off()
+
+
+```
+
+
+
