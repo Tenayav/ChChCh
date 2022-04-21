@@ -453,7 +453,7 @@ mm_sigSpectral6 = melt(long_data_Spectral_sig_genes6)
  # dev.off()
   
 #Intensities
-sig_genes6 <- c("anxa1","btf3","hnrnpm","mif","naa15","rpl10$")
+sig_genes6 <- c("anxa1","btf3","hnrnpm","naa15","rpl10$")
 long_data_Intensities_sig_genes6 <- Intensities[, grep(pattern_to_search_sig_genes6, colnames(Intensities))]
 genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
 long_data_Intensities_sig_genes6 <- cbind(genotype,long_data_Intensities_sig_genes6)
@@ -464,7 +464,7 @@ ggplot(mm_sigIntensities6)+geom_boxplot(aes(x=genotype, y=value),fill = "#00AFBB
 dev.off()
 
 #Sig Genes Minus RPL10 because not significant in intensities
-sig_genes5 <- c("anxa1","btf3","hnrnpm","mif","naa15")
+sig_genes5 <- c("anxa1","btf3","hnrnpm","naa15")
 pattern_to_search_sig_genes5 <- paste0(sig_genes5, collapse = "|")
 long_data_Intensities_sig_genes5 <- Intensities[, grep(pattern_to_search_sig_genes5, colnames(Intensities))]
 genotype <- c("WT","WT","WT","WT","WT","WT","WT","WT","WT","WT","KO","KO","KO","KO","KO","KO","KO","KO","KO","KO")
@@ -472,9 +472,12 @@ long_data_Intensities_sig_genes5 <- cbind(genotype,long_data_Intensities_sig_gen
 mm_sigIntensities5 = melt(long_data_Intensities_sig_genes5)
 
 #red fill below. Old Teal = "#00AFBB"
-pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_22_5sig_genes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
-ggplot(mm_sigIntensities5)+geom_boxplot(aes(x=genotype, y=value),fill = "#BB2526",size=0.5)+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format")+ggtitle("Mass Spec Intensities of 5 Genes of Interest")+labs(y = "Mass Spec Intensity", x = "\nFirre Genotype in Mouse Embryonic Stem Cells")
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_22_4sig_genes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
+ggplot(mm_sigIntensities5)+geom_boxplot(aes(x=genotype, y=value),fill = "#BB2526",size=0.5)+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format")+ggtitle("Mass Spec Intensities of 4 Genes of Interest")+labs(y = "Mass Spec Intensity", x = "\nFirre Genotype in Mouse Embryonic Stem Cells")
 dev.off()
 ##Hello
+
+#Making a plot in red of the pulldown efficiency for odd and even probes
+
 ```
 
