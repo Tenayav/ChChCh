@@ -925,8 +925,8 @@ grViz(diagram = "digraph flowchart {
       [14]: 'Odd and Even Ratios (>= 1.5) \\nand pvalue (=<0.05) \\nfrom Jan2022 TV'
       [15]: 'Odd and Even Ratios \\nfrom Jan2022 Fede Data \\nfor both WT:KO (>= 1.1),  \\nUp in 2h:KO from WT:KO (WT:KO < 2h:KO), \\nand KO Check (=<2)'
       [16]: 'Michaels RNA seq \\nRatios and Padjvalues'
-      [17]: 'True for 5 out of 12 Cutoffs (Average was ~3.7 out of 12)'
-      [18]:'# Promising Genes - 18 Genes'
+      [17]: 'True for 5 out of 12 Cutoffs (Average was ~3.7 out of 12, 18 Genes) \\n and Localization Consideration (Nuclear, 8 Genes) \\and Revisit Raw Data'
+      [18]:'1 Potentially Promising Gene - Pkm'
       ")
 
 ```
@@ -939,13 +939,13 @@ grViz(diagram = "digraph flowchart {
       node [fontname = Helvetica, shape = rectange, color = White, style = filled]        
       tab1 [label = '@@1']
       
-      node [fontname = Helvetica, shape = rectange, color = DeepSkyBlue, style = filled]
+      node [fontname = Helvetica, shape = rectange, color = grey90, style = filled]
       tab2 [label = '@@2']
     
-      node [fontname = Helvetica, shape = rectange, color = Tomato1, style = filled]        
+      node [fontname = Helvetica, shape = rectange, color = grey80, style = filled]        
       tab3 [label = '@@3']   
       
-      node [fontname = Helvetica, shape = rectange, color = MediumPurple1, style = filled]
+      node [fontname = Helvetica, shape = rectange, color = grey70, style = filled]
       tab4 [label = '@@4']
       
       node [fontname = Helvetica, shape = rectange, color = White, style = filled] 
@@ -959,7 +959,7 @@ grViz(diagram = "digraph flowchart {
       tab12 [label = '@@12']
       tab13 [label = '@@13']
       
-      node [fontname = Helvetica, shape = rectange, color = DarkOliveGreen3, style = filled]
+      node [fontname = Helvetica, shape = rectange, color = Firebrick1, style = filled]
       tab14 [label = '@@14']
       
 
@@ -980,22 +980,22 @@ grViz(diagram = "digraph flowchart {
       [2]: '50ng Sample Load Technical Replicate'
       [3]: '100ng Sample Load Technical Replicate'
       [4]: 'Combine 50ng and 100ng data'
-      [5]: 'Ratio WT:KO >= 1.5 [517 genes]'
-      [6]: 'Cutoffs for 4 out of 6 WT Samples with Intensities above 0 [35 Genes]'
+      [5]: 'Cutoffs for 4 out of 6 WT Samples with Intensities above 0 [517 genes]'
+      [6]: 'Ratio WT:KO >= 1.5 [35 Genes]'
       [7]: 'Selected Genes with No or 1 KO Intensity [13 Genes]'
       [8]: 'Selected Proteins that are nuclear [7 Genes]'
       [9]: 'Expand Comparison to Other Datasets'
-      [10]: 'Sucrose Gradient Ratios and KO checks'
-      [11]: 'Odd and Even Ratios and KO Checks from Jan2022 TV'
-      [12]: 'Odd and Even Ratios from Jan2022 Fede Data for both WT:KO and WT2h:KO'
-      [13]: 'Michaels RNA seq Ratios and Padjvalues'
-      [14]: '2 Promising Genes - Hmgb1 and Ddx39b '
+      [10]: 'Sucrose Gradient \\nRatios and KO checks'
+      [11]: 'Odd and Even Ratios and \\nKO Checks from Jan2022 TV'
+      [12]: 'Odd and Even Ratios \\nfrom Jan2022 Fede Data \\nfor both WT:KO and WT2h:KO'
+      [13]: 'Michaels RNA seq \\nRatios and Padjvalues'
+      [14]: '4 Promising Genes - Hmgb1, Hspb1, Sf3b4, and Xpo1 \\n Potential Gene - Cbx3 and DDx39b'
       
       ")
 ```
 
 
-#Folks wanted a parametric test to confirm that my selections are not random. 
+#Folks wanted a hypergeometric test to confirm that my selections are not random. 
 ```{r}
 #first I want to show the log ratios of all samples that at least one intensity in either KO or WT. 
 Intensities2 <- Intensities
@@ -1011,6 +1011,11 @@ pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04
 hist(Intensities2_filteroutinput_nonzero$logratio, breaks = 40, main="Frequency of Log (10) WT: KO Ratio \n of Mass Spec Intensities from Firre ChIRP Mar2022", xlab = "Log (10) Ratio of WT: KO Intensities", ylab = "Frequency of Genes", labels=TRUE)
 dev.off()
 
+#https://stackoverflow.com/questions/8382806/hypergeometric-test-phyper
+phyper(13,143,517-143,35)
+phyper(13,143,517-143,35, lower.tail=FALSE)
+
+phyper(4,143,517-143,35)
 ```
 
 #Need to make my job easier by compiling all the other data into one csv
@@ -1232,7 +1237,22 @@ ggplot(data=Intensities2_filteroutinput_nonzero_reorderedcolumns, aes(x=logratio
         geom_hline(yintercept=-log10(0.05), col="red")
 dev.off()
 
+#needed two more box-whisker plots 
+#for rsp5 and serbp1
+genotype <- c("ko","ko", "ko", "ko", "wt", "wt","wt","wt","wt", "wt")
+value <- c(65363.63,	1	,396753.44,	417464.38, 155158.23,	256241.44,	96489.51,	1,	1,	1)
+rsp5_data <- data.frame(genotype,value)
 
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_18_rsp5_marchirp_boxwhisker.pdf")
+  print(ggboxplot(rsp5_data,x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle("rsp5")+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+ dev.off()
+
+values <- c(1,	1,	184039.19,	128326.766,	60440.02,	47030.36,	1,	93394.695,	1,	1) 
+serbp1_data <- data.frame(genotype,values)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_18_serbp1_marchirp_boxwhisker.pdf")
+  print(ggboxplot(serbp1_data,x="genotype",y="values",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle("serbp1")+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+ dev.off()
+ 
 ```
 
 
