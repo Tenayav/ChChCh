@@ -473,11 +473,30 @@ mm_sigIntensities5 = melt(long_data_Intensities_sig_genes5)
 
 #red fill below. Old Teal = "#00AFBB"
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_03_22_4sig_genes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Jan2022FA_v_Jan2022TV.pdf")
-ggplot(mm_sigIntensities5)+geom_boxplot(aes(x=genotype, y=value),fill = "#BB2526",size=0.5)+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format")+ggtitle("Mass Spec Intensities of 4 Genes of Interest")+labs(y = "Mass Spec Intensity", x = "\nFirre Genotype in Mouse Embryonic Stem Cells")
+ggplot(mm_sigIntensities5)+geom_boxplot(aes(x=genotype, y=value),fill = "#BB2526")+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format")+ggtitle("Mass Spec Intensities of 4 Genes of Interest")+labs(y = "Mass Spec Intensity", x = "\nFirre Genotype in Mouse Embryonic Stem Cells")+theme_minimal()
 dev.off()
 ##Hello
 
 #Making a plot in red of the pulldown efficiency for odd and even probes
+genotype <- c("ko", "wt")
+Gapdh_odd <- c(0.000737,0.000621)
+Gapdh_even <- c(0.000462,0.000397)
+mTug1_odd <- c(0.00076, 0.00131)
+mTug1_even <-c(0,0)
+mFirre_odd <- c(0.0056,5.67)
+mFirre_even <- c(0.0107, 11.37)
+sd <- c(0.000146686, 7.42003E-05, 0.000245243, 0.000250719, 0.001306125, 0.001140803, 0 , 0, 0.004033324, 0.258695089, 0.001997781, 0.573784967)
 
+pulldown_efficiency <- data.frame(genotype,Gapdh_odd, Gapdh_even, mTug1_odd, mTug1_even, mFirre_odd, mFirre_even)
+mm_pulldown <- melt(pulldown_efficiency)
+mm_pulldown <- data.frame(mm_pulldown,sd)
+
+#http://www.sthda.com/english/wiki/ggplot2-barplots-quick-start-guide-r-software-and-data-visualization
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_04_21_FirreChIRP_PulldownEfficiency.pdf")
+ggplot(mm_pulldown, aes(x=variable, y=value, fill=genotype))+geom_bar(stat="identity", position=position_dodge())+ scale_fill_manual(values=c('#808080','#BB2526'))+ ggtitle("Firre ChIRP Pulldown Efficiency and Specificity") +
+  xlab("RNAs Tested by RT-qPCR Separated by Probe Set (Odd or Even)") + ylab("Relative Efficiency in Comparison to 2% Input") + geom_errorbar(aes(ymin=value-sd, ymax=value+sd), width=.2,
+                 position=position_dodge(.9))+
+  theme_minimal()
+dev.off()
 ```
 
