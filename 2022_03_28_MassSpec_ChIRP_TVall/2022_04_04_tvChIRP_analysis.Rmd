@@ -1252,7 +1252,57 @@ serbp1_data <- data.frame(genotype,values)
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall/2022_04_18_serbp1_marchirp_boxwhisker.pdf")
   print(ggboxplot(serbp1_data,x="genotype",y="values",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle("serbp1")+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
  dev.off()
- 
+
+sig_genes <- c("sf3b4","ddx39b","xpo1","cbx3","hmgb1")
+pattern_to_search_sig_genes <- paste0(sig_genes, collapse = "|")
+long_data_Intensities_sig_genes <- Intensities_1_out_of_6_ready[, grep(pattern_to_search_sig_genes, colnames(Intensities_1_out_of_6_ready))]
+genotype <- c("WT","WT","WT","WT","WT","WT","KO","KO","KO","KO")
+long_data_Intensities_sig_genes <- cbind(genotype,long_data_Intensities_sig_genes)
+mm_sigIntensities = melt(long_data_Intensities_sig_genes)
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_22_5sig_genes_Intensities_boxwhisker_Wilcoxon_S_MassSpec_Mar2022.pdf")
+ggplot(mm_sigIntensities)+geom_boxplot(aes(x=genotype, y=value),fill = "#BB2526")+facet_grid(.~variable)+stat_compare_means(aes(x=genotype, y=value,group = genotype),label = "p.format")+ggtitle("Mass Spec Intensities of 5 Genes of Interest from MarChIRP")+labs(y = "Mass Spec Intensity", x = "\nFirre Genotype in Mouse Embryonic Stem Cells")+theme_minimal()
+dev.off()
+
+genotype_pulldown <- c("ko", "wt")
+Gapdh_odd <- c(0.000737,0.000621)
+Gapdh_even <- c(0.000462,0.000397)
+mTug1_odd <- c(0.00076, 0.00131)
+mTug1_even <-c(0,0)
+mFirre_odd <- c(0.0056,5.67)
+mFirre_even <- c(0.0107, 11.37)
+sd <- c(0.000146686, 7.42003E-05, 0.000245243, 0.000250719, 0.001306125, 0.001140803, 0 , 0, 0.004033324, 0.258695089, 0.001997781, 0.573784967)
+
+pulldown_efficiency <- data.frame(genotype_pulldown,Gapdh_odd, Gapdh_even, mTug1_odd, mTug1_even, mFirre_odd, mFirre_even)
+mm_pulldown <- melt(pulldown_efficiency)
+mm_pulldown <- data.frame(mm_pulldown,sd)
+
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_02_01_FirreMassSpecData_Analysis//2022_04_21_FirreChIRP_PulldownEfficiency.pdf")
+ggplot(mm_pulldown, aes(x=variable, y=value, fill=genotype))+geom_bar(stat="identity", position=position_dodge())+ scale_fill_manual(values=c('#808080','#BB2526'))+ ggtitle("Firre ChIRP Pulldown Efficiency and Specificity") +
+  xlab("RNAs Tested by RT-qPCR Separated by Probe Set (Odd or Even)") + ylab("Relative Efficiency in Comparison to 2% Input") + geom_errorbar(aes(ymin=value-sd, ymax=value+sd), width=.2,
+                 position=position_dodge(.9))+
+  theme_minimal()
+dev.off()
+
+genotype_pulldown <- c("ko", "wt")
+Gapdh_OE <- c(0.000925195,0.000781142)
+mTug1_OE <-c(0,0.000779717)
+mFirre_OE <- c(0.010098569, 8.920536162)
+OE_sd <- c(0.00057796, 0.000193657, 0, 0.000781445, 0.005078991, 2.251688784)
+
+OEpulldown_efficiency <- data.frame(genotype_pulldown,Gapdh_OE, mTug1_OE, mFirre_OE)
+mm_OEpulldown <- melt(OEpulldown_efficiency)
+mm_OEpulldown <- data.frame(mm_OEpulldown,OE_sd)
+
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_21_FirreChIRP_CombinedPulldownEfficiency.pdf")
+ggplot(mm_OEpulldown, aes(x=variable, y=value, fill=genotype_pulldown))+geom_bar(stat="identity", position=position_dodge())+ scale_fill_manual(values=c('#808080','#BB2526'))+ ggtitle("Firre ChIRP Pulldown Efficiency and Specificity") +
+  xlab("RNAs Tested by RT-qPCR from Immunoprecipitation \nwith Combined Odd and Even Probes") + ylab("Relative Efficiency in Comparison to 2% Input") + geom_errorbar(aes(ymin=value-OE_sd, ymax=value+OE_sd), width=.2,
+                 position=position_dodge(.9))+
+  theme_minimal()
+dev.off()
+
 ```
 
 
