@@ -1312,5 +1312,48 @@ dev.off()
 
 ```
 
+#Making Venn Diagrams and Histograms of 1 out of # for Mar, JanTV, JanFede, and SucGrad
+```{r}
+
+#Combined Mar Data
+
+#filter out by WT_check >0
+#started with 609 genes
+wtcheck_1outof6_Mar_ChIRP <- dplyr::filter(Intensities2_filteroutinput_nonzero_reorderedcolumns, wt_check.combinedMarChIRP > 0)
+#ended with 517 genes
+#Mar2022 Pvalue Ratios
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_1outof6_Histogram_Ttest_Pvalues_WT_KO_MassSpec_Mar2022TV.pdf")
+hist(wtcheck_1outof6_Mar_ChIRP$ttest_pvalue.combinedMarChIRP, breaks = 50, main="(1 out of 6) Frequency of T-Test P-values in Mar2022 ChIRP Data", xlab = "T-Test P-value", ylab = "Frequency of P-values", labels=TRUE) 
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_1outof6_Histogram_Wilcox_Pvalues_WT_KO_MassSpec_Mar2022TV.pdf")
+hist(wtcheck_1outof6_Mar_ChIRP$wilcoxtest_pvalue.combinedMarChIRP, breaks = 50, main="(1 out of 6) Frequency of Wilcox P-values in Mar2022 ChIRP Data", xlab = "Wilcox P-value", ylab = "Frequency of P-values", labels=TRUE) 
+dev.off()
+
+
+
+#SucGrad Data
+#Filter out by Wtcheck > 0 
+#started with 4280 genes
+wtcheck_1outof6_SucGrad <- dplyr::filter(Intensities_sucgrad_nonzero2, wt_check.combinedSucGrad > 0)
+#Ended up with 3933
+
+
+#Jan2022TV Data
+#Filter out by WTcheck > 0
+#Start with 130 genes
+wtcheck_1outof6_JanTV_ChIRP <- dplyr::filter(Intensities_Jan2022TV, wt_check.Jan2022TV > 0)
+#Ended up with 112 genes
+
+
+#Jan2022Fede Data
+#Filter out by Wtcheck > 0
+#started with 214 genes
+#more complicated because I need to do a total_wtcheck for both odd and even, and regular and 2h WT. 
+wtcheck_1outof6_JanTV_ChIRP <- dplyr::filter(Intensities_Jan2022_FA, wt_check.Jan2022TV > 0)
+
+#ended up with 
+
+
+```
 
 
