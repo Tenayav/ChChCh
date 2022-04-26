@@ -1321,12 +1321,15 @@ dev.off()
 #started with 609 genes
 wtcheck_1outof6_Mar_ChIRP <- dplyr::filter(Intensities2_filteroutinput_nonzero_reorderedcolumns, wt_check.combinedMarChIRP > 0)
 #ended with 517 genes
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_MarChIRP_1outof6_Histogram_FoldChange_WT_KO_MassSpec_2022TV.pdf")
+hist(wtcheck_1outof6_Mar_ChIRP$logratio.combinedMarChIRP, breaks = 30, main="(1 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom March 2022 ChIRP (Kit with Combined Probe Sets) Protein Mass Spec Data", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
 #Mar2022 Pvalue Ratios
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_1outof6_Histogram_Ttest_Pvalues_WT_KO_MassSpec_Mar2022TV.pdf")
-hist(wtcheck_1outof6_Mar_ChIRP$ttest_pvalue.combinedMarChIRP, breaks = 50, main="(1 out of 6) Frequency of T-Test P-values in Mar2022 ChIRP Data", xlab = "T-Test P-value", ylab = "Frequency of P-values", labels=TRUE) 
+hist(wtcheck_1outof6_Mar_ChIRP$ttest_pvalue.combinedMarChIRP, breaks = 20, main="(1 out of 6) Frequency of T-Test P-values in Mar2022 ChIRP Data", xlab = "T-Test P-value", ylab = "Frequency of P-values", labels=TRUE) 
 dev.off()
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_1outof6_Histogram_Wilcox_Pvalues_WT_KO_MassSpec_Mar2022TV.pdf")
-hist(wtcheck_1outof6_Mar_ChIRP$wilcoxtest_pvalue.combinedMarChIRP, breaks = 50, main="(1 out of 6) Frequency of Wilcox P-values in Mar2022 ChIRP Data", xlab = "Wilcox P-value", ylab = "Frequency of P-values", labels=TRUE) 
+hist(wtcheck_1outof6_Mar_ChIRP$wilcoxtest_pvalue.combinedMarChIRP, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon P-values in Mar2022 ChIRP Data", xlab = "Wilcoxon P-value", ylab = "Frequency of P-values", labels=TRUE) 
 dev.off()
 
 
@@ -1336,24 +1339,109 @@ dev.off()
 #started with 4280 genes
 wtcheck_1outof6_SucGrad <- dplyr::filter(Intensities_sucgrad_nonzero2, wt_check.combinedSucGrad > 0)
 #Ended up with 3933
-
+#Histogram of Ratios
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_1outof6_Histogram_FoldChange_WT_KO_MassSpec_SucGrad.pdf")
+hist(wtcheck_1outof6_SucGrad$logratio.combinedSucGrad, breaks = 30, main="(1 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom SucGrad Protein Mass Spec Data", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
+#Histogram of Wilcoxon Pvalues 
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_SucGrad_1outof6_Histogram_Wilcox_Pvalues_WT_KO_MassSpec.pdf")
+hist(wtcheck_1outof6_SucGrad$wilcoxtest_pvalue.combinedSucGrad, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon P-values in Sucrose Gradient Data of WT to KO", xlab = "Wilcoxon P-value", ylab = "Frequency of P-values", labels=TRUE) 
+dev.off()
 
 #Jan2022TV Data
 #Filter out by WTcheck > 0
 #Start with 130 genes
 wtcheck_1outof6_JanTV_ChIRP <- dplyr::filter(Intensities_Jan2022TV, wt_check.Jan2022TV > 0)
 #Ended up with 112 genes
+#Histogram of Even Ratios
+wtcheck_1outof6_JanTV_ChIRP$log_even_ratio.Jan2022TV = log(wtcheck_1outof6_JanTV_ChIRP$evenratio.Jan2022TV,10)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_even_1outof6_Histogram_FoldChange_WT_KO_MassSpec_Jan2022TV.pdf")
+hist(wtcheck_1outof6_JanTV_ChIRP$log_even_ratio.Jan2022TV, breaks = 30, main="(1 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom Even Probe Set ChIRP (Kit) Protein Mass Spec Data", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
+
+#Histogram of Odd Ratios
+wtcheck_1outof6_JanTV_ChIRP$log_odd_ratio.Jan2022TV = log(wtcheck_1outof6_JanTV_ChIRP$oddratio.Jan2022TV,10)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_odd_1outof6_Histogram_FoldChange_WT_KO_MassSpec_Jan2022TV.pdf")
+hist(wtcheck_1outof6_JanTV_ChIRP$log_odd_ratio.Jan2022TV, breaks = 30, main="(1 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom Odd Probe Set ChIRP (Kit) Protein Mass Spec Data", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
+
+#Histogram of Wilcoxon Pvalues
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_1outof6_Histogram_Wilcox_Pvalues_WT_KO_MassSpec_Jan2022TV.pdf")
+hist(wtcheck_1outof6_JanTV_ChIRP$wilcoxtest_pvalue.Jan2022TV, breaks = 20, main="(1 out of 6) Frequency of Wilcoxon P-values in Jan2022 ChIRP (Kit) Data", xlab = "Wilcoxon P-value", ylab = "Frequency of P-values", labels=TRUE) 
+dev.off()
+#Histogram of Even Ratios
+wtcheck_1outof6_JanTV_ChIRP$log_even_ratio.Jan2022TV = log(wtcheck_1outof6_JanTV_ChIRP$evenratio.Jan2022TV,10)
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_even_1outof6_Histogram_FoldChange_WT_KO_MassSpec_Jan2022TV.pdf")
+hist(wtcheck_1outof6_JanTV_ChIRP$log_even_ratio.Jan2022TV, breaks = 20, main="(1 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom Even Probe Set ChIRP (Kit) Protein Mass Spec Data", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
 
 
 #Jan2022Fede Data
 #Filter out by Wtcheck > 0
 #started with 214 genes
 #more complicated because I need to do a total_wtcheck for both odd and even, and regular and 2h WT. 
-wtcheck_1outof6_JanTV_ChIRP <- dplyr::filter(Intensities_Jan2022_FA, wt_check.Jan2022TV > 0)
+Intensities_Jan2022_FA$wt_all_check.Fede_Jan2022 <- Intensities_Jan2022_FA$even_wt_check.Fede_Jan2022 + Intensities_Jan2022_FA$even_2h_wt_check.Fede_Jan2022 + Intensities_Jan2022_FA$odd_2h_wt_check.Fede_Jan2022 + Intensities_Jan2022_FA$odd_wt_check.Fede_Jan2022
+wtcheck_1outof6_JanFede_ChIRP <- dplyr::filter(Intensities_Jan2022_FA, wt_all_check.Fede_Jan2022 > 0)
+#ended up with 208 genes
 
-#ended up with 
+#log of ratios
+wtcheck_1outof6_JanFede_ChIRP$log_even_ratio.Fede_Jan2022 = log(wtcheck_1outof6_JanFede_ChIRP$even_wt_ratio.Fede_Jan2022,10)
+wtcheck_1outof6_JanFede_ChIRP$log_even2h_ratio.Fede_Jan2022 = log(wtcheck_1outof6_JanFede_ChIRP$even_2h_wt_ratio.Fede_Jan2022,10)
+wtcheck_1outof6_JanFede_ChIRP$log_odd_ratio.Fede_Jan2022 = log(wtcheck_1outof6_JanFede_ChIRP$odd_wt_ratio.Fede_Jan2022,10)
+wtcheck_1outof6_JanFede_ChIRP$log_odd2h_ratio.Fede_Jan2022 = log(wtcheck_1outof6_JanFede_ChIRP$odd_2h_wt_ratio.Fede_Jan2022,10)
+
+#Histogram of Even Ratios
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_evenFede_1outof6_Histogram_FoldChange_WT_KO_MassSpec_Jan2022Fede.pdf")
+hist(wtcheck_1outof6_JanFede_ChIRP$log_even_ratio.Fede_Jan2022, breaks = 30, main="(1 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom Even Probe Set ChIRP (HChang Protocol) Protein Mass Spec Data", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_even2hFede_1outof6_Histogram_FoldChange_WT_KO_MassSpec_Jan2022Fede.pdf")
+hist(wtcheck_1outof6_JanFede_ChIRP$log_even2h_ratio.Fede_Jan2022, breaks = 30, main="(1 out of 6) Frequency of Log Average of Fold Change of 2hWT/KO Intensities \nfrom Even Probe Set ChIRP (HChang Protocol) Protein Mass Spec Data", xlab = "Log Average Fold Change of 2h Doxy Induced WT to Uninduced KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
+
+#Histogram of Odd Ratios
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_oddFede_1outof6_Histogram_FoldChange_WT_KO_MassSpec_Jan2022Fede.pdf")
+hist(wtcheck_1outof6_JanFede_ChIRP$log_odd_ratio.Fede_Jan2022, breaks = 30, main="(1 out of 6) Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom Odd Probe Set ChIRP (HChang Protocol) Protein Mass Spec Data", xlab = "Log Average Fold Change of WT to KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_odd2hFede_1outof6_Histogram_FoldChange_WT_KO_MassSpec_Jan2022Fede.pdf")
+hist(wtcheck_1outof6_JanFede_ChIRP$log_odd2h_ratio.Fede_Jan2022, breaks = 30, main="(1 out of 6) Frequency of Log Average of Fold Change of 2hWT/KO Intensities \nfrom Odd Probe Set ChIRP (HChang Protocol) Protein Mass Spec Data", xlab = "Log Average Fold Change of 2h Doxy Induced WT to Uninduced KO with genes that have at least one WT intensity", ylab = "Frequency of Genes", labels=TRUE) 
+dev.off()
 
 
 ```
 
+#Venn Diagrams for RNA Society Poster
+```{r}
+#Venn Diagram between March ChIRP and Suc Grad
+genes_Mar_v_SucGrad <- list(genes_kitMar2022 = sort(wtcheck_1outof6_Mar_ChIRP$gene.combinedMarChIRP), genes_SucGrad= sort(wtcheck_1outof6_SucGrad$gene.combinedSucGrad))
+pdf("2022_04_26_VennDiagram_Mar_v_SucGrad.pdf")
+ggvenn(genes_Mar_v_SucGrad, c("genes_kitMar2022", "genes_SucGrad"))
+dev.off()
+#by size
+venn_win <- euler(c(KitChIRP_OE=148, SucGrad=3561, "KitChIRP_OE&SucGrad"=369), shape = "ellipse")
+pdf("2022_04_26_VennDiagram_Mar_v_SucGrad_bysize.pdf")
+plot(venn_win, 
+     fill = c("lightcoral", "gray"),
+     quantities = list(fontsize = 13))
+dev.off()
+
+
+#Venn Diagram Mar2022 and Fede
+genes_Mar_v_Fede <- list(genes_kitMar2022 = sort(wtcheck_1outof6_Mar_ChIRP$gene.combinedMarChIRP), genes_Fede = sort(wtcheck_1outof6_JanFede_ChIRP$gene.Fede_Jan2022) )
+pdf("2022_04_26_VennDiagram_Odd_Mar_v_Fede.pdf")
+ggvenn(genes_Mar_v_Fede, c("genes_kitMar2022", "genes_Fede"))
+dev.off()
+#by size
+venn_win2 <- euler(c(KitChIRP_OE=372, HChangChIRP=63, "KitChIRP_OE&HChangChIRP"=145), shape = "ellipse")
+pdf("2022_04_26_VennDiagram_Mar_v_Fede_bysize.pdf")
+plot(venn_win2, 
+     fill = c("lightcoral", "darkslategray3"),
+     quantities = list(fontsize = 13))
+dev.off()
+
+
+#Venn Diagram Even Fede and Even Jan 
+
+
+
+```
 
