@@ -23,6 +23,11 @@ library(ggrepel)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+```{r}
+devtools::install_github("rich-iannone/DiagrammeRsvg")
+```
+
 #Making Tibbles of Intensities for each protein from the March 2022 only including only those with 
 #Wt hits (out = only KO and input)
 ```{r}
@@ -934,7 +939,7 @@ grViz(diagram = "digraph flowchart {
 
 #Process Map of Mass Spec 4.0
 ```{r}
-grViz(diagram = "digraph flowchart {
+graph <- create_graph() %>% grViz(diagram = "digraph flowchart {
       
       node [fontname = Helvetica, shape = rectange, color = White, style = filled]        
       tab1 [label = '@@1']
@@ -992,6 +997,8 @@ grViz(diagram = "digraph flowchart {
       [14]: '4 Promising Genes - Hmgb1, Hspb1, Sf3b4, and Xpo1 \\n Potential Gene - Cbx3 and DDx39b'
       
       ")
+
+graph %>% export_graph(file_name = "my_crazy_graph.pdf")
 ```
 
 
