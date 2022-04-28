@@ -1353,6 +1353,12 @@ dev.off()
 #Start with 130 genes
 wtcheck_1outof6_JanTV_ChIRP <- dplyr::filter(Intensities_Jan2022TV, wt_check.Jan2022TV > 0)
 #Ended up with 112 genes
+
+wtcheck_even_1outof6_JanTV_ChIRP <- dplyr::filter(wtcheck_1outof6_JanTV_ChIRP, wt_0h_even_total_intensity.Jan2022.Jan2022TV > 1)
+wtcheck_odd_1outof6_JanTV_ChIRP <- dplyr::filter(wtcheck_1outof6_JanTV_ChIRP, wt_0h_odd_total_intensity.Jan2022.Jan2022TV > 1)
+wtcheck_common_odd_even_1outof6_JanTV_ChIRP <- dplyr::filter(wtcheck_even_1outof6_JanTV_ChIRP, wt_0h_odd_total_intensity.Jan2022.Jan2022TV > 1)
+
+
 #Histogram of Even Ratios
 wtcheck_1outof6_JanTV_ChIRP$log_even_ratio.Jan2022TV = log(wtcheck_1outof6_JanTV_ChIRP$evenratio.Jan2022TV,10)
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_04_26_even_1outof6_Histogram_FoldChange_WT_KO_MassSpec_Jan2022TV.pdf")
@@ -1382,7 +1388,12 @@ dev.off()
 #more complicated because I need to do a total_wtcheck for both odd and even, and regular and 2h WT. 
 Intensities_Jan2022_FA$wt_all_check.Fede_Jan2022 <- Intensities_Jan2022_FA$even_wt_check.Fede_Jan2022 + Intensities_Jan2022_FA$even_2h_wt_check.Fede_Jan2022 + Intensities_Jan2022_FA$odd_2h_wt_check.Fede_Jan2022 + Intensities_Jan2022_FA$odd_wt_check.Fede_Jan2022
 wtcheck_1outof6_JanFede_ChIRP <- dplyr::filter(Intensities_Jan2022_FA, wt_all_check.Fede_Jan2022 > 0)
+wtcheckodd_1outof6_JanFede_ChIRP <- dplyr::filter(Intensities_Jan2022_FA, odd_wt_check.Fede_Jan2022 > 0)
+wtcheckeven_1outof6_JanFede_ChIRP <- dplyr::filter(Intensities_Jan2022_FA, even_wt_check.Fede_Jan2022 > 0)
+wtcheck_common_odd_even_1outof6_JaneFede_ChIRP <- dplyr::filter(wtcheckodd_1outof6_JanFede_ChIRP,  even_wt_check.Fede_Jan2022 > 0)
 #ended up with 208 genes
+
+#Now I want to look at only genes that went up from 0h to 2hWT 
 
 #log of ratios
 wtcheck_1outof6_JanFede_ChIRP$log_even_ratio.Fede_Jan2022 = log(wtcheck_1outof6_JanFede_ChIRP$even_wt_ratio.Fede_Jan2022,10)
@@ -1425,23 +1436,74 @@ plot(venn_win,
 dev.off()
 
 
-#Venn Diagram Mar2022 and Fede
-genes_Mar_v_Fede <- list(genes_kitMar2022 = sort(wtcheck_1outof6_Mar_ChIRP$gene.combinedMarChIRP), genes_Fede = sort(wtcheck_1outof6_JanFede_ChIRP$gene.Fede_Jan2022) )
-pdf("2022_04_26_VennDiagram_Odd_Mar_v_Fede.pdf")
-ggvenn(genes_Mar_v_Fede, c("genes_kitMar2022", "genes_Fede"))
+#Venn Diagram Mar2022 and CommonOE of Fede
+genes_Mar_v_Fede <- list(genes_kitMar2022 = sort(wtcheck_1outof6_Mar_ChIRP$gene.combinedMarChIRP), genes_Fede_commonOE = sort(wtcheck_common_odd_even_1outof6_JaneFede_ChIRP$gene.Fede_Jan2022) )
+pdf("2022_04_26_VennDiagram_Mar_v_Fede_commonOE.pdf")
+ggvenn(genes_Mar_v_Fede, c("genes_kitMar2022", "genes_Fede_commonOE"))
 dev.off()
 #by size
-venn_win2 <- euler(c(KitChIRP_OE=372, HChangChIRP=63, "KitChIRP_OE&HChangChIRP"=145), shape = "ellipse")
-pdf("2022_04_26_VennDiagram_Mar_v_Fede_bysize.pdf")
+venn_win2 <- euler(c(KitChIRP_OE=384, CommonOE_Fede_ChIRP=49, "KitChIRP_OE&CommonOE_Fede_ChIRP"=133), shape = "ellipse")
+pdf("2022_04_26_VennDiagram_Mar_v_Fede_commonOE_bysize.pdf")
 plot(venn_win2, 
      fill = c("lightcoral", "darkslategray3"),
      quantities = list(fontsize = 13))
 dev.off()
 
+#Venn Diagram Mar2022 and CommonOE of JanTV
+genes_Mar_v_JanTV <- list(genes_kitMar2022 = sort(wtcheck_1outof6_Mar_ChIRP$gene.combinedMarChIRP), genes_JanTV_commonOE = sort(wtcheck_common_odd_even_1outof6_JanTV_ChIRP$gene.Jan2022TV) )
+pdf("2022_04_26_VennDiagram_Mar_v_JanTV_commonOE.pdf")
+ggvenn(genes_Mar_v_JanTV, c("genes_kitMar2022", "genes_JanTV_commonOE"))
+dev.off()
+#by size
+venn_win2 <- euler(c(KitChIRP_OE=457, CommonOE_JanTV_ChIRP=32, "KitChIRP_OE&CommonOE_JanTV_ChIRP"=60), shape = "ellipse")
+pdf("2022_04_26_VennDiagram_Mar_v_JanTV_commonOE_bysize.pdf")
+plot(venn_win2, 
+     fill = c("lightcoral", "lightgoldenrod1"),
+     quantities = list(fontsize = 13))
+dev.off()
 
 #Venn Diagram Even Fede and Even Jan 
+genes_even_JanTV_v_JanFede <- list(evengenes_JanTV = sort(wtcheck_even_1outof6_JanTV_ChIRP$gene.Jan2022TV), evengenes_JanFede = sort(wtcheckeven_1outof6_JanFede_ChIRP$gene.Fede_Jan2022))
+pdf("2022_04_26_VennDiagram_EvenGenes_JanTV_v_JanFede.pdf")
+ggvenn(genes_even_JanTV_v_JanFede, c("evengenes_JanTV", "evengenes_JanFede"))
+dev.off()
+#by size
+#by size
+venn_win2 <- euler(c(evengenes_JanTV=55, evengenes_JanFede=143, "evengenes_JanTV&evengenes_JanFede"=41), shape = "ellipse")
+pdf("2022_04_26_VennDiagram_EvenJanTV_v_JanFede_bysize.pdf")
+plot(venn_win2, 
+     fill = c("lightgoldenrod1", "darkslategray3"),
+     quantities = list(fontsize = 13))
+dev.off()
 
+#Venn Diagram Odd JanTV and Odd JanFede
+genes_odd_JanTV_v_JanFede <- list(oddgenes_JanTV = sort(wtcheck_odd_1outof6_JanTV_ChIRP$gene.Jan2022TV), oddgenes_JanFede = sort(wtcheckodd_1outof6_JanFede_ChIRP$gene.Fede_Jan2022))
+pdf("2022_04_26_VennDiagram_OddGenes_JanTV_v_JanFede.pdf")
+ggvenn(genes_odd_JanTV_v_JanFede, c("oddgenes_JanTV", "oddgenes_JanFede"))
+dev.off()
+#by size
+#by size
+venn_win2 <- euler(c(oddgenes_JanTV=64, oddgenes_JanFede=157, "oddgenes_JanTV&oddgenes_JanFede"=44), shape = "ellipse")
+pdf("2022_04_26_VennDiagram_OddJanTV_v_JanFede_bysize.pdf")
+plot(venn_win2, 
+     fill = c("lightgoldenrod1", "darkslategray3"),
+     quantities = list(fontsize = 13))
+dev.off()
 
+#For2hFede Use Sienna3
+
+#Intersecting the data
+genes_Mar_v_SucGrad <- list(genes_kitMar2022 = sort(wtcheck_1outof6_Mar_ChIRP$gene.combinedMarChIRP), genes_SucGrad= sort(wtcheck_1outof6_SucGrad$gene.combinedSucGrad), genes_Fede_commonOE = sort(wtcheck_common_odd_even_1outof6_JaneFede_ChIRP$gene.Fede_Jan2022))
+pdf("2022_04_26_VennDiagram_Mar_v_SucGrad_v_commonOE_Fede.pdf")
+ggvenn(genes_Mar_v_SucGrad, c("genes_kitMar2022", "genes_SucGrad", "genes_Fede_commonOE"))
+dev.off()
+#bysize
+venn_win3 <- euler(c(MarTV=139, CommonOE_JanFede=1, SucGrad=3513, "MarTV&CommonOE_JanFede"=9, "MarTV&SucGrad"=245, "CommonOE_JanFede&SucGrad"=48, "MarTV&CommonOE_JanFede&SucGrad"=124), shape = "ellipse")
+pdf("2022_04_26_VennDiagram_Mar_v_SucGrad_v_commonOE_Fede_bysize.pdf")
+plot(venn_win3, 
+     fill = c("lightcoral","darkslategray3", "white"),
+     quantities = list(fontsize = 13))
+dev.off()
 
 ```
 
