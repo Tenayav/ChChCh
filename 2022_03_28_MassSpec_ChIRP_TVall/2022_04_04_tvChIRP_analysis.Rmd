@@ -1310,6 +1310,28 @@ ggplot(mm_OEpulldown, aes(x=variable, y=value, fill=genotype_pulldown))+geom_bar
   theme_minimal()
 dev.off()
 
+
+#pulldown efficiency for Fede's Experiment
+genotype_Fedepulldown <- c("KO", "WT", "WT2h")
+Gapdh_Odd <- c(0.0701308,0.009137027,0.011952359)
+Gapdh_Even <- c(0.045238763,0.004343471,0.043909272)
+mTug1_Odd <-c(0.155516237,0.011414104,0.04585048)
+mTug1_Even <-c(0.001099616, 8.29506E-05, 5.81551E-05)
+mFirre_Odd <- c(0,70.40853578,11.74020811)
+mFirre_Even <- c(0, 15.04682919, 15.4736664)
+sd_fede <- c(0.062351006,0.009771398,0.010432933,0.048413036,0.003141753,0.066157591,0.167791558,0.019604462,0.063678141,0.001822,3.80322E-05, 4.01532E-05,0,42.54650799,20.03023555,0,14.13402302,0.786561053)
+
+Fedepulldown_efficiency <- data.frame(genotype_Fedepulldown,Gapdh_Odd,Gapdh_Even, mTug1_Odd, mTug1_Even, mFirre_Odd, mFirre_Even)
+mm_Fedepulldown <- melt(Fedepulldown_efficiency)
+mm_Fedepulldown <- data.frame(mm_Fedepulldown,sd_fede)
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_05_02_Fede_FirreChIRP_PulldownEfficiency.pdf")
+ggplot(mm_Fedepulldown, aes(x=variable, y=value, fill=genotype_Fedepulldown))+geom_bar(stat="identity", position=position_dodge())+ scale_fill_manual(values=c('#808080','#BB2526','#E63954'))+ ggtitle("Homebrew Firre ChIRP Pulldown Efficiency and Specificity") +
+  xlab("RNAs Tested by RT-qPCR Separated by Probe Set (Odd or Even)") + ylab("Relative Efficiency in Comparison to 2% Input") + geom_errorbar(aes(ymin=value-sd_fede, ymax=value+sd_fede), width=.2,
+                 position=position_dodge(.9))+
+  theme_minimal()
+dev.off()
+
 ```
 
 #Making Venn Diagrams and Histograms of 1 out of # for Mar, JanTV, JanFede, and SucGrad
