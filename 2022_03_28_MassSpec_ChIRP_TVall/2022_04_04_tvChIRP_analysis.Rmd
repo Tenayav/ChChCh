@@ -1326,7 +1326,7 @@ mm_Fedepulldown <- melt(Fedepulldown_efficiency)
 mm_Fedepulldown <- data.frame(mm_Fedepulldown,sd_fede)
 
 pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_MassSpec_ChIRP_TVall//2022_05_02_Fede_FirreChIRP_PulldownEfficiency.pdf")
-ggplot(mm_Fedepulldown, aes(x=variable, y=value, fill=genotype_Fedepulldown))+geom_bar(stat="identity", position=position_dodge())+ scale_fill_manual(values=c('#808080','#BB2526','#E63954'))+ ggtitle("Homebrew Firre ChIRP Pulldown Efficiency and Specificity") +
+ggplot(mm_Fedepulldown, aes(x=variable, y=value, fill=genotype_Fedepulldown))+geom_bar(stat="identity", position=position_dodge())+ scale_fill_manual(values=c('#808080','#BB2526','#E63954'))+ ggtitle("In-House Firre ChIRP Pulldown Efficiency and Specificity Validated by RT-qPCR") +
   xlab("RNAs Tested by RT-qPCR Separated by Probe Set (Odd or Even)") + ylab("Relative Efficiency in Comparison to 2% Input") + geom_errorbar(aes(ymin=value-sd_fede, ymax=value+sd_fede), width=.2,
                  position=position_dodge(.9))+
   theme_minimal()
@@ -1527,5 +1527,24 @@ plot(venn_win3,
      quantities = list(fontsize = 13))
 dev.off()
 
+```
+
+#Making a spreadsheet of those 133 genes common between Jan2022Fede common genes (O+E) and Mar2022TV, 124 of which are common to SucGrad
+```{r}
+genes_MarTV_v_JanFede <- wtcheck_1outof6_Mar_ChIRP$gene.combinedMarChIRP[wtcheck_1outof6_Mar_ChIRP$gene.combinedMarChIRP %in% wtcheck_common_odd_even_1outof6_JaneFede_ChIRP$gene.Fede_Jan2022]
+genes_MarTV_v_JanFede_v_SucGrad <- genes_MarTV_v_JanFede[genes_MarTV_v_JanFede %in% wtcheck_1outof6_SucGrad$gene.combinedSucGrad]
+length(genes_MarTV_v_JanFede)
+length(genes_MarTV_v_JanFede_v_SucGrad)
+
+pattern_to_searchZ <- paste0(genes_MarTV_v_JanFede, collapse = "$|^")
+pattern_to_search20 <- paste("^",pattern_to_searchZ,"$",sep="")
+subset1 <- wtcheck_1outof6_Mar_ChIRP[grepl(pattern_to_search20, wtcheck_1outof6_Mar_ChIRP$gene.combinedMarChIRP),]
+subset2 <- wtcheck_common_odd_even_1outof6_JaneFede_ChIRP[grepl(pattern_to_search20, wtcheck_common_odd_even_1outof6_JaneFede_ChIRP$gene.Fede_Jan2022),]
+compositedata_genes_MarTV_v_JanFede <- inner_join(subset1, subset2, by = c("gene.combinedMarChIRP" = "gene.Fede_Jan2022"))
+
+#SucGrad
+subset3 <- wtcheck_1outof6_SucGrad[grepl(pattern_to_search20, wtcheck_1outof6_SucGrad$gene.combinedSucGrad),]
+composite_data_genes_MarTV_v_JanFede_v_SucGrad <- full_join(compositedata_genes_MarTV_v_JanFede, subset3, by = c("gene.combinedMarChIRP" = "gene.combinedSucGrad"))
+write.csv(composite_data_genes_MarTV_v_JanFede_v_SucGrad, file = "2022_05_09_compositedata_genes_OEJanFede_Mar2022_SucGrad.csv", row.names=TRUE)
 ```
 
