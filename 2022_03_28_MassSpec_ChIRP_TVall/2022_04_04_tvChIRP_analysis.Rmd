@@ -1548,3 +1548,40 @@ composite_data_genes_MarTV_v_JanFede_v_SucGrad <- full_join(compositedata_genes_
 write.csv(composite_data_genes_MarTV_v_JanFede_v_SucGrad, file = "2022_05_09_compositedata_genes_OEJanFede_Mar2022_SucGrad.csv", row.names=TRUE)
 ```
 
+#Doing venn diagram and also spreadsheets of all genes common to Jan2022Fede, Mar2022TV, and SucGrad with ratios above 1.5
+```{r}
+#Doing a 2h fold change over wt fold change for Fede Jan data 
+wtcheck_1outof6_JanFede_ChIRP$odd_2hfc_wtfc_ratio = wtcheck_1outof6_JanFede_ChIRP$odd_2h_wt_ratio.Fede_Jan2022/wtcheck_1outof6_JanFede_ChIRP$odd_wt_ratio.Fede_Jan2022
+wt_odd_1.5_2h_ratiocheck_wtcheck_1outof6_JanFede_ChIRP<- dplyr::filter(wtcheck_1outof6_JanFede_ChIRP, odd_2hfc_wtfc_ratio >= 1.5)
+
+wtcheck_1outof6_JanFede_ChIRP$even_2hfc_wtfc_ratio = wtcheck_1outof6_JanFede_ChIRP$even_2h_wt_ratio.Fede_Jan2022/wtcheck_1outof6_JanFede_ChIRP$even_wt_ratio.Fede_Jan2022
+wt_even_1.5_2h_ratiocheck_wtcheck_1outof6_JanFede_ChIRP<- dplyr::filter(wtcheck_1outof6_JanFede_ChIRP, even_2hfc_wtfc_ratio >= 1.5)
+
+#1.5-ratio cutoff for MarChIRP combined data
+ratiofiltered_Mar2022ChIRPcombined <- dplyr::filter(wtcheck_1outof6_Mar_ChIRP, ratio.combinedMarChIRP >= 1.5) 
+
+#Venn Diagram 
+
+#Intersecting the data
+genes_Fede_1.5_2hfc_wtfc_ratio <- list(genes_oddInHouse = sort(wt_even_1.5_2h_ratiocheck_wtcheck_1outof6_JanFede_ChIRP$gene.Fede_Jan2022), genes_evenInHouse= sort(wt_odd_1.5_2h_ratiocheck_wtcheck_1outof6_JanFede_ChIRP$gene.Fede_Jan2022), genes_kitMar2022 = sort(ratiofiltered_Mar2022ChIRPcombined$gene.combinedMarChIRP))
+pdf("2022_05_23_VennDiagram_JanFede_1.5_2hfc_wtfc_ratio.pdf")
+ggvenn(genes_Fede_1.5_2hfc_wtfc_ratio, c("genes_oddInHouse","genes_evenInHouse","genes_kitMar2022"))
+dev.off()
+#bysize
+venn_win_jan_ratio_fc <- euler(c(KitCombined=303, InHouse_Odd=50, InHouse_Even=13, "KitCombined&InHouse_Odd"=12, "KitCombined&InHouse_Even"=1, "InHouse_Odd&InHouse_Even"=5, "KitCombined&InHouse_Odd&InHouse_Even"=0), shape = "ellipse")
+pdf("2022_05_23_VennDiagram_JanFede_1.5_2hfc_wtfc_ratio_bysize.pdf")
+plot(venn_win_jan_ratio_fc, 
+     fill = c("lightcoral","darkslategray3", "white"),
+     quantities = list(fontsize = 13))
+dev.off()
+
+#Regular 1.5-ratio cutoff for odd and even WT
+wt_odd_reg_ratiocheck_wtcheck_1outof6_JanFede_ChIRP<- dplyr::filter(wtcheck_1outof6_JanFede_ChIRP, odd_wt_ratio.Fede_Jan2022 >= 1.5)
+wt_even_reg_ratiocheck_wtcheck_1outof6_JanFede_ChIRP<- dplyr::filter(wtcheck_1outof6_JanFede_ChIRP, even_wt_ratio.Fede_Jan2022 >= 1.5)
+
+genes_FedeO_E_Marcomb_ratio <- list(genes_oddInHouse = sort(wt_odd_reg_ratiocheck_wtcheck_1outof6_JanFede_ChIRP$gene.Fede_Jan2022), genes_evenInHouse= sort(wt_even_reg_ratiocheck_wtcheck_1outof6_JanFede_ChIRP$gene.Fede_Jan2022), genes_kitMar2022 = sort(ratiofiltered_Mar2022ChIRPcombined$gene.combinedMarChIRP))
+pdf("2022_05_23_VennDiagram_JanFede_reg_ratio_MarChIRP.pdf")
+ggvenn(genes_FedeO_E_Marcomb_ratio , c("genes_oddInHouse","genes_evenInHouse","genes_kitMar2022"))
+dev.off()
+```
+
