@@ -1,0 +1,92 @@
+---
+title: "2022_06_06_ChIRP_PeptideAnalysis"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(dplyr)
+library(purrr)
+library(janitor)
+library(ggplot2)
+library(ggvenn)
+library(VennDiagram)
+library(venneuler)
+library(eulerr)
+library(reshape)
+library(DiagrammeR)
+library(ggrepel)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#Import and Clean up Data
+
+#Mar2022 Kit Data for Peptides
+mass_spec_50ng_peptide_Mar2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_06_06_Peptide_MarChIRP/2022_03_24data_50ng_peptide_Mar2022ChIRPOandE.csv") %>% clean_names()
+mass_spec_100ng_peptide_Mar2022_TV <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_06_06_Peptide_MarChIRP/2022_03_24data_100ng_peptide_Mar2022ChIRPOandE.csv") %>% clean_names()
+
+#Combine the gene name with the peptide sequence
+mass_spec_50ng_peptide_Mar2022_TV$peptide_name <- paste(mass_spec_50ng_peptide_Mar2022_TV$gene, mass_spec_50ng_peptide_Mar2022_TV$peptide_sequence, sep="_")
+
+mass_spec_100ng_peptide_Mar2022_TV$peptide_name <- paste(mass_spec_100ng_peptide_Mar2022_TV$gene, mass_spec_100ng_peptide_Mar2022_TV$peptide_sequence, sep="_")
+
+#Intensities only data
+Intensities_50ng_peptide <- mass_spec_50ng_peptide_Mar2022_TV[,c(33,21,22,23,24,25)]
+colnames(Intensities_50ng_peptide)[2:6] <- paste(colnames(Intensities_50ng_peptide)[2:6],"50ng",sep=".")
+
+Intensities_100ng_peptide <- mass_spec_100ng_peptide_Mar2022_TV[,c(33,21,22,23,24,25)]
+colnames(Intensities_100ng_peptide)[2:6] <- paste(colnames(Intensities_100ng_peptide)[2:6],"100ng",sep=".")
+
+Intensities <- full_join(Intensities_50ng_peptide,Intensities_100ng_peptide,by="peptide_name",copy=FALSE,keep = FALSE)
+Intensities <- as.data.frame(Intensities)
+
+#From the fulljoin, I need to change NA's to Zeros
+Intensities <- Intensities %>% replace_na(list(r2_ko_oe_intensity.50ng = 0.0, r2_wt_oe_intensity.50ng = 0.0, r3_ko_oe_intensity.50ng = 0.0, r3_wt_oe_intensity.50ng = 0.0, r4_wt_oe_intensity.50ng=0.0, r2_ko_oe_intensity.100ng=0.0, r2_wt_oe_intensity.100ng=0.0, r3_wt_oe_intensity.100ng=0.0, r3_ko_oe_intensity.100ng=0.0, r4_wt_oe_intensity.100ng=0.0))
+
+#Took out the input only peptides
+Intensities_inputcleared <- Intensities[rowSums(Intensities > 0) >= 2,]
+
+#Calculated fold enrichment for all
+Intensities_inputcleared$wt_mean <- rowMeans(subset( Intensities_inputcleared, select = c(r2_wt_oe_intensity.50ng, r3_wt_oe_intensity.50ng, r4_wt_oe_intensity.50ng, r2_wt_oe_intensity.100ng, r3_wt_oe_intensity.100ng, r4_wt_oe_intensity.100ng)),)
+Intensities_inputcleared$ko_mean <- rowMeans(subset(Intensities_inputcleared, select = c(r2_ko_oe_intensity.50ng, r3_ko_oe_intensity.50ng, r2_ko_oe_intensity.100ng, r3_ko_oe_intensity.100ng)),)
+Intensities_inputcleared_nonzero <- Intensities_inputcleared %>% map_if(is.numeric, ~.+1)
+Intensities_inputcleared_nonzero <- as.data.frame(Intensities_inputcleared_nonzero)
+Intensities_inputcleared_nonzero <- Intensities_inputcleared_nonzero %>% mutate(ratio = wt_mean/ko_mean)
+Intensities_inputcleared_nonzero$logratio = log(Intensities_inputcleared_nonzero$ratio,10)
+
+
+#Calculated wilcoxon and t-test values for all
+Intensities_inputcleared_nonzero$ttest_pvalue <- sapply(1:nrow(Intensities_inputcleared_nonzero), function(i) t.test(as.numeric(as.character(unlist(Intensities_inputcleared_nonzero[i,c(2,4,7,9)]))), as.numeric(as.character(unlist(Intensities_inputcleared_nonzero[i,c(3,5,6,8,10,11)]))))[c("p.value")])
+Intensities_inputcleared_nonzero$ttest_pvalue <- as.numeric(unlist(Intensities_inputcleared_nonzero$ttest_pvalue))
+
+Intensities_inputcleared_nonzero$wilcoxtest_pvalue <- sapply(1:nrow(Intensities_inputcleared_nonzero), function(i) wilcox.test(as.numeric(as.character(unlist(Intensities_inputcleared_nonzero[i,c(2,4,7,9)]))), as.numeric(as.character(unlist(Intensities_inputcleared_nonzero[i,c(3,5,6,8,10,11)]))))[c("p.value")])
+Intensities_inputcleared_nonzero$wilcoxtest_pvalue <- as.numeric(unlist(Intensities_inputcleared_nonzero$wilcoxtest_pvalue))
+
+
+#Made graphs of all before I do any filtering to compare with the protein data
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_06_06_Peptide_MarChIRP//2022_06_06_Histogram_beforefilter_peptide_FoldChange_WT_KO_MassSpec_Mar2022TV.pdf")
+hist(Intensities_inputcleared_nonzero$logratio, breaks = 50, main="Frequency of Log Average of Fold Change of WT/KO Intensities \nfrom TVkitMar2022 peptides", xlab = "Log Average Fold Change of WT to KO of all peptides (no filter)", ylab = "Frequency of Peptides (n=2134)", labels=TRUE) 
+dev.off()
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_06_06_Peptide_MarChIRP//2022_06_06_Histogram_beforefilter_peptide_Ttest_WT_KO_MassSpec_Mar2022TV.pdf")
+hist(Intensities_inputcleared_nonzero$ttest_pvalue, breaks = 20, main=" Frequency of T-Test P-values in Mar2022 ChIRP Peptide Data (No Filter)", xlab = "T-Test P-value", ylab = "Frequency of P-values", labels=TRUE) 
+dev.off()
+
+pdf("/scratch/Shares/rinn/tenaya/ChChCh/2022_06_06_Peptide_MarChIRP//2022_06_06_Histogram_beforefilter_peptide_Wilcoxontest_WT_KO_MassSpec_Mar2022TV.pdf")
+hist(Intensities_inputcleared_nonzero$wilcoxtest_pvalue, breaks = 20, main="Frequency of Wilcoxon P-values in Mar2022 ChIRP Peptide Data (No Filter)", xlab = "Wilcoxon P-value", ylab = "Frequency of P-values", labels=TRUE) 
+dev.off()
+
+```
+
+
+#Now going to go through the pipeline to see what comes out
+```{r}
+
+
+```
+
