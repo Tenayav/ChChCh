@@ -86,7 +86,86 @@ dev.off()
 
 #Now going to go through the pipeline to see what comes out
 ```{r}
+#WT and KO Checks
+Intensities_inputcleared_nonzero$wt_check <- rowSums(Intensities_inputcleared_nonzero[,c(3,5,6,8,10,11)] >1)
+Intensities_inputcleared_nonzero$ko_check <- rowSums(Intensities_inputcleared_nonzero[,c(2,4,7,9)] >1)
 
+#Filter 4 out of 6 WT
+Intensities_inputcleared_nonzero_4_out_of_6_wtcheck <- dplyr::filter(Intensities_inputcleared_nonzero, wt_check >= 4)
+#after 4 out of 6 wt, 430 peptides
+
+#Filter 1.5 ratio
+Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck <- dplyr::filter(Intensities_inputcleared_nonzero_4_out_of_6_wtcheck, ratio >= 1.5)
+#by itself there are 1041 peptides above 1.5 ratio
+#but with the 4 out of 6 ratio previously applied, n=82
+
+#Filter 1 out of 4 KO
+Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck <- dplyr::filter(Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck, ko_check <= 1)
+#after 1 or less KO, n=41
+#without the ratio filter but with 4 out of 5, n=42
+
+#Filter 0 out of 4 KO
+Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_0kocheck <- dplyr::filter(Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck, ko_check <= 0)
+#no ko, n=19
+
+#Write 1 out of 4 KO to CSV to do a nuclear check
+write.csv(Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck,"/scratch/Shares/rinn/tenaya/ChChCh/2022_06_06_Peptide_MarChIRP//2022_06_07_results_4outof6_wtcheck_1.5filtercutoff_1kocutoff.csv",row.names = TRUE)
+
+#Make BoxWhisker of all 42 Genes
+Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready <- as.data.frame(t(Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck))
+Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2 <- Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready[1:11,]
+Intensities_peptide_newcol <- c("genotype","KO","WT","KO","WT","WT","KO","WT","KO","WT","WT")
+Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2 <- cbind(Intensities_peptide_newcol,Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2)
+Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2<-Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2 %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2[] <- lapply(Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2, type.convert, as.is = TRUE)
+melted_Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2 = melt(Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2)
+
+for (var in melted_Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_06_06_Peptide_MarChIRP/2022_06_06_BoxWhiskerPlots_max1ko_peptide//", var, "peptide_4outof6wtcheck_ratiocutoff_1komax.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2[melted_Intensities_inputcleared_nonzero_4_out_of_6_wtcheck_ratiocheck_1kocheck_ready2$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+ dev.off()
+  }
+
+
+
+
+
+
+```
+
+#Reverse Analysis for KO because we want to make sure we have some good hits. 
+```{r}
+#Filter 3 out of 4 KO
+Intensities_inputcleared_nonzero_revKO <- dplyr::filter(Intensities_inputcleared_nonzero, ko_check >= 3)
+#after 3 out of 4 ko, 534 peptides
+
+#Filter ratio 1/1.5 = 0.667
+Intensities_inputcleared_nonzero_revKO_ratiocheck <- dplyr::filter(Intensities_inputcleared_nonzero_revKO, ratio <= 0.667)
+#with the 3 out of 4ko and revKO ratio, n=310
+
+#Filter 1 out of 6 WT
+Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck <- dplyr::filter(Intensities_inputcleared_nonzero_revKO_ratiocheck, wt_check <= 1)
+#n=84
+
+#Write 1 out of 4 KO to CSV to do a nuclear check
+write.csv(Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck,"/scratch/Shares/rinn/tenaya/ChChCh/2022_06_06_Peptide_MarChIRP//2022_06_07_RevKO_analysis_results.csv",row.names = TRUE)
+
+#Make BoxWhisker of all 42 Genes
+Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready <- as.data.frame(t(Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck))
+Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2 <- Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready[1:11,]
+Intensities_peptide_newcol <- c("genotype","KO","WT","KO","WT","WT","KO","WT","KO","WT","WT")
+Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2 <- cbind(Intensities_peptide_newcol,Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2)
+Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2<-Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2 %>% row_to_names (row_number= 1) %>% clean_names()
+Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2[] <- lapply(Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2, type.convert, as.is = TRUE)
+melted_Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2 = melt(Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2)
+
+for (var in melted_Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2$variable) { 
+ 
+  pdf(paste("/scratch/Shares/rinn/tenaya/ChChCh/2022_06_06_Peptide_MarChIRP/2022_06_06_RevKO_BoxWhiskerPlots_peptide//", var, "RevKO_peptide.pdf", sep=""))
+  print(ggboxplot(melted_Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2[melted_Intensities_inputcleared_nonzero_revKO_ratiocheck_wtcheck_ready2$variable==var,],x="genotype",y="value",fill="#00AFBB",line.color ="gray",add="jitter")+ggtitle(var)+stat_compare_means(label.x = 0.5)+stat_compare_means(method = "t.test"))
+ dev.off()
+  }
 
 ```
 
