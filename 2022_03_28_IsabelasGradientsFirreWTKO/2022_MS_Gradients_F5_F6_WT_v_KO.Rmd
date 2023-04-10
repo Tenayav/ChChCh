@@ -1,0 +1,209 @@
+---
+title: "2022_03_28_Isabela_Firre_Gradients_F5_F6_WT_v_KO"
+output:
+  pdf_document: default
+  html_document: default
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(purrr)
+library(janitor)
+library(ggplot2)
+library(ggvenn)
+library(VennDiagram)
+library(venneuler)
+library(eulerr)
+library(reshape)
+library(tibble)
+library(DESeq2)
+source("/scratch/Shares/rinn/isabela/rna_protein_complexes/analysis/util/_plot_theme.R")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+MS analysis - Wilcoxon test (non-parametric)
+>>> We have a small population of measurements (4 if count all runs or 2 of count only the real bio replicates). So it is hard to say the values are distributed normally (it is recommended > 30). It is clear that some are not if we consider intensities = 0 in one replicate and very high values in the other. That is why Wilcoxon sounds more appropriate than t-test, because it is non-parametric test not based on normal distribution.
+
+
+##CLEAN FROM HERE IF DECIEED KEEP OLD ANALYSIS
+```{r - load data}
+
+#50ng protein
+#Anthony said the 50ng yielded more genes identified
+mass_spec_50ng_Mar2022_SucGrad <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/2022_03_24_50ng_protein_SCP_JRinn_PTN_MESC_results.csv") %>% clean_names()
+
+#100ng protein 
+mass_spec_100ng_Mar2022_SucGrad <- read_csv("/scratch/Shares/rinn/tenaya/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/2022_03_24_100ng_protein_SCP_JRinn_PTN_MESC_results.csv") %>% clean_names()
+
+
+```
+
+#Making Tibbles of Calculated Intensities 
+```{r}
+#50 ng protein 
+Intensities_50ng <- mass_spec_50ng_Mar2022_SucGrad[,c(4,28,29,30,31)]
+colnames(Intensities_50ng)[2:5] <- paste(colnames(Intensities_50ng)[2:5],"50ng",sep=".")
+
+
+#100ng protein same thing. 
+Intensities_100ng <- mass_spec_100ng_Mar2022_SucGrad[,c(4,28,29,30,31)]
+colnames(Intensities_100ng)[2:5] <- paste(colnames(Intensities_100ng)[2:5],"100ng",sep=".")
+```
+
+Organize a bit
+```{r - split wt and ko}
+#50 ng
+wt_50 <- Intensities_50ng %>%
+  select(1, 4:5)
+colnames(wt_50) <- c("gene", "wt50_p1", "wt50_p2")
+
+ko_50 <- Intensities_50ng %>%
+  select(1:3)
+colnames(ko_50) <- c("gene", "ko50_p1", "ko50_p2")
+
+#100ng
+wt_100 <- Intensities_100ng %>%
+  select(1, 4:5)
+colnames(wt_100) <- c("gene", "wt100_p1", "wt100_p2")
+
+ko_100 <- Intensities_100ng %>%
+  select(1:3)
+colnames(ko_100) <- c("gene", "ko100_p1", "ko100_p2")
+
+```
+
+Select those proteins identified in WT : this will be our starting list
+```{r - stringent filter}
+
+# get rid of those that have intensities = 0 in both replicates of each run independently
+wt50_filter <- wt_50 %>%
+  filter(wt50_p1 > 0, wt50_p2 > 0)
+
+wt100_filter <- wt_100 %>%
+  filter(wt100_p1 > 0, wt100_p2 > 0)
+
+# full list
+wt_filter <- intersect(wt50_filter$gene, wt100_filter$gene)
+#2317 proteins
+```
+
+Make a complete table
+```{r}
+wt_filter <- as.data.frame(wt_filter)
+colnames(wt_filter) <- c("gene")
+
+ptn_int <- wt_filter %>%
+  left_join(wt_50) %>%
+  left_join(wt_100) %>%
+  left_join(ko_50) %>%
+  left_join(ko_100)
+```
+
+Exclude those proteins that are DOWN regulated in the RNA-seq data (meaning the protein levels could be down because they are overall down in the cell, and not specific in F5+6)
+```{r - RNA-seq filter}
+#filter those that are DEG in the RNA-seq data WT x KO (if they are already expressed differently in the cells, we can not assume they are not present in the fraction because of Firre)
+
+#Michael gave me the table of DEG in KO vs WT mESC
+#read in
+rna_seq <- read_csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/firre_ko_vs_wt_mesc_deseq_results.csv")
+
+#filter using usual parameters  = filter by log2FC = 0.58 means FC 1.5
+rna_seq_filtered <- rna_seq %>%
+  filter(padj <= 0.05, log2FoldChange <= -0.5849)
+#314 genes are downregulated in KO compared to WT
+
+#comparing what is DOWN in KO cells with protein list
+intersect_rna_seq <- intersect(ptn_int$gene, rna_seq_filtered$gene_name)
+#Apoe gene - only 1
+
+ptn_int <- ptn_int %>%
+  filter(!gene == "Apoe")
+
+#2331 proteins (I don't know why some more appeared here)
+```
+
+# Cleaned results from 2022_03_28_Isabela_Firre_Gradients_F5_F6_WT_v_KO_copy.Rmd
+
+```{r - 2320 genes to start}
+#consider for the analysis only genes that show intensities > 0 in both replicates
+
+#read in
+Intensities_filter_both <- read_csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/intensities_valid_filter.csv")
+
+#calculate FC (ratio) between KO and WT values
+#before we have to adjust those that heve intensities = 0 because the ratio can not be calculated
+Intensities_filter_both_nonzero <- Intensities_filter_both %>% map_if(is.numeric, ~.+1)
+Intensities_filter_both_nonzero <- as.data.frame(Intensities_filter_both_nonzero)
+
+
+Intensities_filter_both_FC <- Intensities_filter_both_nonzero %>%
+  mutate(mean50_ko = rowMeans(Intensities_filter_both_nonzero[ , c(2,3)])) %>%
+  mutate(mean50_wt = rowMeans(Intensities_filter_both_nonzero[ , c(4,5)])) %>%
+  mutate(mean100_ko = rowMeans(Intensities_filter_both_nonzero[ , c(6,7)])) %>%
+  mutate(mean100_wt = rowMeans(Intensities_filter_both_nonzero[ , c(8,9)])) 
+
+Intensities_filter_both_FC <- Intensities_filter_both_FC %>%
+  mutate(ratio_50 = Intensities_filter_both_FC$mean50_wt/Intensities_filter_both_FC$mean50_ko) %>%
+  mutate(ratio_100 = Intensities_filter_both_FC$mean100_wt/Intensities_filter_both_FC$mean100_ko)
+
+Intensities_filter_both_FC$ratio_mean <- (rowMeans(Intensities_filter_both_FC[ , c(14,15)])) 
+
+```
+
+```{r - filter by FC}
+#filter by FC 1.5
+Intensities_filter_both_FC_UP <- Intensities_filter_both_FC %>%
+#347
+
+#save this - they are interesting genes because have intensity WT > KO
+write_csv(Intensities_filter_both_FC_UP, "/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/intensity_FC_upWT.csv")
+Intensities_filter_both_FC_UP <- read.csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/intensity_FC_upWT.csv")
+```
+
+Run statistics:
+# We have a small population of measurements (4 if count all runs or 2 of count only the real bio replicates). So it is hard to say the values are distributed normally (it is recommended > 30). It is clear that some are not if we consider intensities = 0 in one replicate and very high values in the other. That is why Wilcoxon sounds more appropriate than t-test, because it is non-parametric test not based on normal distribution.
+```{r - Wilcoxon test}
+#results from wilcoxon analysis and function (find in 2022_03_28_Isabela_Firre_Gradients_F5_F6_WT_v_KO_copy.Rmd)
+results_Intensities_valid <- read_csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/results_protein_Intensities_filter.csv")
+
+#results from wilcox test filtered by pvalue < 0.05
+wilcox <- read_csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/sigInten_valid_genes_filter_values.csv")
+
+# 84 genes
+```
+
+
+```{r - let's find overlap between Wilcoxon and FC significant}
+
+sig_ptn <- intersect(wilcox$gene, Intensities_filter_both_FC_UP$gene)
+#45 genes
+
+#saved here 
+Intensities_FCfilter_pval_filter <- read.csv("/scratch/Shares/rinn/isabela/ChChCh/2022_03_28_IsabelasGradientsFirreWTKO/results/Intensities_FCfilter_pval_filter.csv")
+```
+
+This 45 proteins are the final list of interesting proteins using WT x KO to make a start list to find partners.
+Using very stringent filters.
+
+Let's plot a hetmap of this.
+```{r}
+
+# plot only 100ng samples 
+plot_int <- Intensities_FCfilter_pval_filter %>%
+  select(1, 6:9) %>%
+  column_to_rownames("gene")
+colnames(plot_int) <- c("ko_p1", "ko_p2", "wt_p1", "wt_p2")
+plot_int <- plot_int[, c(3, 4, 1, 2)]
+
+plot_int_scaled <- t(scale(t(plot_int)))
+col <- c("WT(1)", "WT(2)", "KO(1)","KO(2)")
+pheatmap::pheatmap(plot_int_scaled, cluster_cols = FALSE, cluster_rows = T, 
+                   show_rownames = T, 
+                   breaks = seq(-1.5, 1.5, length.out = length(col_pal10)),
+                   color = col_pal10, border_color = NA, fontsize_row = 8, labels_col = col,
+                   angle_col = 90)
+```
+
